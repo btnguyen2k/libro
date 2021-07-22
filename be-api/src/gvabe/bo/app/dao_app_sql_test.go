@@ -37,10 +37,10 @@ func sqlInitTable(sqlc *prom.SqlConnect, table string) error {
 	case prom.FlavorCosmosDb:
 		spec := &henge.CosmosdbCollectionSpec{Pk: henge.CosmosdbColId}
 		err = henge.InitCosmosdbCollection(sqlc, table, spec)
-	case prom.FlavorPgSql:
-		err = henge.InitPgsqlTable(sqlc, table, nil)
 	case prom.FlavorMySql:
 		err = henge.InitMysqlTable(sqlc, table, nil)
+	case prom.FlavorPgSql:
+		err = henge.InitPgsqlTable(sqlc, table, nil)
 	case prom.FlavorSqlite:
 		err = henge.InitSqliteTable(sqlc, table, nil)
 	}

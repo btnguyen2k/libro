@@ -33,16 +33,16 @@ func sqlInitTable(sqlc *prom.SqlConnect, table string) error {
 		}
 	}
 	sqlc.GetDB().Exec(fmt.Sprintf("DROP TABLE %s", table))
-	// _, err = sqlc.GetDB().Exec(fmt.Sprintf("DROP TABLE %s", table))
-	// if err != nil {
-	// 	fmt.Printf("WARNING: %s\n", err)
-	// }
 	switch sqlc.GetDbFlavor() {
 	case prom.FlavorCosmosDb:
 		spec := &henge.CosmosdbCollectionSpec{Pk: henge.CosmosdbColId, Uk: [][]string{{"/" + UserColMaskUid}}}
 		err = henge.InitCosmosdbCollection(sqlc, table, spec)
-	case prom.FlavorPgSql, prom.FlavorSqlite:
+	case prom.FlavorMySql:
+		err = henge.InitMysqlTable(sqlc, table, map[string]string{UserColMaskUid: "VARCHAR(32)"})
+	case prom.FlavorPgSql:
 		err = henge.InitPgsqlTable(sqlc, table, map[string]string{UserColMaskUid: "VARCHAR(32)"})
+	case prom.FlavorSqlite:
+		err = henge.InitSqliteTable(sqlc, table, map[string]string{UserColMaskUid: "VARCHAR(32)"})
 	}
 	return err
 }
