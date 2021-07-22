@@ -66,6 +66,12 @@ const (
 
 	// userAttr_Ubo is for internal use only!
 	userAttr_Ubo = "_ubo"
+
+	// SerKeyAttrs is a key used by User.ToMap and User.MarshalJSON/User.UnmarshalJSON to store BO's custom attributes.
+	SerKeyAttrs = "_attrs"
+
+	// SerKeyFields is a key used by User.ToMap and User.MarshalJSON/User.UnmarshalJSON to store BO's top-level custom fields.
+	SerKeyFields = "_fields"
 )
 
 // User is the business object
@@ -81,12 +87,27 @@ type User struct {
 }
 
 // ToMap transforms user's attributes to a map.
+//
+// The function returns a map with the following structure:
+//   {
+//     henge.FieldId: u.GetId(),
+//     SerKeyFields: map[string]interface{}{
+//         // all BO's top-level custom fields go here
+//		},
+//     SerKeyAttrs: map[string]interface{}{
+//         // all BO's custom attributes go here
+//     },
+//   }
 func (u *User) ToMap(postFunc henge.FuncPostUboToMap) map[string]interface{} {
 	result := map[string]interface{}{
-		henge.FieldId:       u.GetId(),
-		UserFieldMaskId:     u.maskId,
-		UserAttrIsAdmin:     u.isAdmin,
-		UserAttrDisplayName: u.displayName,
+		henge.FieldId: u.GetId(),
+		SerKeyFields: map[string]interface{}{
+			UserFieldMaskId: u.maskId,
+		},
+		SerKeyAttrs: map[string]interface{}{
+			UserAttrIsAdmin:     u.isAdmin,
+			UserAttrDisplayName: u.displayName,
+		},
 	}
 	if postFunc != nil {
 		result = postFunc(result)
@@ -95,15 +116,15 @@ func (u *User) ToMap(postFunc henge.FuncPostUboToMap) map[string]interface{} {
 }
 
 // MarshalJSON implements json.encode.Marshaler.MarshalJSON
-//	TODO: lock for read?
+// TODO: lock for read?
 func (u *User) MarshalJSON() ([]byte, error) {
 	u.sync()
 	m := map[string]interface{}{
 		userAttr_Ubo: u.UniversalBo.Clone(),
-		"_cols": map[string]interface{}{
+		SerKeyFields: map[string]interface{}{
 			UserFieldMaskId: u.maskId,
 		},
-		"_attrs": map[string]interface{}{
+		SerKeyAttrs: map[string]interface{}{
 			UserAttrDisplayName: u.displayName,
 			UserAttrIsAdmin:     u.isAdmin,
 			UserAttrPassword:    u.password,
@@ -113,7 +134,7 @@ func (u *User) MarshalJSON() ([]byte, error) {
 }
 
 // UnmarshalJSON implements json.decode.Unmarshaler.UnmarshalJSON
-//	TODO: lock for write?
+// TODO: lock for write?
 func (u *User) UnmarshalJSON(data []byte) error {
 	var m map[string]interface{}
 	if err := json.Unmarshal(data, &m); err != nil {
@@ -126,12 +147,12 @@ func (u *User) UnmarshalJSON(data []byte) error {
 			return err
 		}
 	}
-	if _cols, ok := m["_cols"].(map[string]interface{}); ok {
+	if _cols, ok := m[SerKeyFields].(map[string]interface{}); ok {
 		if u.maskId, err = reddo.ToString(_cols[UserFieldMaskId]); err != nil {
 			return err
 		}
 	}
-	if _attrs, ok := m["_attrs"].(map[string]interface{}); ok {
+	if _attrs, ok := m[SerKeyAttrs].(map[string]interface{}); ok {
 		if u.displayName, err = reddo.ToString(_attrs[UserAttrDisplayName]); err != nil {
 			return err
 		}
@@ -146,7 +167,7 @@ func (u *User) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-// GetMaskUniqueId returns value of user's 'mask-id' attribute
+// GetMaskId returns value of user's 'mask-id' attribute
 func (u *User) GetMaskId() string {
 	return u.maskId
 }

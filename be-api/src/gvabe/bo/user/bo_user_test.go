@@ -96,10 +96,14 @@ func TestUser_ToMap(t *testing.T) {
 
 	m := user.ToMap(nil)
 	expected := map[string]interface{}{
-		henge.FieldId:       _id,
-		UserFieldMaskId:     _maskId,
-		UserAttrIsAdmin:     _isAdmin,
-		UserAttrDisplayName: _displayName,
+		henge.FieldId: _id,
+		SerKeyFields: map[string]interface{}{
+			UserFieldMaskId: _maskId,
+		},
+		SerKeyAttrs: map[string]interface{}{
+			UserAttrIsAdmin:     _isAdmin,
+			UserAttrDisplayName: _displayName,
+		},
 	}
 	if !reflect.DeepEqual(m, expected) {
 		t.Fatalf("%s failed: expected %#v but received %#v", name, expected, m)
@@ -107,17 +111,20 @@ func TestUser_ToMap(t *testing.T) {
 
 	m = user.ToMap(func(input map[string]interface{}) map[string]interface{} {
 		return map[string]interface{}{
-			"FieldId":              input[henge.FieldId],
-			"UserFieldMaskId":     input[UserFieldMaskId],
-			"UserAttrIsAdmin":     input[UserAttrIsAdmin],
-			"UserAttrDisplayName": input[UserAttrDisplayName],
+			"FieldId":      input[henge.FieldId],
+			"SerKeyFields": input[SerKeyFields],
+			"SerKeyAttrs":  input[SerKeyAttrs],
 		}
 	})
 	expected = map[string]interface{}{
-		"FieldId":              _id,
-		"UserFieldMaskId":     _maskId,
-		"UserAttrIsAdmin":     _isAdmin,
-		"UserAttrDisplayName": _displayName,
+		"FieldId": _id,
+		"SerKeyFields": map[string]interface{}{
+			UserFieldMaskId: _maskId,
+		},
+		"SerKeyAttrs": map[string]interface{}{
+			UserAttrIsAdmin:     _isAdmin,
+			UserAttrDisplayName: _displayName,
+		},
 	}
 	if !reflect.DeepEqual(m, expected) {
 		t.Fatalf("%s failed: expected %#v but received %#v", name, expected, m)
