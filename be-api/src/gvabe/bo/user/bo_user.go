@@ -9,8 +9,6 @@ import (
 )
 
 // NewUser is helper function to create new User bo
-//
-// Available since template-v0.2.0
 func NewUser(appVersion uint64, id, maskId string) *User {
 	user := &User{
 		UniversalBo: henge.NewUniversalBo(id, appVersion),
@@ -19,8 +17,6 @@ func NewUser(appVersion uint64, id, maskId string) *User {
 }
 
 // NewUserFromUbo is helper function to create User bo from a universal bo
-//
-// Available since template-v0.2.0
 func NewUserFromUbo(ubo *henge.UniversalBo) *User {
 	if ubo == nil {
 		return nil
@@ -75,9 +71,7 @@ const (
 )
 
 // User is the business object
-//	- User inherits unique id from bo.UniversalBo
-//
-// available since template-v0.2.0
+//   - User inherits unique id from bo.UniversalBo
 type User struct {
 	*henge.UniversalBo `json:"_ubo"`
 	maskId             string `json:"mid"`

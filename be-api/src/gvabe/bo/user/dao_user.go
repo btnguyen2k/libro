@@ -5,8 +5,10 @@ import (
 	"github.com/btnguyen2k/henge"
 )
 
-const TableUser = "gva_user"
 const (
+	// TableUser is name of the database table to store user records.
+	TableUser = "libro_user"
+
 	// UserColMaskUid is name of database column for user's mask-id.
 	UserColMaskUid = "zmid"
 )

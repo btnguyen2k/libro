@@ -16,7 +16,7 @@ func NewApp(appVersion uint64, id, name, desc string, isVisible bool) *App {
 	return bo.SetName(name).SetDescription(desc).SetVisible(isVisible).sync()
 }
 
-// NewAppFromUbo is helper function to create User bo from a universal bo.
+// NewAppFromUbo is helper function to create App bo from a universal bo.
 func NewAppFromUbo(ubo *henge.UniversalBo) *App {
 	if ubo == nil {
 		return nil
@@ -62,7 +62,7 @@ const (
 )
 
 // App is the business object.
-//	- App inherits unique id from bo.UniversalBo
+//   - App inherits unique id from bo.UniversalBo
 type App struct {
 	*henge.UniversalBo `json:"_ubo"`
 	name               string `json:"name"`
@@ -74,7 +74,7 @@ type App struct {
 //
 // The function returns a map with the following structure:
 //   {
-//     henge.FieldId: u.GetId(),
+//     henge.FieldId: a.GetId(),
 //     SerKeyFields: map[string]interface{}{
 //         // all BO's top-level custom fields go here
 //		},
@@ -136,7 +136,6 @@ func (a *App) UnmarshalJSON(data []byte) error {
 		if a.isVisible, err = reddo.ToBool(_attrs[AppAttrIsVisible]); err != nil {
 			return err
 		}
-
 	}
 	a.sync()
 	return nil

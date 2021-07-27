@@ -25,6 +25,31 @@ The business object `App` represents a registered application.
 |`GetAll(filter godal.FilterOpt, sorting *godal.SortingOpt) ([]*App, error)`|retrieves all available business objects from storage|
 |`Update(bo *App) (bool, error)`|modifies an existing business object|
 
+## Section: BO & DAO
+
+The business object `Section` represents a document section for an app.
+
+**BO attributes:**
+
+|Name   |Type  |Description|
+|-------|------|-----------|
+|app    |string|(*top-level attribute*) Id of the application the document section belongs to|
+|title  |string|Section's title, for displaying purpose|
+|icon   |string|Section's icon id, for displaying purpose|
+|summary|string|Section's summary text|
+|pos    |int   |Position, for ordering/sorting purpose|
+
+**DAO functions:**
+
+|Function|Description|
+|-------------------------------|-----------|
+|`Delete(bo *Section) (bool, error)`|removes the specified business object from storage|
+|`Create(bo *Section) (bool, error)`|persists a new business object to storage|
+|`Get(id string) (*Section, error)` |retrieves a business object from storage|
+|`GetN(app *app.App, fromOffset, maxNumRows int, filter godal.FilterOpt, sorting *godal.SortingOpt) ([]*App, error)`|retrieves N business objects from storage|
+|`GetAll(app *app.App, filter godal.FilterOpt, sorting *godal.SortingOpt) ([]*App, error)`|retrieves all available business objects from storage|
+|`Update(bo *Section) (bool, error)`|modifies an existing business object|
+
 ## User: BO & DAO
 
 The business object `User` represents a user account in the application.
