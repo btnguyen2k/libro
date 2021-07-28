@@ -14,11 +14,11 @@ import (
 func TestNewSection(t *testing.T) {
 	name := "TestNewSection"
 	_tagVersion := uint64(1337)
-	_id := "libro"
+	_appId := "libro"
 	_name := "Libro"
 	_desc := "Libro description"
 	_isVisible := true
-	_app := app.NewApp(_tagVersion, _id, _name, _desc, _isVisible)
+	_app := app.NewApp(_tagVersion, _appId, _name, _desc, _isVisible)
 
 	_title := "Quick start"
 	_icon := "default"
@@ -30,6 +30,7 @@ func TestNewSection(t *testing.T) {
 	}
 	section.SetPosition(_pos)
 
+	_id := section.GetId()
 	if tagVersion := section.GetTagVersion(); tagVersion != _tagVersion {
 		t.Fatalf("%s failed: expected tag-version to be %#v but received %#v", name, _tagVersion, tagVersion)
 	}
@@ -65,7 +66,7 @@ func TestNewSectionFromUbo(t *testing.T) {
 	_title := "Quick start"
 	_icon := "default"
 	_summary := "section one"
-	_pos := rand.Int()
+	_pos := rand.Intn(10242048)
 	ubo := henge.NewUniversalBo(_id, _tagVersion)
 	ubo.SetExtraAttr(SectionFieldAppId, _appId)
 	ubo.SetDataAttr(SectionAttrTitle, _title)
@@ -103,21 +104,22 @@ func TestNewSectionFromUbo(t *testing.T) {
 func TestSection_ToMap(t *testing.T) {
 	name := "TestSection_ToMap"
 	_tagVersion := uint64(1337)
-	_id := "libro"
+	_appId := "libro"
 	_name := "Libro"
 	_desc := "Libro description"
 	_isVisible := true
-	_app := app.NewApp(_tagVersion, _id, _name, _desc, _isVisible)
+	_app := app.NewApp(_tagVersion, _appId, _name, _desc, _isVisible)
 
 	_title := "Quick start"
 	_icon := "default"
 	_summary := "section one"
-	_pos := rand.Int()
+	_pos := rand.Intn(10242048)
 	section := NewSection(_tagVersion, _app, _title, _icon, _summary)
 	if section == nil {
 		t.Fatalf("%s failed: nil", name)
 	}
 	section.SetPosition(_pos)
+	_id := section.GetId()
 
 	m := section.ToMap(nil)
 	expected := map[string]interface{}{
@@ -163,16 +165,16 @@ func TestSection_ToMap(t *testing.T) {
 func TestSection_json(t *testing.T) {
 	name := "TestSection_json"
 	_tagVersion := uint64(1337)
-	_id := "libro"
+	_appId := "libro"
 	_name := "Libro"
 	_desc := "Libro description"
 	_isVisible := true
-	_app := app.NewApp(_tagVersion, _id, _name, _desc, _isVisible)
+	_app := app.NewApp(_tagVersion, _appId, _name, _desc, _isVisible)
 
 	_title := "Quick start"
 	_icon := "default"
 	_summary := "section one"
-	_pos := rand.Int()
+	_pos := rand.Intn(10242048)
 	section1 := NewSection(_tagVersion, _app, _title, _icon, _summary)
 	if section1 == nil {
 		t.Fatalf("%s failed: nil", name)
