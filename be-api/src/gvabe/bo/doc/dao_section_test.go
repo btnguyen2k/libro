@@ -21,18 +21,19 @@ func initSampleRowsSection(t *testing.T, testName string, dao SectionDao) {
 	rand.Seed(time.Now().UnixNano())
 	numApps := 1 + rand.Intn(numSampleRowsSection/10)
 	appList = make([]*app.App, numApps)
+	_tagVersion := uint64(1337)
+	for i := 0; i < numApps; i++ {
+		_appId := "libro" + fmt.Sprintf("%02d", i)
+		_name := "Libro" + _appId
+		_desc := "Libro description " + _appId
+		_isVisible := rand.Int()%7 == 0
+		_app := app.NewApp(_tagVersion, _appId, _name, _desc, _isVisible)
+		appList[i] = _app
+	}
 	sectionList = make([]*Section, numSampleRowsSection)
 	appSectionCount = make(map[string]int)
 	for i := 0; i < numSampleRowsSection; i++ {
-		_tagVersion := uint64(1337)
-		_appId := rand.Intn(numApps)
-		_appIdStr := "libro" + fmt.Sprintf("%02d", _appId)
-		_name := "Libro" + _appIdStr
-		_desc := "Libro description " + _appIdStr
-		_isVisible := i%7 == 0
-		_app := app.NewApp(_tagVersion, _appIdStr, _name, _desc, _isVisible)
-		appList[_appId] = _app
-
+		_app := appList[rand.Intn(numApps)]
 		istr := fmt.Sprintf("%03d", i)
 		_title := "Quick start " + istr
 		_icon := "default"
@@ -249,7 +250,7 @@ func doTestSectionDaoGetN(t *testing.T, name string, dao SectionDao) {
 		numRowsLimit := rand.Intn(10)
 		boList, err := dao.GetN(app, startOffset, numRowsLimit, nil, nil)
 		expected := appSectionCount[app.GetId()]
-		expected = int(math.Min(float64(expected-startOffset), float64(numRowsLimit)))
+		expected = int(math.Min(math.Max(0, float64(expected-startOffset)), float64(numRowsLimit)))
 		if err != nil || len(boList) != expected {
 			t.Fatalf("%s failed: expected %#v but received %#v (error %s)", name+"/GetAll", expected, len(boList), err)
 		}
