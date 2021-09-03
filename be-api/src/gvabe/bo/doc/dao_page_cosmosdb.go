@@ -5,14 +5,14 @@ import (
 	"github.com/btnguyen2k/prom"
 )
 
-// NewTopicDaoCosmosdb is helper method to create Azure Cosmos DB-implementation of TopicDao
+// NewPageDaoCosmosdb is helper method to create Azure Cosmos DB-implementation of PageDao
 //
 // Note: txModeOnWrite is not currently used!
-func NewTopicDaoCosmosdb(sqlc *prom.SqlConnect, tableName string, txModeOnWrite bool) TopicDao {
-	dao := &BaseTopicDaoImpl{}
+func NewPageDaoCosmosdb(sqlc *prom.SqlConnect, tableName string, txModeOnWrite bool) PageDao {
+	dao := &BasePageDaoImpl{}
 	spec := &henge.CosmosdbDaoSpec{
 		// PkName:        henge.CosmosdbColId,
-		PkName:        TopicColAppId,
+		PkName:        PageColAppId,
 		TxModeOnWrite: txModeOnWrite,
 	}
 	dao.UniversalDao = henge.NewUniversalDaoCosmosdbSql(sqlc, tableName, spec)

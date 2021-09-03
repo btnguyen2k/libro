@@ -1,10 +1,13 @@
 package doc
 
 import (
+	"encoding/json"
 	"math/rand"
+	"reflect"
 	"testing"
 
 	"github.com/btnguyen2k/henge"
+	"main/src/gvabe/bo"
 	"main/src/gvabe/bo/app"
 	"main/src/utils"
 )
@@ -21,7 +24,7 @@ func TestNewPage(t *testing.T) {
 	_title := "Quick start"
 	_icon := "default"
 	_summary := "topic one"
-	_pos := rand.Int()
+	_pos := rand.Intn(10242048)
 	_topic := NewTopic(_tagVersion, _app, _title, _icon, _summary)
 	if _topic == nil {
 		t.Fatalf("%s failed: nil", name)
@@ -122,114 +125,138 @@ func TestNewPageFromUbo(t *testing.T) {
 	}
 }
 
-// func TestPage_ToMap(t *testing.T) {
-// 	name := "TestPage_ToMap"
-// 	_tagVersion := uint64(1337)
-// 	_appId := "libro"
-// 	_name := "Libro"
-// 	_desc := "Libro description"
-// 	_isVisible := true
-// 	_app := app.NewApp(_tagVersion, _appId, _name, _desc, _isVisible)
-//
-// 	_title := "Quick start"
-// 	_icon := "default"
-// 	_summary := "topic one"
-// 	_pos := rand.Intn(10242048)
-// 	topic := NewPage(_tagVersion, _app, _title, _icon, _summary)
-// 	if topic == nil {
-// 		t.Fatalf("%s failed: nil", name)
-// 	}
-// 	topic.SetPosition(_pos)
-// 	_id := topic.GetId()
-//
-// 	m := topic.ToMap(nil)
-// 	expected := map[string]interface{}{
-// 		henge.FieldId: _id,
-// 		SerKeyFields: map[string]interface{}{
-// 			PageFieldAppId: _app.GetId(),
-// 		},
-// 		SerKeyAttrs: map[string]interface{}{
-// 			PageAttrTitle:    _title,
-// 			PageAttrIcon:     _icon,
-// 			PageAttrSummary:  _summary,
-// 			PageAttrPosition: _pos,
-// 		},
-// 	}
-// 	if !reflect.DeepEqual(m, expected) {
-// 		t.Fatalf("%s failed: expected %#v but received %#v", name, expected, m)
-// 	}
-//
-// 	m = topic.ToMap(func(input map[string]interface{}) map[string]interface{} {
-// 		return map[string]interface{}{
-// 			"FieldId":      input[henge.FieldId],
-// 			"SerKeyFields": input[SerKeyFields],
-// 			"SerKeyAttrs":  input[SerKeyAttrs],
-// 		}
-// 	})
-// 	expected = map[string]interface{}{
-// 		"FieldId": _id,
-// 		"SerKeyFields": map[string]interface{}{
-// 			PageFieldAppId: _app.GetId(),
-// 		},
-// 		"SerKeyAttrs": map[string]interface{}{
-// 			PageAttrTitle:    _title,
-// 			PageAttrIcon:     _icon,
-// 			PageAttrSummary:  _summary,
-// 			PageAttrPosition: _pos,
-// 		},
-// 	}
-// 	if !reflect.DeepEqual(m, expected) {
-// 		t.Fatalf("%s failed: expected %#v but received %#v", name, expected, m)
-// 	}
-// }
-//
-// func TestPage_json(t *testing.T) {
-// 	name := "TestPage_json"
-// 	_tagVersion := uint64(1337)
-// 	_appId := "libro"
-// 	_name := "Libro"
-// 	_desc := "Libro description"
-// 	_isVisible := true
-// 	_app := app.NewApp(_tagVersion, _appId, _name, _desc, _isVisible)
-//
-// 	_title := "Quick start"
-// 	_icon := "default"
-// 	_summary := "topic one"
-// 	_pos := rand.Intn(10242048)
-// 	topic1 := NewPage(_tagVersion, _app, _title, _icon, _summary)
-// 	if topic1 == nil {
-// 		t.Fatalf("%s failed: nil", name)
-// 	}
-// 	topic1.SetPosition(_pos)
-// 	js1, _ := json.Marshal(topic1)
-//
-// 	var topic2 *Page
-// 	err := json.Unmarshal(js1, &topic2)
-// 	if err != nil {
-// 		t.Fatalf("%s failed: %e", name, err)
-// 	}
-// 	if topic1.GetTagVersion() != topic2.GetTagVersion() {
-// 		t.Fatalf("%s failed: expected %#v but received %#v", name, topic1.GetTagVersion(), topic2.GetTagVersion())
-// 	}
-// 	if topic1.GetId() != topic2.GetId() {
-// 		t.Fatalf("%s failed: expected %#v but received %#v", name, topic1.GetId(), topic2.GetId())
-// 	}
-// 	if topic1.GetAppId() != topic2.GetAppId() {
-// 		t.Fatalf("%s failed: expected %#v but received %#v", name, topic1.GetAppId(), topic2.GetAppId())
-// 	}
-// 	if topic1.GetTitle() != topic2.GetTitle() {
-// 		t.Fatalf("%s failed: expected %#v but received %#v", name, topic1.GetTitle(), topic2.GetTitle())
-// 	}
-// 	if topic1.GetIcon() != topic2.GetIcon() {
-// 		t.Fatalf("%s failed: expected %#v but received %#v", name, topic1.GetIcon(), topic2.GetIcon())
-// 	}
-// 	if topic1.GetSummary() != topic2.GetSummary() {
-// 		t.Fatalf("%s failed: expected %#v but received %#v", name, topic1.GetSummary(), topic2.GetSummary())
-// 	}
-// 	if topic1.GetPosition() != topic2.GetPosition() {
-// 		t.Fatalf("%s failed: expected %#v but received %#v", name, topic1.GetPosition(), topic2.GetPosition())
-// 	}
-// 	if topic1.GetChecksum() != topic2.GetChecksum() {
-// 		t.Fatalf("%s failed: expected %#v but received %#v", name, topic1.GetChecksum(), topic2.GetChecksum())
-// 	}
-// }
+func TestPage_ToMap(t *testing.T) {
+	name := "TestPage_ToMap"
+	_tagVersion := uint64(1337)
+	_appId := "libro"
+	_name := "Libro"
+	_desc := "Libro description"
+	_isVisible := true
+	_app := app.NewApp(_tagVersion, _appId, _name, _desc, _isVisible)
+
+	_title := "Quick start"
+	_icon := "default"
+	_summary := "topic one"
+	_pos := rand.Intn(10242048)
+	_topic := NewTopic(_tagVersion, _app, _title, _icon, _summary)
+	if _topic == nil {
+		t.Fatalf("%s failed: nil", name)
+	}
+	_topic.SetPosition(_pos)
+
+	_content := "page one"
+	page := NewPage(_tagVersion, _topic, _title+"-page", _icon+"-page", _summary+"-page", _content)
+	if page == nil {
+		t.Fatalf("%s failed: nil", name)
+	}
+	page.SetPosition(_pos + 1)
+
+	_id := page.GetId()
+	m := page.ToMap(nil)
+	expected := map[string]interface{}{
+		henge.FieldId: _id,
+		bo.SerKeyFields: map[string]interface{}{
+			PageFieldAppId:   _app.GetId(),
+			PageFieldTopicId: _topic.GetId(),
+		},
+		bo.SerKeyAttrs: map[string]interface{}{
+			PageAttrTitle:    _title + "-page",
+			PageAttrIcon:     _icon + "-page",
+			PageAttrSummary:  _summary + "-page",
+			PageAttrPosition: _pos + 1,
+			PageAttrContent:  _content,
+		},
+	}
+	if !reflect.DeepEqual(m, expected) {
+		t.Fatalf("%s failed: expected %#v but received %#v", name, expected, m)
+	}
+
+	m = page.ToMap(func(input map[string]interface{}) map[string]interface{} {
+		return map[string]interface{}{
+			"FieldId":      input[henge.FieldId],
+			"SerKeyFields": input[bo.SerKeyFields],
+			"SerKeyAttrs":  input[bo.SerKeyAttrs],
+		}
+	})
+	expected = map[string]interface{}{
+		"FieldId": _id,
+		"SerKeyFields": map[string]interface{}{
+			PageFieldAppId:   _app.GetId(),
+			PageFieldTopicId: _topic.GetId(),
+		},
+		"SerKeyAttrs": map[string]interface{}{
+			PageAttrTitle:    _title + "-page",
+			PageAttrIcon:     _icon + "-page",
+			PageAttrSummary:  _summary + "-page",
+			PageAttrPosition: _pos + 1,
+			PageAttrContent:  _content,
+		},
+	}
+	if !reflect.DeepEqual(m, expected) {
+		t.Fatalf("%s failed: expected %#v but received %#v", name, expected, m)
+	}
+}
+
+func TestPage_json(t *testing.T) {
+	name := "TestPage_json"
+	_tagVersion := uint64(1337)
+	_appId := "libro"
+	_name := "Libro"
+	_desc := "Libro description"
+	_isVisible := true
+	_app := app.NewApp(_tagVersion, _appId, _name, _desc, _isVisible)
+
+	_title := "Quick start"
+	_icon := "default"
+	_summary := "topic one"
+	_pos := rand.Intn(10242048)
+	_topic := NewTopic(_tagVersion, _app, _title, _icon, _summary)
+	if _topic == nil {
+		t.Fatalf("%s failed: nil", name)
+	}
+	_topic.SetPosition(_pos)
+
+	_content := "page one"
+	page1 := NewPage(_tagVersion, _topic, _title+"-page", _icon+"-page", _summary+"-page", _content)
+	if page1 == nil {
+		t.Fatalf("%s failed: nil", name)
+	}
+	page1.SetPosition(_pos + 1)
+	js1, _ := json.Marshal(page1)
+
+	var page2 *Page
+	err := json.Unmarshal(js1, &page2)
+	if err != nil {
+		t.Fatalf("%s failed: %e", name, err)
+	}
+	if page1.GetTagVersion() != page2.GetTagVersion() {
+		t.Fatalf("%s failed: expected %#v but received %#v", name, page1.GetTagVersion(), page2.GetTagVersion())
+	}
+	if page1.GetId() != page2.GetId() {
+		t.Fatalf("%s failed: expected %#v but received %#v", name, page1.GetId(), page2.GetId())
+	}
+	if page1.GetAppId() != page2.GetAppId() {
+		t.Fatalf("%s failed: expected %#v but received %#v", name, page1.GetAppId(), page2.GetAppId())
+	}
+	if page1.GetTopicId() != page2.GetTopicId() {
+		t.Fatalf("%s failed: expected %#v but received %#v", name, page1.GetTopicId(), page2.GetTopicId())
+	}
+	if page1.GetTitle() != page2.GetTitle() {
+		t.Fatalf("%s failed: expected %#v but received %#v", name, page1.GetTitle(), page2.GetTitle())
+	}
+	if page1.GetIcon() != page2.GetIcon() {
+		t.Fatalf("%s failed: expected %#v but received %#v", name, page1.GetIcon(), page2.GetIcon())
+	}
+	if page1.GetSummary() != page2.GetSummary() {
+		t.Fatalf("%s failed: expected %#v but received %#v", name, page1.GetSummary(), page2.GetSummary())
+	}
+	if page1.GetPosition() != page2.GetPosition() {
+		t.Fatalf("%s failed: expected %#v but received %#v", name, page1.GetPosition(), page2.GetPosition())
+	}
+	if page1.GetContent() != page2.GetContent() {
+		t.Fatalf("%s failed: expected %#v but received %#v", name, page1.GetContent(), page2.GetContent())
+	}
+	if page1.GetChecksum() != page2.GetChecksum() {
+		t.Fatalf("%s failed: expected %#v but received %#v", name, page1.GetChecksum(), page2.GetChecksum())
+	}
+}

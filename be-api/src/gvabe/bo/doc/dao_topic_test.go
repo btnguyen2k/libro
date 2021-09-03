@@ -13,10 +13,6 @@ import (
 
 const numSampleRowsTopic = 100
 
-var appList []*app.App
-var topicList []*Topic
-var appTopicCount map[string]int
-
 func initSampleRowsTopic(t *testing.T, testName string, dao TopicDao) {
 	rand.Seed(time.Now().UnixNano())
 	numApps := 1 + rand.Intn(numSampleRowsTopic/10)

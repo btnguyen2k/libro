@@ -17,10 +17,10 @@ import (
 )
 
 const (
-	testSqlTableTopic = "test_topic"
+	testSqlTablePage = "test_page"
 )
 
-func sqlInitTableTopic(sqlc *prom.SqlConnect, table string) error {
+func sqlInitTablePage(sqlc *prom.SqlConnect, table string) error {
 	rand.Seed(time.Now().UnixNano())
 	var err error
 	if sqlc.GetDbFlavor() == prom.FlavorCosmosDb {
@@ -35,26 +35,26 @@ func sqlInitTableTopic(sqlc *prom.SqlConnect, table string) error {
 		spec := &henge.CosmosdbCollectionSpec{Pk: henge.CosmosdbColId}
 		err = henge.InitCosmosdbCollection(sqlc, table, spec)
 	case prom.FlavorMySql:
-		err = henge.InitMysqlTable(sqlc, table, map[string]string{TopicColAppId: "VARCHAR(32)"})
+		err = henge.InitMysqlTable(sqlc, table, map[string]string{PageColAppId: "VARCHAR(32)", PageColTopicId: "VARCHAR(32)"})
 	case prom.FlavorPgSql:
-		err = henge.InitPgsqlTable(sqlc, table, map[string]string{TopicColAppId: "VARCHAR(32)"})
+		err = henge.InitPgsqlTable(sqlc, table, map[string]string{PageColAppId: "VARCHAR(32)", PageColTopicId: "VARCHAR(32)"})
 	case prom.FlavorSqlite:
-		err = henge.InitSqliteTable(sqlc, table, map[string]string{TopicColAppId: "VARCHAR(32)"})
+		err = henge.InitSqliteTable(sqlc, table, map[string]string{PageColAppId: "VARCHAR(32)", PageColTopicId: "VARCHAR(32)"})
 	}
 	return err
 }
 
-func initTopicDaoSql(sqlc *prom.SqlConnect) TopicDao {
+func initPageDaoSql(sqlc *prom.SqlConnect) PageDao {
 	if sqlc.GetDbFlavor() == prom.FlavorCosmosDb {
-		return NewTopicDaoCosmosdb(sqlc, testSqlTableTopic, true)
+		return NewPageDaoCosmosdb(sqlc, testSqlTablePage, true)
 	}
-	return NewTopicDaoSql(sqlc, testSqlTableTopic, true)
+	return NewPageDaoSql(sqlc, testSqlTablePage, true)
 }
 
 /*----------------------------------------------------------------------*/
 
-func TestNewTopicDaoSql(t *testing.T) {
-	name := "TestNewTopicDaoSql"
+func TestNewPageDaoSql(t *testing.T) {
+	name := "TestNewPageDaoSql"
 	urlMap := sqlGetUrlFromEnv()
 	if len(urlMap) == 0 {
 		t.Skipf("%s skipped", name)
@@ -66,20 +66,20 @@ func TestNewTopicDaoSql(t *testing.T) {
 		} else if sqlc == nil {
 			t.Fatalf("%s failed: nil", name+"/"+dbtype)
 		}
-		err = sqlInitTableTopic(sqlc, testSqlTableTopic)
+		err = sqlInitTablePage(sqlc, testSqlTablePage)
 		if err != nil {
-			t.Fatalf("%s failed: error [%s]", name+"/sqlInitTableTopic/"+dbtype, err)
+			t.Fatalf("%s failed: error [%s]", name+"/sqlInitTablePage/"+dbtype, err)
 		}
-		dao := initTopicDaoSql(sqlc)
+		dao := initPageDaoSql(sqlc)
 		if dao == nil {
-			t.Fatalf("%s failed: nil", name+"/initTopicDaoSql")
+			t.Fatalf("%s failed: nil", name+"/initPageDaoSql")
 		}
 		sqlc.Close()
 	}
 }
 
-func TestTopicDaoSql_CreateGet(t *testing.T) {
-	name := "TestTopicDaoSql_CreateGet"
+func TestPageDaoSql_CreateGet(t *testing.T) {
+	name := "TestPageDaoSql_CreateGet"
 	urlMap := sqlGetUrlFromEnv()
 	if len(urlMap) == 0 {
 		t.Skipf("%s skipped", name)
@@ -91,11 +91,11 @@ func TestTopicDaoSql_CreateGet(t *testing.T) {
 		} else if sqlc == nil {
 			t.Fatalf("%s failed: nil", name+"/"+dbtype)
 		}
-		err = sqlInitTableTopic(sqlc, testSqlTableTopic)
+		err = sqlInitTablePage(sqlc, testSqlTablePage)
 		if err != nil {
-			t.Fatalf("%s failed: error [%s]", name+"/sqlInitTableTopic/"+dbtype, err)
+			t.Fatalf("%s failed: error [%s]", name+"/sqlInitTablePage/"+dbtype, err)
 		}
-		dao := initTopicDaoSql(sqlc)
+		dao := initPageDaoSql(sqlc)
 		if dao == nil {
 			t.Fatalf("%s failed: nil", name)
 		}
@@ -104,13 +104,13 @@ func TestTopicDaoSql_CreateGet(t *testing.T) {
 		} else {
 			henge.TimeLayout = time.RFC3339
 		}
-		doTestTopicDaoCreateGet(t, name, dao)
+		doTestPageDaoCreateGet(t, name, dao)
 		sqlc.Close()
 	}
 }
 
-func TestTopicDaoSql_CreateUpdateGet(t *testing.T) {
-	name := "TestTopicDaoSql_CreateUpdateGet"
+func TestPageDaoSql_CreateUpdateGet(t *testing.T) {
+	name := "TestPageDaoSql_CreateUpdateGet"
 	urlMap := sqlGetUrlFromEnv()
 	if len(urlMap) == 0 {
 		t.Skipf("%s skipped", name)
@@ -122,21 +122,21 @@ func TestTopicDaoSql_CreateUpdateGet(t *testing.T) {
 		} else if sqlc == nil {
 			t.Fatalf("%s failed: nil", name+"/"+dbtype)
 		}
-		err = sqlInitTableTopic(sqlc, testSqlTableTopic)
+		err = sqlInitTablePage(sqlc, testSqlTablePage)
 		if err != nil {
-			t.Fatalf("%s failed: error [%s]", name+"/sqlInitTableTopic/"+dbtype, err)
+			t.Fatalf("%s failed: error [%s]", name+"/sqlInitTablePage/"+dbtype, err)
 		}
-		dao := initTopicDaoSql(sqlc)
+		dao := initPageDaoSql(sqlc)
 		if dao == nil {
 			t.Fatalf("%s failed: nil", name)
 		}
-		doTestTopicDaoCreateUpdateGet(t, name, dao)
+		doTestPageDaoCreateUpdateGet(t, name, dao)
 		sqlc.Close()
 	}
 }
 
-func TestTopicDaoSql_CreateDelete(t *testing.T) {
-	name := "TestTopicDaoSql_CreateDelete"
+func TestPageDaoSql_CreateDelete(t *testing.T) {
+	name := "TestPageDaoSql_CreateDelete"
 	urlMap := sqlGetUrlFromEnv()
 	if len(urlMap) == 0 {
 		t.Skipf("%s skipped", name)
@@ -148,21 +148,21 @@ func TestTopicDaoSql_CreateDelete(t *testing.T) {
 		} else if sqlc == nil {
 			t.Fatalf("%s failed: nil", name+"/"+dbtype)
 		}
-		err = sqlInitTableTopic(sqlc, testSqlTableTopic)
+		err = sqlInitTablePage(sqlc, testSqlTablePage)
 		if err != nil {
-			t.Fatalf("%s failed: error [%s]", name+"/sqlInitTableTopic/"+dbtype, err)
+			t.Fatalf("%s failed: error [%s]", name+"/sqlInitTablePage/"+dbtype, err)
 		}
-		dao := initTopicDaoSql(sqlc)
+		dao := initPageDaoSql(sqlc)
 		if dao == nil {
 			t.Fatalf("%s failed: nil", name)
 		}
-		doTestTopicDaoCreateDelete(t, name, dao)
+		doTestPageDaoCreateDelete(t, name, dao)
 		sqlc.Close()
 	}
 }
 
-func TestTopicDaoSql_GetAll(t *testing.T) {
-	name := "TestTopicDaoSql_GetAll"
+func TestPageDaoSql_GetAll(t *testing.T) {
+	name := "TestPageDaoSql_GetAll"
 	urlMap := sqlGetUrlFromEnv()
 	if len(urlMap) == 0 {
 		t.Skipf("%s skipped", name)
@@ -174,21 +174,21 @@ func TestTopicDaoSql_GetAll(t *testing.T) {
 		} else if sqlc == nil {
 			t.Fatalf("%s failed: nil", name+"/"+dbtype)
 		}
-		err = sqlInitTableTopic(sqlc, testSqlTableTopic)
+		err = sqlInitTablePage(sqlc, testSqlTablePage)
 		if err != nil {
-			t.Fatalf("%s failed: error [%s]", name+"/sqlInitTableTopic/"+dbtype, err)
+			t.Fatalf("%s failed: error [%s]", name+"/sqlInitTablePage/"+dbtype, err)
 		}
-		dao := initTopicDaoSql(sqlc)
+		dao := initPageDaoSql(sqlc)
 		if dao == nil {
 			t.Fatalf("%s failed: nil", name)
 		}
-		doTestTopicDaoGetAll(t, name, dao)
+		doTestPageDaoGetAll(t, name, dao)
 		sqlc.Close()
 	}
 }
 
-func TestTopicDaoSql_GetN(t *testing.T) {
-	name := "TestTopicDaoSql_GetN"
+func TestPageDaoSql_GetN(t *testing.T) {
+	name := "TestPageDaoSql_GetN"
 	urlMap := sqlGetUrlFromEnv()
 	if len(urlMap) == 0 {
 		t.Skipf("%s skipped", name)
@@ -200,15 +200,15 @@ func TestTopicDaoSql_GetN(t *testing.T) {
 		} else if sqlc == nil {
 			t.Fatalf("%s failed: nil", name+"/"+dbtype)
 		}
-		err = sqlInitTableTopic(sqlc, testSqlTableTopic)
+		err = sqlInitTablePage(sqlc, testSqlTablePage)
 		if err != nil {
-			t.Fatalf("%s failed: error [%s]", name+"/sqlInitTableTopic/"+dbtype, err)
+			t.Fatalf("%s failed: error [%s]", name+"/sqlInitTablePage/"+dbtype, err)
 		}
-		dao := initTopicDaoSql(sqlc)
+		dao := initPageDaoSql(sqlc)
 		if dao == nil {
 			t.Fatalf("%s failed: nil", name)
 		}
-		doTestTopicDaoGetN(t, name, dao)
+		doTestPageDaoGetN(t, name, dao)
 		sqlc.Close()
 	}
 }

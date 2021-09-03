@@ -8,17 +8,17 @@ import (
 )
 
 const (
-	testDynamodbTableTopic = "test_topic"
+	testDynamodbTablePage = "test_page"
 )
 
-func initTopicDaoDynamodb(adc *prom.AwsDynamodbConnect) TopicDao {
-	return NewTopicDaoDynamodb(adc, testDynamodbTableTopic)
+func initPageDaoDynamodb(adc *prom.AwsDynamodbConnect) PageDao {
+	return NewPageDaoDynamodb(adc, testDynamodbTablePage)
 }
 
 /*----------------------------------------------------------------------*/
 
-func TestNewTopicDaoDynamodb(t *testing.T) {
-	name := "TestNewTopicDaoDynamodb"
+func TestNewPageDaoDynamodb(t *testing.T) {
+	name := "TestNewPageDaoDynamodb"
 	adc, err := newDynamodbConnect(t, name)
 	if err != nil {
 		t.Fatalf("%s failed: error [%s]", name, err)
@@ -26,19 +26,19 @@ func TestNewTopicDaoDynamodb(t *testing.T) {
 		t.Fatalf("%s failed: nil", name)
 	}
 	spec := &henge.DynamodbTablesSpec{MainTableRcu: 2, MainTableWcu: 1, CreateUidxTable: true, UidxTableRcu: 2, UidxTableWcu: 1}
-	err = dynamodbInitTable(adc, testDynamodbTableTopic, spec)
+	err = dynamodbInitTable(adc, testDynamodbTablePage, spec)
 	if err != nil {
 		t.Fatalf("%s failed: error [%s]", name+"/dynamodbInitTable", err)
 	}
-	dao := initTopicDaoDynamodb(adc)
+	dao := initPageDaoDynamodb(adc)
 	if dao == nil {
-		t.Fatalf("%s failed: nil", name+"/initTopicDaoDynamodb")
+		t.Fatalf("%s failed: nil", name+"/initPageDaoDynamodb")
 	}
 	defer adc.Close()
 }
 
-func TestTopicDaoDynamodb_CreateGet(t *testing.T) {
-	name := "TestTopicDaoDynamodb_CreateGet"
+func TestPageDaoDynamodb_CreateGet(t *testing.T) {
+	name := "TestPageDaoDynamodb_CreateGet"
 	adc, err := newDynamodbConnect(t, name)
 	if err != nil {
 		t.Fatalf("%s failed: error [%s]", name, err)
@@ -46,20 +46,20 @@ func TestTopicDaoDynamodb_CreateGet(t *testing.T) {
 		t.Fatalf("%s failed: nil", name)
 	}
 	spec := &henge.DynamodbTablesSpec{MainTableRcu: 2, MainTableWcu: 1, CreateUidxTable: true, UidxTableRcu: 2, UidxTableWcu: 1}
-	err = dynamodbInitTable(adc, testDynamodbTableTopic, spec)
+	err = dynamodbInitTable(adc, testDynamodbTablePage, spec)
 	if err != nil {
 		t.Fatalf("%s failed: error [%s]", name+"/dynamodbInitTable", err)
 	}
-	dao := initTopicDaoDynamodb(adc)
+	dao := initPageDaoDynamodb(adc)
 	if dao == nil {
-		t.Fatalf("%s failed: nil", name+"/initTopicDaoDynamodb")
+		t.Fatalf("%s failed: nil", name+"/initPageDaoDynamodb")
 	}
 	defer adc.Close()
-	doTestTopicDaoCreateGet(t, name, dao)
+	doTestPageDaoCreateGet(t, name, dao)
 }
 
-func TestTopicDaoDynamodb_CreateUpdateGet(t *testing.T) {
-	name := "TestTopicDaoDynamodb_CreateUpdateGet"
+func TestPageDaoDynamodb_CreateUpdateGet(t *testing.T) {
+	name := "TestPageDaoDynamodb_CreateUpdateGet"
 	adc, err := newDynamodbConnect(t, name)
 	if err != nil {
 		t.Fatalf("%s failed: error [%s]", name, err)
@@ -67,20 +67,20 @@ func TestTopicDaoDynamodb_CreateUpdateGet(t *testing.T) {
 		t.Fatalf("%s failed: nil", name)
 	}
 	spec := &henge.DynamodbTablesSpec{MainTableRcu: 2, MainTableWcu: 1, CreateUidxTable: true, UidxTableRcu: 2, UidxTableWcu: 1}
-	err = dynamodbInitTable(adc, testDynamodbTableTopic, spec)
+	err = dynamodbInitTable(adc, testDynamodbTablePage, spec)
 	if err != nil {
 		t.Fatalf("%s failed: error [%s]", name+"/dynamodbInitTable", err)
 	}
-	dao := initTopicDaoDynamodb(adc)
+	dao := initPageDaoDynamodb(adc)
 	if dao == nil {
-		t.Fatalf("%s failed: nil", name+"/initTopicDaoDynamodb")
+		t.Fatalf("%s failed: nil", name+"/initPageDaoDynamodb")
 	}
 	defer adc.Close()
-	doTestTopicDaoCreateUpdateGet(t, name, dao)
+	doTestPageDaoCreateUpdateGet(t, name, dao)
 }
 
-func TestTopicDaoDynamodb_CreateDelete(t *testing.T) {
-	name := "TestTopicDaoDynamodb_CreateDelete"
+func TestPageDaoDynamodb_CreateDelete(t *testing.T) {
+	name := "TestPageDaoDynamodb_CreateDelete"
 	adc, err := newDynamodbConnect(t, name)
 	if err != nil {
 		t.Fatalf("%s failed: error [%s]", name, err)
@@ -88,20 +88,20 @@ func TestTopicDaoDynamodb_CreateDelete(t *testing.T) {
 		t.Fatalf("%s failed: nil", name)
 	}
 	spec := &henge.DynamodbTablesSpec{MainTableRcu: 2, MainTableWcu: 1, CreateUidxTable: true, UidxTableRcu: 2, UidxTableWcu: 1}
-	err = dynamodbInitTable(adc, testDynamodbTableTopic, spec)
+	err = dynamodbInitTable(adc, testDynamodbTablePage, spec)
 	if err != nil {
 		t.Fatalf("%s failed: error [%s]", name+"/dynamodbInitTable", err)
 	}
-	dao := initTopicDaoDynamodb(adc)
+	dao := initPageDaoDynamodb(adc)
 	if dao == nil {
-		t.Fatalf("%s failed: nil", name+"/initTopicDaoDynamodb")
+		t.Fatalf("%s failed: nil", name+"/initPageDaoDynamodb")
 	}
 	defer adc.Close()
-	doTestTopicDaoCreateDelete(t, name, dao)
+	doTestPageDaoCreateDelete(t, name, dao)
 }
 
-func TestTopicDaoDynamodb_GetAll(t *testing.T) {
-	name := "TestTopicDaoDynamodb_GetAll"
+func TestPageDaoDynamodb_GetAll(t *testing.T) {
+	name := "TestPageDaoDynamodb_GetAll"
 	adc, err := newDynamodbConnect(t, name)
 	if err != nil {
 		t.Fatalf("%s failed: error [%s]", name, err)
@@ -109,20 +109,20 @@ func TestTopicDaoDynamodb_GetAll(t *testing.T) {
 		t.Fatalf("%s failed: nil", name)
 	}
 	spec := &henge.DynamodbTablesSpec{MainTableRcu: 2, MainTableWcu: 1, CreateUidxTable: true, UidxTableRcu: 2, UidxTableWcu: 1}
-	err = dynamodbInitTable(adc, testDynamodbTableTopic, spec)
+	err = dynamodbInitTable(adc, testDynamodbTablePage, spec)
 	if err != nil {
 		t.Fatalf("%s failed: error [%s]", name+"/dynamodbInitTable", err)
 	}
-	dao := initTopicDaoDynamodb(adc)
+	dao := initPageDaoDynamodb(adc)
 	if dao == nil {
-		t.Fatalf("%s failed: nil", name+"/initTopicDaoDynamodb")
+		t.Fatalf("%s failed: nil", name+"/initPageDaoDynamodb")
 	}
 	defer adc.Close()
-	doTestTopicDaoGetAll(t, name, dao)
+	doTestPageDaoGetAll(t, name, dao)
 }
 
-func TestTopicDaoDynamodb_GetN(t *testing.T) {
-	name := "TestTopicDaoDynamodb_GetN"
+func TestPageDaoDynamodb_GetN(t *testing.T) {
+	name := "TestPageDaoDynamodb_GetN"
 	adc, err := newDynamodbConnect(t, name)
 	if err != nil {
 		t.Fatalf("%s failed: error [%s]", name, err)
@@ -130,14 +130,14 @@ func TestTopicDaoDynamodb_GetN(t *testing.T) {
 		t.Fatalf("%s failed: nil", name)
 	}
 	spec := &henge.DynamodbTablesSpec{MainTableRcu: 2, MainTableWcu: 1, CreateUidxTable: true, UidxTableRcu: 2, UidxTableWcu: 1}
-	err = dynamodbInitTable(adc, testDynamodbTableTopic, spec)
+	err = dynamodbInitTable(adc, testDynamodbTablePage, spec)
 	if err != nil {
 		t.Fatalf("%s failed: error [%s]", name+"/dynamodbInitTable", err)
 	}
-	dao := initTopicDaoDynamodb(adc)
+	dao := initPageDaoDynamodb(adc)
 	if dao == nil {
-		t.Fatalf("%s failed: nil", name+"/initTopicDaoDynamodb")
+		t.Fatalf("%s failed: nil", name+"/initPageDaoDynamodb")
 	}
 	defer adc.Close()
-	doTestTopicDaoGetN(t, name, dao)
+	doTestPageDaoGetN(t, name, dao)
 }
