@@ -1,48 +1,25 @@
 package doc
 
 import (
-	"math/rand"
 	"os"
 	"strings"
 	"testing"
-	"time"
 
-	"github.com/btnguyen2k/henge"
 	"github.com/btnguyen2k/prom"
 )
 
 const (
-	testMongoCollection = "test_section"
+	testMongoCollection = "test_topic"
 )
 
-func mongoInitCollection(mc *prom.MongoConnect, collection string) error {
-	rand.Seed(time.Now().UnixNano())
-	mc.GetCollection(collection).Drop(nil)
-	return henge.InitMongoCollection(mc, collection)
+func initTopicDaoMongo(mc *prom.MongoConnect) TopicDao {
+	return NewTopicDaoMongo(mc, testMongoCollection, strings.Index(mc.GetUrl(), "replicaSet=") >= 0)
 }
-
-func newMongoConnect(t *testing.T, testName string, db, url string) (*prom.MongoConnect, error) {
-	db = strings.Trim(db, "\"")
-	url = strings.Trim(url, "\"")
-	if db == "" || url == "" {
-		t.Skipf("%s skipped", testName)
-	}
-	return prom.NewMongoConnect(url, db, 10000)
-}
-
-func initDaoMongo(mc *prom.MongoConnect) SectionDao {
-	return NewSectionDaoMongo(mc, testMongoCollection, strings.Index(mc.GetUrl(), "replicaSet=") >= 0)
-}
-
-const (
-	envMongoDb  = "MONGO_DB"
-	envMongoUrl = "MONGO_URL"
-)
 
 /*----------------------------------------------------------------------*/
 
-func TestNewSectionDaoMongo(t *testing.T) {
-	name := "TestNewSectionDaoMongo"
+func TestNewTopicDaoMongo(t *testing.T) {
+	name := "TestNewTopicDaoMongo"
 	db := os.Getenv(envMongoDb)
 	url := os.Getenv(envMongoUrl)
 	mc, err := newMongoConnect(t, name, db, url)
@@ -55,15 +32,15 @@ func TestNewSectionDaoMongo(t *testing.T) {
 	if err != nil {
 		t.Fatalf("%s failed: error [%s]", name+"/mongoInitCollection", err)
 	}
-	dao := initDaoMongo(mc)
+	dao := initTopicDaoMongo(mc)
 	if dao == nil {
-		t.Fatalf("%s failed: nil", name+"/initDaoMongo")
+		t.Fatalf("%s failed: nil", name+"/initTopicDaoMongo")
 	}
 	mc.Close(nil)
 }
 
-func TestSectionDaoMongo_CreateGet(t *testing.T) {
-	name := "TestSectionDaoMongo_CreateGet"
+func TestTopicDaoMongo_CreateGet(t *testing.T) {
+	name := "TestTopicDaoMongo_CreateGet"
 	db := os.Getenv(envMongoDb)
 	url := os.Getenv(envMongoUrl)
 	mc, err := newMongoConnect(t, name, db, url)
@@ -76,13 +53,13 @@ func TestSectionDaoMongo_CreateGet(t *testing.T) {
 	if err != nil {
 		t.Fatalf("%s failed: error [%s]", name+"/mongoInitCollection", err)
 	}
-	dao := initDaoMongo(mc)
-	doTestSectionDaoCreateGet(t, name, dao)
+	dao := initTopicDaoMongo(mc)
+	doTestTopicDaoCreateGet(t, name, dao)
 	mc.Close(nil)
 }
 
-func TestSectionDaoMongo_CreateUpdateGet(t *testing.T) {
-	name := "TestSectionDaoMongo_CreateGet"
+func TestTopicDaoMongo_CreateUpdateGet(t *testing.T) {
+	name := "TestTopicDaoMongo_CreateGet"
 	db := os.Getenv(envMongoDb)
 	url := os.Getenv(envMongoUrl)
 	mc, err := newMongoConnect(t, name, db, url)
@@ -95,13 +72,13 @@ func TestSectionDaoMongo_CreateUpdateGet(t *testing.T) {
 	if err != nil {
 		t.Fatalf("%s failed: error [%s]", name+"/mongoInitCollection", err)
 	}
-	dao := initDaoMongo(mc)
-	doTestSectionDaoCreateUpdateGet(t, name, dao)
+	dao := initTopicDaoMongo(mc)
+	doTestTopicDaoCreateUpdateGet(t, name, dao)
 	mc.Close(nil)
 }
 
-func TestSectionDaoMongo_CreateDelete(t *testing.T) {
-	name := "TestSectionDaoMongo_CreateDelete"
+func TestTopicDaoMongo_CreateDelete(t *testing.T) {
+	name := "TestTopicDaoMongo_CreateDelete"
 	db := os.Getenv(envMongoDb)
 	url := os.Getenv(envMongoUrl)
 	mc, err := newMongoConnect(t, name, db, url)
@@ -114,13 +91,13 @@ func TestSectionDaoMongo_CreateDelete(t *testing.T) {
 	if err != nil {
 		t.Fatalf("%s failed: error [%s]", name+"/mongoInitCollection", err)
 	}
-	dao := initDaoMongo(mc)
-	doTestSectionDaoCreateDelete(t, name, dao)
+	dao := initTopicDaoMongo(mc)
+	doTestTopicDaoCreateDelete(t, name, dao)
 	mc.Close(nil)
 }
 
-func TestSectionDaoMongo_GetAll(t *testing.T) {
-	name := "TestSectionDaoMongo_GetAll"
+func TestTopicDaoMongo_GetAll(t *testing.T) {
+	name := "TestTopicDaoMongo_GetAll"
 	db := os.Getenv(envMongoDb)
 	url := os.Getenv(envMongoUrl)
 	mc, err := newMongoConnect(t, name, db, url)
@@ -133,13 +110,13 @@ func TestSectionDaoMongo_GetAll(t *testing.T) {
 	if err != nil {
 		t.Fatalf("%s failed: error [%s]", name+"/mongoInitCollection", err)
 	}
-	dao := initDaoMongo(mc)
-	doTestSectionDaoGetAll(t, name, dao)
+	dao := initTopicDaoMongo(mc)
+	doTestTopicDaoGetAll(t, name, dao)
 	mc.Close(nil)
 }
 
-func TestSectionDaoMongo_GetN(t *testing.T) {
-	name := "TestSectionDaoMongo_GetN"
+func TestTopicDaoMongo_GetN(t *testing.T) {
+	name := "TestTopicDaoMongo_GetN"
 	db := os.Getenv(envMongoDb)
 	url := os.Getenv(envMongoUrl)
 	mc, err := newMongoConnect(t, name, db, url)
@@ -152,7 +129,7 @@ func TestSectionDaoMongo_GetN(t *testing.T) {
 	if err != nil {
 		t.Fatalf("%s failed: error [%s]", name+"/mongoInitCollection", err)
 	}
-	dao := initDaoMongo(mc)
-	doTestSectionDaoGetN(t, name, dao)
+	dao := initTopicDaoMongo(mc)
+	doTestTopicDaoGetN(t, name, dao)
 	mc.Close(nil)
 }

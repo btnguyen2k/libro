@@ -5,11 +5,11 @@ import (
 	"github.com/btnguyen2k/prom"
 )
 
-// NewSectionDaoCosmosdb is helper method to create Azure Cosmos DB-implementation of SectionDao
+// NewTopicDaoCosmosdb is helper method to create Azure Cosmos DB-implementation of TopicDao
 //
 // Note: txModeOnWrite is not currently used!
-func NewSectionDaoCosmosdb(sqlc *prom.SqlConnect, tableName string, txModeOnWrite bool) SectionDao {
-	dao := &BaseSectionDaoImpl{}
+func NewTopicDaoCosmosdb(sqlc *prom.SqlConnect, tableName string, txModeOnWrite bool) TopicDao {
+	dao := &BaseTopicDaoImpl{}
 	spec := &henge.CosmosdbDaoSpec{
 		PkName:        henge.CosmosdbColId,
 		TxModeOnWrite: txModeOnWrite,

@@ -11,15 +11,15 @@ import (
 	"main/src/gvabe/bo/app"
 )
 
-const numSampleRowsSection = 100
+const numSampleRowsTopic = 100
 
 var appList []*app.App
-var sectionList []*Section
-var appSectionCount map[string]int
+var topicList []*Topic
+var appTopicCount map[string]int
 
-func initSampleRowsSection(t *testing.T, testName string, dao SectionDao) {
+func initSampleRowsTopic(t *testing.T, testName string, dao TopicDao) {
 	rand.Seed(time.Now().UnixNano())
-	numApps := 1 + rand.Intn(numSampleRowsSection/10)
+	numApps := 1 + rand.Intn(numSampleRowsTopic/10)
 	appList = make([]*app.App, numApps)
 	_tagVersion := uint64(1337)
 	for i := 0; i < numApps; i++ {
@@ -30,18 +30,18 @@ func initSampleRowsSection(t *testing.T, testName string, dao SectionDao) {
 		_app := app.NewApp(_tagVersion, _appId, _name, _desc, _isVisible)
 		appList[i] = _app
 	}
-	sectionList = make([]*Section, numSampleRowsSection)
-	appSectionCount = make(map[string]int)
-	for i := 0; i < numSampleRowsSection; i++ {
+	topicList = make([]*Topic, numSampleRowsTopic)
+	appTopicCount = make(map[string]int)
+	for i := 0; i < numSampleRowsTopic; i++ {
 		_app := appList[rand.Intn(numApps)]
 		istr := fmt.Sprintf("%03d", i)
 		_title := "Quick start " + istr
 		_icon := "default"
-		_summary := "section " + istr
+		_summary := "topic " + istr
 		_pos := rand.Int()
 		_email := istr + "@libro"
 		_age := float64(18 + i)
-		bo := NewSection(_tagVersion, _app, _title, _icon, _summary)
+		bo := NewTopic(_tagVersion, _app, _title, _icon, _summary)
 		bo.SetPosition(_pos)
 		bo.SetDataAttr("props.owner", "App"+istr)
 		bo.SetDataAttr("props.email", _email)
@@ -49,14 +49,14 @@ func initSampleRowsSection(t *testing.T, testName string, dao SectionDao) {
 		if ok, err := dao.Create(bo); err != nil || !ok {
 			t.Fatalf("%s failed: %#v / %s", testName+"/Create", ok, err)
 		}
-		sectionList[i] = bo
+		topicList[i] = bo
 
-		counter := appSectionCount[_app.GetId()]
-		appSectionCount[_app.GetId()] = counter + 1
+		counter := appTopicCount[_app.GetId()]
+		appTopicCount[_app.GetId()] = counter + 1
 	}
 }
 
-func doTestSectionDaoCreateGet(t *testing.T, name string, dao SectionDao) {
+func doTestTopicDaoCreateGet(t *testing.T, name string, dao TopicDao) {
 	_tagVersion := uint64(1337)
 	_appId := "libro"
 	_name := "Libro"
@@ -66,9 +66,9 @@ func doTestSectionDaoCreateGet(t *testing.T, name string, dao SectionDao) {
 
 	_title := "Quick start"
 	_icon := "default"
-	_summary := "section one"
+	_summary := "topic one"
 	_pos := rand.Intn(10242048)
-	bo0 := NewSection(_tagVersion, _app, _title, _icon, _summary)
+	bo0 := NewTopic(_tagVersion, _app, _title, _icon, _summary)
 	bo0.SetPosition(_pos)
 	_email := "libro@libro"
 	_age := float64(35)
@@ -122,7 +122,7 @@ func doTestSectionDaoCreateGet(t *testing.T, name string, dao SectionDao) {
 	}
 }
 
-func doTestSectionDaoCreateUpdateGet(t *testing.T, name string, dao SectionDao) {
+func doTestTopicDaoCreateUpdateGet(t *testing.T, name string, dao TopicDao) {
 	_tagVersion := uint64(1337)
 	_appId := "libro"
 	_name := "Libro"
@@ -132,9 +132,9 @@ func doTestSectionDaoCreateUpdateGet(t *testing.T, name string, dao SectionDao) 
 
 	_title := "Quick start"
 	_icon := "default"
-	_summary := "section one"
+	_summary := "topic one"
 	_pos := rand.Intn(10242048)
-	bo0 := NewSection(_tagVersion, _app, _title, _icon, _summary)
+	bo0 := NewTopic(_tagVersion, _app, _title, _icon, _summary)
 	bo0.SetPosition(_pos)
 	_email := "libro@libro"
 	_age := float64(35)
@@ -198,7 +198,7 @@ func doTestSectionDaoCreateUpdateGet(t *testing.T, name string, dao SectionDao) 
 	}
 }
 
-func doTestSectionDaoCreateDelete(t *testing.T, name string, dao SectionDao) {
+func doTestTopicDaoCreateDelete(t *testing.T, name string, dao TopicDao) {
 	_tagVersion := uint64(1337)
 	_appId := "libro"
 	_name := "Libro"
@@ -208,9 +208,9 @@ func doTestSectionDaoCreateDelete(t *testing.T, name string, dao SectionDao) {
 
 	_title := "Quick start"
 	_icon := "default"
-	_summary := "section one"
+	_summary := "topic one"
 	_pos := rand.Intn(10242048)
-	bo0 := NewSection(_tagVersion, _app, _title, _icon, _summary)
+	bo0 := NewTopic(_tagVersion, _app, _title, _icon, _summary)
 	bo0.SetPosition(_pos)
 	_email := "libro@libro"
 	_age := float64(35)
@@ -232,27 +232,28 @@ func doTestSectionDaoCreateDelete(t *testing.T, name string, dao SectionDao) {
 	}
 }
 
-func doTestSectionDaoGetAll(t *testing.T, name string, dao SectionDao) {
-	initSampleRowsSection(t, name, dao)
+func doTestTopicDaoGetAll(t *testing.T, name string, dao TopicDao) {
+	initSampleRowsTopic(t, name, dao)
 	for _, app := range appList {
 		boList, err := dao.GetAll(app, nil, nil)
-		expected := appSectionCount[app.GetId()]
+		expected := appTopicCount[app.GetId()]
 		if err != nil || len(boList) != expected {
 			t.Fatalf("%s failed: expected %#v but received %#v (error %s)", name+"/GetAll", expected, len(boList), err)
 		}
 	}
 }
 
-func doTestSectionDaoGetN(t *testing.T, name string, dao SectionDao) {
-	initSampleRowsSection(t, name, dao)
+func doTestTopicDaoGetN(t *testing.T, name string, dao TopicDao) {
+	initSampleRowsTopic(t, name, dao)
 	for _, app := range appList {
 		startOffset := rand.Intn(5)
-		numRowsLimit := rand.Intn(10)
+		numRowsLimit := rand.Intn(10) + 1
 		boList, err := dao.GetN(app, startOffset, numRowsLimit, nil, nil)
-		expected := appSectionCount[app.GetId()]
+		expected := appTopicCount[app.GetId()]
 		expected = int(math.Min(math.Max(0, float64(expected-startOffset)), float64(numRowsLimit)))
 		if err != nil || len(boList) != expected {
-			t.Fatalf("%s failed: expected %#v but received %#v (error %s)", name+"/GetAll", expected, len(boList), err)
+			// fmt.Printf("%s - %#v - %#v / %#v\n", app.GetId(), startOffset, numRowsLimit, appTopicCount)
+			t.Fatalf("%s failed: expected %#v but received %#v (error %s)", name+"/"+app.GetId(), expected, len(boList), err)
 		}
 	}
 }
