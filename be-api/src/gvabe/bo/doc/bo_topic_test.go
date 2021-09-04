@@ -18,8 +18,8 @@ func TestNewTopic(t *testing.T) {
 	_appId := "libro"
 	_name := "Libro"
 	_desc := "Libro description"
-	_isVisible := true
-	_app := app.NewApp(_tagVersion, _appId, _name, _desc, _isVisible)
+	_isPublished := true
+	_app := app.NewApp(_tagVersion, _appId, _name, _desc, _isPublished)
 
 	_title := "Quick start"
 	_icon := "default"
@@ -108,8 +108,8 @@ func TestTopic_ToMap(t *testing.T) {
 	_appId := "libro"
 	_name := "Libro"
 	_desc := "Libro description"
-	_isVisible := true
-	_app := app.NewApp(_tagVersion, _appId, _name, _desc, _isVisible)
+	_isPublished := true
+	_app := app.NewApp(_tagVersion, _appId, _name, _desc, _isPublished)
 
 	_title := "Quick start"
 	_icon := "default"
@@ -169,8 +169,8 @@ func TestTopic_json(t *testing.T) {
 	_appId := "libro"
 	_name := "Libro"
 	_desc := "Libro description"
-	_isVisible := true
-	_app := app.NewApp(_tagVersion, _appId, _name, _desc, _isVisible)
+	_isPublished := true
+	_app := app.NewApp(_tagVersion, _appId, _name, _desc, _isPublished)
 
 	_title := "Quick start"
 	_icon := "default"

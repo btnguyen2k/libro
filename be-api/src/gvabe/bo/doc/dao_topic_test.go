@@ -22,8 +22,8 @@ func initSampleRowsTopic(t *testing.T, testName string, dao TopicDao) {
 		_appId := "libro" + fmt.Sprintf("%02d", i)
 		_name := "Libro" + _appId
 		_desc := "Libro description " + _appId
-		_isVisible := rand.Int()%7 == 0
-		_app := app.NewApp(_tagVersion, _appId, _name, _desc, _isVisible)
+		_isPublished := rand.Int()%7 == 0
+		_app := app.NewApp(_tagVersion, _appId, _name, _desc, _isPublished)
 		appList[i] = _app
 	}
 	topicList = make([]*Topic, numSampleRowsTopic)
@@ -57,8 +57,8 @@ func doTestTopicDaoCreateGet(t *testing.T, name string, dao TopicDao) {
 	_appId := "libro"
 	_name := "Libro"
 	_desc := "Libro description"
-	_isVisible := true
-	_app := app.NewApp(_tagVersion, _appId, _name, _desc, _isVisible)
+	_isPublished := true
+	_app := app.NewApp(_tagVersion, _appId, _name, _desc, _isPublished)
 
 	_title := "Quick start"
 	_icon := "default"
@@ -123,8 +123,8 @@ func doTestTopicDaoCreateUpdateGet(t *testing.T, name string, dao TopicDao) {
 	_appId := "libro"
 	_name := "Libro"
 	_desc := "Libro description"
-	_isVisible := true
-	_app := app.NewApp(_tagVersion, _appId, _name, _desc, _isVisible)
+	_isPublished := true
+	_app := app.NewApp(_tagVersion, _appId, _name, _desc, _isPublished)
 
 	_title := "Quick start"
 	_icon := "default"
@@ -199,8 +199,8 @@ func doTestTopicDaoCreateDelete(t *testing.T, name string, dao TopicDao) {
 	_appId := "libro"
 	_name := "Libro"
 	_desc := "Libro description"
-	_isVisible := true
-	_app := app.NewApp(_tagVersion, _appId, _name, _desc, _isVisible)
+	_isPublished := true
+	_app := app.NewApp(_tagVersion, _appId, _name, _desc, _isPublished)
 
 	_title := "Quick start"
 	_icon := "default"

@@ -61,8 +61,8 @@ func doTestPageDaoCreateGet(t *testing.T, name string, dao PageDao) {
 	_appId := "libro"
 	_name := "Libro"
 	_desc := "Libro description"
-	_isVisible := true
-	_app := app.NewApp(_tagVersion, _appId, _name, _desc, _isVisible)
+	_isPublished := true
+	_app := app.NewApp(_tagVersion, _appId, _name, _desc, _isPublished)
 
 	_title := "Quick start"
 	_icon := "default"
@@ -137,8 +137,8 @@ func doTestPageDaoCreateUpdateGet(t *testing.T, name string, dao PageDao) {
 	_appId := "libro"
 	_name := "Libro"
 	_desc := "Libro description"
-	_isVisible := true
-	_app := app.NewApp(_tagVersion, _appId, _name, _desc, _isVisible)
+	_isPublished := true
+	_app := app.NewApp(_tagVersion, _appId, _name, _desc, _isPublished)
 
 	_title := "Quick start"
 	_icon := "default"
@@ -225,8 +225,8 @@ func doTestPageDaoCreateDelete(t *testing.T, name string, dao PageDao) {
 	_appId := "libro"
 	_name := "Libro"
 	_desc := "Libro description"
-	_isVisible := true
-	_app := app.NewApp(_tagVersion, _appId, _name, _desc, _isVisible)
+	_isPublished := true
+	_app := app.NewApp(_tagVersion, _appId, _name, _desc, _isPublished)
 
 	_title := "Quick start"
 	_icon := "default"

@@ -14,8 +14,8 @@ func TestNewApp(t *testing.T) {
 	_id := "libro"
 	_name := "Libro"
 	_desc := "Libro description"
-	_isVisible := true
-	app := NewApp(_tagVersion, _id, _name, _desc, _isVisible)
+	_isPublished := true
+	app := NewApp(_tagVersion, _id, _name, _desc, _isPublished)
 	if app == nil {
 		t.Fatalf("%s failed: nil", name)
 	}
@@ -31,8 +31,8 @@ func TestNewApp(t *testing.T) {
 	if desc := app.GetDescription(); desc != _desc {
 		t.Fatalf("%s failed: expected bo's desc to be %#v but received %#v", name, _desc, desc)
 	}
-	if isVisible := app.IsVisible(); isVisible != _isVisible {
-		t.Fatalf("%s failed: expected bo's is-visible to be %#v but received %#v", name, _isVisible, isVisible)
+	if isPublished := app.IsPublished(); isPublished != _isPublished {
+		t.Fatalf("%s failed: expected bo's is-published to be %#v but received %#v", name, _isPublished, isPublished)
 	}
 }
 
@@ -46,11 +46,11 @@ func TestNewAppFromUbo(t *testing.T) {
 	_id := "libro"
 	_name := "Libro"
 	_desc := "Libro description"
-	_isVisible := true
+	_isPublished := true
 	ubo := henge.NewUniversalBo(_id, _tagVersion)
 	ubo.SetDataAttr(AppAttrName, _name)
 	ubo.SetDataAttr(AppAttrDesc, _desc)
-	ubo.SetDataAttr(AppAttrIsVisible, _isVisible)
+	ubo.SetDataAttr(AppAttrIsPublished, _isPublished)
 
 	app := NewAppFromUbo(ubo)
 	if app == nil {
@@ -68,8 +68,8 @@ func TestNewAppFromUbo(t *testing.T) {
 	if desc := app.GetDescription(); desc != _desc {
 		t.Fatalf("%s failed: expected bo's desc to be %#v but received %#v", name, _desc, desc)
 	}
-	if isVisible := app.IsVisible(); isVisible != _isVisible {
-		t.Fatalf("%s failed: expected bo's is-visible to be %#v but received %#v", name, _isVisible, isVisible)
+	if isPublished := app.IsPublished(); isPublished != _isPublished {
+		t.Fatalf("%s failed: expected bo's is-published to be %#v but received %#v", name, _isPublished, isPublished)
 	}
 }
 
@@ -79,8 +79,8 @@ func TestApp_ToMap(t *testing.T) {
 	_id := "libro"
 	_name := "Libro"
 	_desc := "Libro description"
-	_isVisible := true
-	app := NewApp(_tagVersion, _id, _name, _desc, _isVisible)
+	_isPublished := true
+	app := NewApp(_tagVersion, _id, _name, _desc, _isPublished)
 	if app == nil {
 		t.Fatalf("%s failed: nil", name)
 	}
@@ -89,9 +89,9 @@ func TestApp_ToMap(t *testing.T) {
 	expected := map[string]interface{}{
 		henge.FieldId: _id,
 		SerKeyAttrs: map[string]interface{}{
-			AppAttrName:      _name,
-			AppAttrDesc:      _desc,
-			AppAttrIsVisible: _isVisible,
+			AppAttrName:        _name,
+			AppAttrDesc:        _desc,
+			AppAttrIsPublished: _isPublished,
 		},
 	}
 	if !reflect.DeepEqual(m, expected) {
@@ -107,9 +107,9 @@ func TestApp_ToMap(t *testing.T) {
 	expected = map[string]interface{}{
 		"FieldId": _id,
 		"SerKeyAttrs": map[string]interface{}{
-			AppAttrName:      _name,
-			AppAttrDesc:      _desc,
-			AppAttrIsVisible: _isVisible,
+			AppAttrName:        _name,
+			AppAttrDesc:        _desc,
+			AppAttrIsPublished: _isPublished,
 		},
 	}
 	if !reflect.DeepEqual(m, expected) {
@@ -123,8 +123,8 @@ func TestApp_json(t *testing.T) {
 	_id := "libro"
 	_name := "Libro"
 	_desc := "Libro description"
-	_isVisible := true
-	app1 := NewApp(_tagVersion, _id, _name, _desc, _isVisible)
+	_isPublished := true
+	app1 := NewApp(_tagVersion, _id, _name, _desc, _isPublished)
 	if app1 == nil {
 		t.Fatalf("%s failed: nil", name)
 	}
@@ -147,8 +147,8 @@ func TestApp_json(t *testing.T) {
 	if app1.GetDescription() != app2.GetDescription() {
 		t.Fatalf("%s failed: expected %#v but received %#v", name, app1.GetDescription(), app2.GetDescription())
 	}
-	if app1.IsVisible() != app2.IsVisible() {
-		t.Fatalf("%s failed: expected %#v but received %#v", name, app1.IsVisible(), app2.IsVisible())
+	if app1.IsPublished() != app2.IsPublished() {
+		t.Fatalf("%s failed: expected %#v but received %#v", name, app1.IsPublished(), app2.IsPublished())
 	}
 	if app1.GetChecksum() != app2.GetChecksum() {
 		t.Fatalf("%s failed: expected %#v but received %#v", name, app1.GetChecksum(), app2.GetChecksum())
