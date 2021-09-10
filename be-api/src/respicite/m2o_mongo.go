@@ -51,7 +51,7 @@ func (dao *M2oDaoMongo) Destroy() {
 func (dao *M2oDaoMongo) GdaoCreateFilter(collectionName string, bo godal.IGenericBo) godal.FilterOpt {
 	if collectionName == dao.storageId {
 		/*
-			"Universal" filter: filter on "src", or "dest" or "src" AND "dest
+			"Universal" filter: filter on "Src", or "Dest" or "Src" AND "Dest
 		*/
 
 		vSrc, _ := bo.GboGetAttr(MappingFieldSrc, nil)

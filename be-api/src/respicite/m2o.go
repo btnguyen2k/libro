@@ -9,18 +9,18 @@ import (
 
 // M2oDao defines many-to-one mapping API
 type M2oDao interface {
-	// Get fetches a mapping {src->dest} from storage.
+	// Get fetches a mapping {Src->Dest} from storage.
 	// If the mapping does not exist, this function returns (nil, ErrNotFound).
 	Get(src string) (*Mapping, error)
 
-	// Rget fetches all mappings {src->dest} from storage.
+	// Rget fetches all mappings {Src->Dest} from storage.
 	Rget(dest string) ([]*Mapping, error)
 
-	// Set creates a mapping {src->dest}.
+	// Set creates a mapping {Src->Dest}.
 	// If the mapping already existed, this function returns (true, ErrDuplicated).
 	Set(src string, dest string) (bool, error)
 
-	// Remove deletes a mapping {src->dest}.
+	// Remove deletes a mapping {Src->Dest}.
 	Remove(src string, dest string) (bool, error)
 }
 
@@ -37,15 +37,15 @@ func (dao *BaseM2oDao) ToMapping(gbo godal.IGenericBo) *Mapping {
 	}
 	result := Mapping{}
 	if src, err := gbo.GboGetAttr(MappingFieldSrc, reddo.TypeString); err == nil && src != nil {
-		result.src = src.(string)
+		result.Src = src.(string)
 	}
 	if dest, err := gbo.GboGetAttr(MappingFieldDest, reddo.TypeString); err == nil && dest != nil {
-		result.dest = dest.(string)
-		// t := dest.(string)
-		// result.dest = &t
+		result.Dest = dest.(string)
+		// t := Dest.(string)
+		// result.Dest = &t
 	}
 	if t, err := gbo.GboGetTimeWithLayout(MappingFieldCreatedOn, time.RFC3339); err == nil {
-		result.createdOn = t
+		result.CreatedOn = t
 	}
 	return &result
 }
@@ -53,9 +53,9 @@ func (dao *BaseM2oDao) ToMapping(gbo godal.IGenericBo) *Mapping {
 // ToGbo converts a Mapping instance to godal.IGenericBo.
 func (dao *BaseM2oDao) ToGbo(m *Mapping) godal.IGenericBo {
 	gbo := godal.NewGenericBo()
-	gbo.GboSetAttr(MappingFieldSrc, m.src)
-	gbo.GboSetAttr(MappingFieldDest, m.dest)
-	gbo.GboSetAttr(MappingFieldCreatedOn, m.createdOn)
+	gbo.GboSetAttr(MappingFieldSrc, m.Src)
+	gbo.GboSetAttr(MappingFieldDest, m.Dest)
+	gbo.GboSetAttr(MappingFieldCreatedOn, m.CreatedOn)
 	return gbo
 }
 
@@ -92,7 +92,7 @@ func (dao *BaseM2oDao) Rget(dest string) ([]*Mapping, error) {
 
 // Set implements M2oDao.Set
 func (dao *BaseM2oDao) Set(src string, dest string) (bool, error) {
-	mapping := &Mapping{src: src, dest: dest, createdOn: time.Now()}
+	mapping := &Mapping{Src: src, Dest: dest, CreatedOn: time.Now()}
 	affectedRows, err := dao.GdaoCreate(dao.storageId, dao.ToGbo(mapping))
 	if err == godal.ErrGdaoDuplicatedEntry {
 		return true, ErrDuplicated
@@ -102,7 +102,7 @@ func (dao *BaseM2oDao) Set(src string, dest string) (bool, error) {
 
 // Remove implements M2oDao.Remove
 func (dao *BaseM2oDao) Remove(src string, dest string) (bool, error) {
-	mapping := &Mapping{src: src, dest: dest}
+	mapping := &Mapping{Src: src, Dest: dest}
 	affectedRows, err := dao.GdaoDelete(dao.storageId, dao.ToGbo(mapping))
 	return affectedRows > 0, err
 }

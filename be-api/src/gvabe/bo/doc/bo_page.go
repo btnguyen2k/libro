@@ -96,8 +96,8 @@ const (
 	// PageAttrContent is the content of document page
 	PageAttrContent = "content"
 
-	// pageAttr_Ubo is for internal use only!
-	pageAttr_Ubo = "_ubo"
+	// pageAttrUbo is for internal use only!
+	pageAttrUbo = "_ubo"
 )
 
 // Page is the business object.
@@ -151,7 +151,7 @@ func (p *Page) ToMap(postFunc henge.FuncPostUboToMap) map[string]interface{} {
 func (p *Page) MarshalJSON() ([]byte, error) {
 	p.sync()
 	m := map[string]interface{}{
-		topicAttr_Ubo: p.UniversalBo.Clone(),
+		topicAttrUbo: p.UniversalBo.Clone(),
 		bo.SerKeyFields: map[string]interface{}{
 			PageFieldAppId:   p.appId,
 			PageFieldTopicId: p.topicId,
@@ -175,8 +175,8 @@ func (p *Page) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	var err error
-	if m[topicAttr_Ubo] != nil {
-		js, _ := json.Marshal(m[topicAttr_Ubo])
+	if m[topicAttrUbo] != nil {
+		js, _ := json.Marshal(m[topicAttrUbo])
 		if err = json.Unmarshal(js, &p.UniversalBo); err != nil {
 			return err
 		}

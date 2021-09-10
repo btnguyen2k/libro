@@ -6,6 +6,7 @@ import (
 
 	"github.com/btnguyen2k/consu/reddo"
 	"github.com/btnguyen2k/henge"
+	"main/src/gvabe/bo"
 )
 
 // NewApp is helper function to create new App bo.
@@ -13,7 +14,12 @@ func NewApp(appVersion uint64, id, name, desc string, isPublished bool) *App {
 	bo := &App{
 		UniversalBo: henge.NewUniversalBo(id, appVersion),
 	}
-	return bo.SetName(name).SetDescription(desc).SetPublished(isPublished).sync()
+	return bo.
+		SetName(name).
+		SetDescription(desc).
+		SetPublished(isPublished).
+		SetNumTopics(0).
+		sync()
 }
 
 // NewAppFromUbo is helper function to create App bo from a universal bo.
@@ -38,6 +44,11 @@ func NewAppFromUbo(ubo *henge.UniversalBo) *App {
 	} else {
 		bo.isPublished, _ = v.(bool)
 	}
+	if v, err := ubo.GetDataAttrAs(AppAttrNumTopics, reddo.TypeInt); err != nil {
+		return nil
+	} else if temp, ok := v.(int64); ok {
+		bo.numTopics = int(temp)
+	}
 	return bo.sync()
 }
 
@@ -51,14 +62,11 @@ const (
 	// AppAttrIsPublished is a flag to mark if app is enabled/published.
 	AppAttrIsPublished = "ispub"
 
-	// appAttr_Ubo is for internal use only!
-	appAttr_Ubo = "_ubo"
+	// AppAttrNumTopics is the number of document topics belong to this app.
+	AppAttrNumTopics = "ntopics"
 
-	// SerKeyAttrs is a key used by App.ToMap and App.MarshalJSON/App.UnmarshalJSON to store BO's custom attributes.
-	SerKeyAttrs = "_attrs"
-
-	// SerKeyFields is a key used by App.ToMap and App.MarshalJSON/App.UnmarshalJSON to store BO's top-level custom fields.
-	SerKeyFields = "_fields"
+	// appAttrUbo is for internal use only!
+	appAttrUbo = "_ubo"
 )
 
 // App is the business object.
@@ -68,6 +76,7 @@ type App struct {
 	name               string `json:"name"`
 	description        string `json:"desc"`
 	isPublished        bool   `json:"ispub"`
+	numTopics          int    `json:"ntopics"`
 }
 
 // ToMap transforms user's attributes to a map.
@@ -85,10 +94,11 @@ type App struct {
 func (a *App) ToMap(postFunc henge.FuncPostUboToMap) map[string]interface{} {
 	result := map[string]interface{}{
 		henge.FieldId: a.GetId(),
-		SerKeyAttrs: map[string]interface{}{
+		bo.SerKeyAttrs: map[string]interface{}{
 			AppAttrName:        a.name,
 			AppAttrDesc:        a.description,
 			AppAttrIsPublished: a.isPublished,
+			AppAttrNumTopics:   a.numTopics,
 		},
 	}
 	if postFunc != nil {
@@ -102,11 +112,12 @@ func (a *App) ToMap(postFunc henge.FuncPostUboToMap) map[string]interface{} {
 func (a *App) MarshalJSON() ([]byte, error) {
 	a.sync()
 	m := map[string]interface{}{
-		appAttr_Ubo: a.UniversalBo.Clone(),
-		SerKeyAttrs: map[string]interface{}{
+		appAttrUbo: a.UniversalBo.Clone(),
+		bo.SerKeyAttrs: map[string]interface{}{
 			AppAttrName:        a.name,
 			AppAttrDesc:        a.description,
 			AppAttrIsPublished: a.isPublished,
+			AppAttrNumTopics:   a.numTopics,
 		},
 	}
 	return json.Marshal(m)
@@ -120,13 +131,13 @@ func (a *App) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	var err error
-	if m[appAttr_Ubo] != nil {
-		js, _ := json.Marshal(m[appAttr_Ubo])
+	if m[appAttrUbo] != nil {
+		js, _ := json.Marshal(m[appAttrUbo])
 		if err = json.Unmarshal(js, &a.UniversalBo); err != nil {
 			return err
 		}
 	}
-	if _attrs, ok := m[SerKeyAttrs].(map[string]interface{}); ok {
+	if _attrs, ok := m[bo.SerKeyAttrs].(map[string]interface{}); ok {
 		if a.name, err = reddo.ToString(_attrs[AppAttrName]); err != nil {
 			return err
 		}
@@ -135,6 +146,11 @@ func (a *App) UnmarshalJSON(data []byte) error {
 		}
 		if a.isPublished, err = reddo.ToBool(_attrs[AppAttrIsPublished]); err != nil {
 			return err
+		}
+		if v, err := reddo.ToInt(_attrs[AppAttrNumTopics]); err != nil {
+			return err
+		} else {
+			a.numTopics = int(v)
 		}
 	}
 	a.sync()
@@ -174,11 +190,23 @@ func (a *App) SetPublished(v bool) *App {
 	return a
 }
 
+// GetNumTopics returns value of app's 'num-topics' attribute.
+func (a *App) GetNumTopics() int {
+	return a.numTopics
+}
+
+// SetNumTopics sets value of app's 'num-topic' attribute.
+func (a *App) SetNumTopics(v int) *App {
+	a.numTopics = v
+	return a
+}
+
 // sync is called to synchronize BO's attributes to its UniversalBo.
 func (a *App) sync() *App {
 	a.SetDataAttr(AppAttrName, a.name)
 	a.SetDataAttr(AppAttrDesc, a.description)
 	a.SetDataAttr(AppAttrIsPublished, a.isPublished)
+	a.SetDataAttr(AppAttrNumTopics, a.numTopics)
 	a.UniversalBo.Sync()
 	return a
 }

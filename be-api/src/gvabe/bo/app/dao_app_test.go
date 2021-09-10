@@ -20,9 +20,11 @@ func initSampleRows(t *testing.T, testName string, dao AppDao) {
 		_name := "Libro" + istr
 		_desc := "Libro description"
 		_isPublished := i%7 == 0
+		_numTopics := i%5 + 1
 		_email := istr + "@libro"
 		_age := float64(18 + i)
 		bo := NewApp(_tagVersion, _id, _name, _desc, _isPublished)
+		bo.SetNumTopics(_numTopics)
 		bo.SetDataAttr("props.owner", "User"+istr)
 		bo.SetDataAttr("props.email", _email)
 		bo.SetDataAttr("age", _age)
@@ -38,9 +40,11 @@ func doTestAppDaoCreateGet(t *testing.T, name string, dao AppDao) {
 	_name := "Libro"
 	_desc := "Libro description"
 	_isPublished := true
+	_numTopics := 3
 	_email := "libro@libro"
 	_age := float64(35)
 	bo0 := NewApp(_tagVersion, _id, _name, _desc, _isPublished)
+	bo0.SetNumTopics(_numTopics)
 	bo0.SetDataAttr("props.owner", _name)
 	bo0.SetDataAttr("props.email", _email)
 	bo0.SetDataAttr("age", _age)
@@ -75,6 +79,9 @@ func doTestAppDaoCreateGet(t *testing.T, name string, dao AppDao) {
 		if v1, v0 := bo1.IsPublished(), _isPublished; v1 != v0 {
 			t.Fatalf("%s failed: expected %#v but received %#v", name, v0, v1)
 		}
+		if v1, v0 := bo1.GetNumTopics(), _numTopics; v1 != v0 {
+			t.Fatalf("%s failed: expected %#v but received %#v", name, v0, v1)
+		}
 		if t1, t0 := bo1.GetTimeCreated(), bo0.GetTimeCreated(); !t1.Equal(t0) {
 			t.Fatalf("%s failed: expected %#v but received %#v", name, t0.Format(time.RFC3339), t1.Format(time.RFC3339))
 		}
@@ -90,9 +97,11 @@ func doTestAppDaoCreateUpdateGet(t *testing.T, name string, dao AppDao) {
 	_name := "Libro"
 	_desc := "Libro description"
 	_isPublished := true
+	_numTopics := 3
 	_email := "libro@libro"
 	_age := float64(35)
 	bo0 := NewApp(_tagVersion, _id, _name, _desc, _isPublished)
+	bo0.SetNumTopics(_numTopics)
 	bo0.SetDataAttr("props.owner", _name)
 	bo0.SetDataAttr("props.email", _email)
 	bo0.SetDataAttr("age", _age)
@@ -100,7 +109,7 @@ func doTestAppDaoCreateUpdateGet(t *testing.T, name string, dao AppDao) {
 		t.Fatalf("%s failed: %#v / %s", name+"/Create", ok, err)
 	}
 
-	bo0.SetName(_name + "-new").SetDescription(_desc + "-new").SetPublished(!_isPublished).SetTagVersion(_tagVersion + 3)
+	bo0.SetName(_name + "-new").SetDescription(_desc + "-new").SetPublished(!_isPublished).SetNumTopics(_numTopics + 2).SetTagVersion(_tagVersion + 3)
 	bo0.SetDataAttr("props.owner", _name+"-new")
 	bo0.SetDataAttr("props.email", _email+"-new")
 	bo0.SetDataAttr("age", _age+2)
@@ -136,6 +145,9 @@ func doTestAppDaoCreateUpdateGet(t *testing.T, name string, dao AppDao) {
 		if v1, v0 := bo1.IsPublished(), !_isPublished; v1 != v0 {
 			t.Fatalf("%s failed: expected %#v but received %#v", name, v0, v1)
 		}
+		if v1, v0 := bo1.GetNumTopics(), _numTopics+2; v1 != v0 {
+			t.Fatalf("%s failed: expected %#v but received %#v", name, v0, v1)
+		}
 		if t1, t0 := bo1.GetTimeCreated(), bo0.GetTimeCreated(); !t1.Equal(t0) {
 			t.Fatalf("%s failed: expected %#v but received %#v", name, t0.Format(time.RFC3339), t1.Format(time.RFC3339))
 		}
@@ -151,9 +163,11 @@ func doTestAppDaoCreateDelete(t *testing.T, name string, dao AppDao) {
 	_name := "Libro"
 	_desc := "Libro description"
 	_isPublished := true
+	_numTopics := 3
 	_email := "libro@libro"
 	_age := float64(35)
 	bo0 := NewApp(_tagVersion, _id, _name, _desc, _isPublished)
+	bo0.SetNumTopics(_numTopics)
 	bo0.SetDataAttr("props.owner", _name)
 	bo0.SetDataAttr("props.email", _email)
 	bo0.SetDataAttr("age", _age)

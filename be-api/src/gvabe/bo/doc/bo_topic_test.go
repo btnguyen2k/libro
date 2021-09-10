@@ -24,12 +24,13 @@ func TestNewTopic(t *testing.T) {
 	_title := "Quick start"
 	_icon := "default"
 	_summary := "topic one"
-	_pos := rand.Int()
+	_pos := rand.Intn(10242048)
+	_numPages := _pos%10 + 1
 	topic := NewTopic(_tagVersion, _app, _title, _icon, _summary)
 	if topic == nil {
 		t.Fatalf("%s failed: nil", name)
 	}
-	topic.SetPosition(_pos)
+	topic.SetPosition(_pos).SetNumPages(_numPages)
 
 	_id := topic.GetId()
 	if tagVersion := topic.GetTagVersion(); tagVersion != _tagVersion {
@@ -53,6 +54,9 @@ func TestNewTopic(t *testing.T) {
 	if pos := topic.GetPosition(); pos != _pos {
 		t.Fatalf("%s failed: expected position to be %#v but received %#v", name, _pos, pos)
 	}
+	if numPages := topic.GetNumPages(); numPages != _numPages {
+		t.Fatalf("%s failed: expected num-pages to be %#v but received %#v", name, _numPages, numPages)
+	}
 }
 
 func TestNewTopicFromUbo(t *testing.T) {
@@ -68,12 +72,14 @@ func TestNewTopicFromUbo(t *testing.T) {
 	_icon := "default"
 	_summary := "topic one"
 	_pos := rand.Intn(10242048)
+	_numPages := _pos%10 + 1
 	ubo := henge.NewUniversalBo(_id, _tagVersion)
 	ubo.SetExtraAttr(TopicFieldAppId, _appId)
 	ubo.SetDataAttr(TopicAttrTitle, _title)
 	ubo.SetDataAttr(TopicAttrIcon, _icon)
 	ubo.SetDataAttr(TopicAttrSummary, _summary)
 	ubo.SetDataAttr(TopicAttrPosition, _pos)
+	ubo.SetDataAttr(TopicAttrNumPages, _numPages)
 
 	topic := NewTopicFromUbo(ubo)
 	if topic == nil {
@@ -100,6 +106,9 @@ func TestNewTopicFromUbo(t *testing.T) {
 	if pos := topic.GetPosition(); pos != _pos {
 		t.Fatalf("%s failed: expected position to be %#v but received %#v", name, _pos, pos)
 	}
+	if numPages := topic.GetNumPages(); numPages != _numPages {
+		t.Fatalf("%s failed: expected num-pages to be %#v but received %#v", name, _numPages, numPages)
+	}
 }
 
 func TestTopic_ToMap(t *testing.T) {
@@ -115,11 +124,12 @@ func TestTopic_ToMap(t *testing.T) {
 	_icon := "default"
 	_summary := "topic one"
 	_pos := rand.Intn(10242048)
+	_numPages := _pos%10 + 1
 	topic := NewTopic(_tagVersion, _app, _title, _icon, _summary)
 	if topic == nil {
 		t.Fatalf("%s failed: nil", name)
 	}
-	topic.SetPosition(_pos)
+	topic.SetPosition(_pos).SetNumPages(_numPages)
 	_id := topic.GetId()
 
 	m := topic.ToMap(nil)
@@ -133,6 +143,7 @@ func TestTopic_ToMap(t *testing.T) {
 			TopicAttrIcon:     _icon,
 			TopicAttrSummary:  _summary,
 			TopicAttrPosition: _pos,
+			TopicAttrNumPages: _numPages,
 		},
 	}
 	if !reflect.DeepEqual(m, expected) {
@@ -156,6 +167,7 @@ func TestTopic_ToMap(t *testing.T) {
 			TopicAttrIcon:     _icon,
 			TopicAttrSummary:  _summary,
 			TopicAttrPosition: _pos,
+			TopicAttrNumPages: _numPages,
 		},
 	}
 	if !reflect.DeepEqual(m, expected) {
@@ -176,11 +188,12 @@ func TestTopic_json(t *testing.T) {
 	_icon := "default"
 	_summary := "topic one"
 	_pos := rand.Intn(10242048)
+	_numPages := _pos%10 + 1
 	topic1 := NewTopic(_tagVersion, _app, _title, _icon, _summary)
 	if topic1 == nil {
 		t.Fatalf("%s failed: nil", name)
 	}
-	topic1.SetPosition(_pos)
+	topic1.SetPosition(_pos).SetNumPages(_numPages)
 	js1, _ := json.Marshal(topic1)
 
 	var topic2 *Topic
@@ -208,6 +221,9 @@ func TestTopic_json(t *testing.T) {
 	}
 	if topic1.GetPosition() != topic2.GetPosition() {
 		t.Fatalf("%s failed: expected %#v but received %#v", name, topic1.GetPosition(), topic2.GetPosition())
+	}
+	if topic1.GetNumPages() != topic2.GetNumPages() {
+		t.Fatalf("%s failed: expected %#v but received %#v", name, topic1.GetNumPages(), topic2.GetNumPages())
 	}
 	if topic1.GetChecksum() != topic2.GetChecksum() {
 		t.Fatalf("%s failed: expected %#v but received %#v", name, topic1.GetChecksum(), topic2.GetChecksum())

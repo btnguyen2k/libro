@@ -2,10 +2,12 @@ package app
 
 import (
 	"encoding/json"
+	"math/rand"
 	"reflect"
 	"testing"
 
 	"github.com/btnguyen2k/henge"
+	"main/src/gvabe/bo"
 )
 
 func TestNewApp(t *testing.T) {
@@ -15,10 +17,12 @@ func TestNewApp(t *testing.T) {
 	_name := "Libro"
 	_desc := "Libro description"
 	_isPublished := true
+	_numTopics := rand.Intn(1024)
 	app := NewApp(_tagVersion, _id, _name, _desc, _isPublished)
 	if app == nil {
 		t.Fatalf("%s failed: nil", name)
 	}
+	app.SetNumTopics(_numTopics)
 	if tagVersion := app.GetTagVersion(); tagVersion != _tagVersion {
 		t.Fatalf("%s failed: expected tag-version to be %#v but received %#v", name, _tagVersion, tagVersion)
 	}
@@ -34,6 +38,9 @@ func TestNewApp(t *testing.T) {
 	if isPublished := app.IsPublished(); isPublished != _isPublished {
 		t.Fatalf("%s failed: expected bo's is-published to be %#v but received %#v", name, _isPublished, isPublished)
 	}
+	if numTopics := app.GetNumTopics(); numTopics != _numTopics {
+		t.Fatalf("%s failed: expected num-topics to be %#v but received %#v", name, _numTopics, numTopics)
+	}
 }
 
 func TestNewAppFromUbo(t *testing.T) {
@@ -47,10 +54,12 @@ func TestNewAppFromUbo(t *testing.T) {
 	_name := "Libro"
 	_desc := "Libro description"
 	_isPublished := true
+	_numTopics := rand.Intn(1024)
 	ubo := henge.NewUniversalBo(_id, _tagVersion)
 	ubo.SetDataAttr(AppAttrName, _name)
 	ubo.SetDataAttr(AppAttrDesc, _desc)
 	ubo.SetDataAttr(AppAttrIsPublished, _isPublished)
+	ubo.SetDataAttr(AppAttrNumTopics, _numTopics)
 
 	app := NewAppFromUbo(ubo)
 	if app == nil {
@@ -71,6 +80,9 @@ func TestNewAppFromUbo(t *testing.T) {
 	if isPublished := app.IsPublished(); isPublished != _isPublished {
 		t.Fatalf("%s failed: expected bo's is-published to be %#v but received %#v", name, _isPublished, isPublished)
 	}
+	if numTopics := app.GetNumTopics(); numTopics != _numTopics {
+		t.Fatalf("%s failed: expected num-topics to be %#v but received %#v", name, _numTopics, numTopics)
+	}
 }
 
 func TestApp_ToMap(t *testing.T) {
@@ -80,18 +92,21 @@ func TestApp_ToMap(t *testing.T) {
 	_name := "Libro"
 	_desc := "Libro description"
 	_isPublished := true
+	_numTopics := rand.Intn(1024)
 	app := NewApp(_tagVersion, _id, _name, _desc, _isPublished)
 	if app == nil {
 		t.Fatalf("%s failed: nil", name)
 	}
+	app.SetNumTopics(_numTopics)
 
 	m := app.ToMap(nil)
 	expected := map[string]interface{}{
 		henge.FieldId: _id,
-		SerKeyAttrs: map[string]interface{}{
+		bo.SerKeyAttrs: map[string]interface{}{
 			AppAttrName:        _name,
 			AppAttrDesc:        _desc,
 			AppAttrIsPublished: _isPublished,
+			AppAttrNumTopics:   _numTopics,
 		},
 	}
 	if !reflect.DeepEqual(m, expected) {
@@ -101,7 +116,7 @@ func TestApp_ToMap(t *testing.T) {
 	m = app.ToMap(func(input map[string]interface{}) map[string]interface{} {
 		return map[string]interface{}{
 			"FieldId":     input[henge.FieldId],
-			"SerKeyAttrs": input[SerKeyAttrs],
+			"SerKeyAttrs": input[bo.SerKeyAttrs],
 		}
 	})
 	expected = map[string]interface{}{
@@ -110,6 +125,7 @@ func TestApp_ToMap(t *testing.T) {
 			AppAttrName:        _name,
 			AppAttrDesc:        _desc,
 			AppAttrIsPublished: _isPublished,
+			AppAttrNumTopics:   _numTopics,
 		},
 	}
 	if !reflect.DeepEqual(m, expected) {
@@ -124,10 +140,12 @@ func TestApp_json(t *testing.T) {
 	_name := "Libro"
 	_desc := "Libro description"
 	_isPublished := true
+	_numTopics := rand.Intn(1024)
 	app1 := NewApp(_tagVersion, _id, _name, _desc, _isPublished)
 	if app1 == nil {
 		t.Fatalf("%s failed: nil", name)
 	}
+	app1.SetNumTopics(_numTopics)
 	js1, _ := json.Marshal(app1)
 
 	var app2 *App
@@ -149,6 +167,9 @@ func TestApp_json(t *testing.T) {
 	}
 	if app1.IsPublished() != app2.IsPublished() {
 		t.Fatalf("%s failed: expected %#v but received %#v", name, app1.IsPublished(), app2.IsPublished())
+	}
+	if app1.GetNumTopics() != app2.GetNumTopics() {
+		t.Fatalf("%s failed: expected %#v but received %#v", name, app1.GetNumTopics(), app2.GetNumTopics())
 	}
 	if app1.GetChecksum() != app2.GetChecksum() {
 		t.Fatalf("%s failed: expected %#v but received %#v", name, app1.GetChecksum(), app2.GetChecksum())

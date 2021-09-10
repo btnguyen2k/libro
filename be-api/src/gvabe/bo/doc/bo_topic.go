@@ -18,13 +18,13 @@ func NewTopic(appVersion uint64, app *app.App, title, icon, summary string) *Top
 	bo := &Topic{
 		UniversalBo: henge.NewUniversalBo(id, appVersion),
 	}
-	position := time.Now().Unix()
 	return bo.
 		SetAppId(app.GetId()).
 		SetTitle(title).
 		SetIcon(icon).
 		SetSummary(summary).
-		SetPosition(int(position)).
+		SetPosition(int(time.Now().Unix())).
+		SetNumPages(0).
 		sync()
 }
 
@@ -60,6 +60,11 @@ func NewTopicFromUbo(ubo *henge.UniversalBo) *Topic {
 	} else if temp, ok := v.(int64); ok {
 		bo.position = int(temp)
 	}
+	if v, err := ubo.GetDataAttrAs(TopicAttrNumPages, reddo.TypeInt); err != nil {
+		return nil
+	} else if temp, ok := v.(int64); ok {
+		bo.numPages = int(temp)
+	}
 	return bo.sync()
 }
 
@@ -79,8 +84,11 @@ const (
 	// TopicAttrPosition is the relative position of document topic (for ordering purpose)
 	TopicAttrPosition = "pos"
 
-	// topicAttr_Ubo is for internal use only!
-	topicAttr_Ubo = "_ubo"
+	// TopicAttrNumPages is the number of document pages belong to this topic
+	TopicAttrNumPages = "npages"
+
+	// topicAttrUbo is for internal use only!
+	topicAttrUbo = "_ubo"
 )
 
 // Topic is the business object.
@@ -92,6 +100,7 @@ type Topic struct {
 	icon               string `json:"icon"`
 	summary            string `json:"summary"`
 	position           int    `json:"pos"`
+	numPages           int    `json:"npages"`
 }
 
 // ToMap transforms topic's attributes to a map.
@@ -117,6 +126,7 @@ func (t *Topic) ToMap(postFunc henge.FuncPostUboToMap) map[string]interface{} {
 			TopicAttrIcon:     t.icon,
 			TopicAttrSummary:  t.summary,
 			TopicAttrPosition: t.position,
+			TopicAttrNumPages: t.numPages,
 		},
 	}
 	if postFunc != nil {
@@ -130,7 +140,7 @@ func (t *Topic) ToMap(postFunc henge.FuncPostUboToMap) map[string]interface{} {
 func (t *Topic) MarshalJSON() ([]byte, error) {
 	t.sync()
 	m := map[string]interface{}{
-		topicAttr_Ubo: t.UniversalBo.Clone(),
+		topicAttrUbo: t.UniversalBo.Clone(),
 		bo.SerKeyFields: map[string]interface{}{
 			TopicFieldAppId: t.appId,
 		},
@@ -139,6 +149,7 @@ func (t *Topic) MarshalJSON() ([]byte, error) {
 			TopicAttrIcon:     t.icon,
 			TopicAttrSummary:  t.summary,
 			TopicAttrPosition: t.position,
+			TopicAttrNumPages: t.numPages,
 		},
 	}
 	return json.Marshal(m)
@@ -152,8 +163,8 @@ func (t *Topic) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	var err error
-	if m[topicAttr_Ubo] != nil {
-		js, _ := json.Marshal(m[topicAttr_Ubo])
+	if m[topicAttrUbo] != nil {
+		js, _ := json.Marshal(m[topicAttrUbo])
 		if err = json.Unmarshal(js, &t.UniversalBo); err != nil {
 			return err
 		}
@@ -177,6 +188,11 @@ func (t *Topic) UnmarshalJSON(data []byte) error {
 			return err
 		} else {
 			t.position = int(v)
+		}
+		if v, err := reddo.ToInt(_attrs[TopicAttrNumPages]); err != nil {
+			return err
+		} else {
+			t.numPages = int(v)
 		}
 	}
 	t.sync()
@@ -238,6 +254,17 @@ func (t *Topic) SetPosition(v int) *Topic {
 	return t
 }
 
+// GetNumPages returns value of topic's 'num-pages' attribute.
+func (t *Topic) GetNumPages() int {
+	return t.numPages
+}
+
+// SetNumPages sets value of topic's 'num-pages' attribute.
+func (t *Topic) SetNumPages(v int) *Topic {
+	t.numPages = v
+	return t
+}
+
 // sync is called to synchronize BO's attributes to its UniversalBo.
 func (t *Topic) sync() *Topic {
 	t.SetExtraAttr(TopicFieldAppId, t.appId)
@@ -245,6 +272,7 @@ func (t *Topic) sync() *Topic {
 	t.SetDataAttr(TopicAttrIcon, t.icon)
 	t.SetDataAttr(TopicAttrSummary, t.summary)
 	t.SetDataAttr(TopicAttrPosition, t.position)
+	t.SetDataAttr(TopicAttrNumPages, t.numPages)
 	t.UniversalBo.Sync()
 	return t
 }

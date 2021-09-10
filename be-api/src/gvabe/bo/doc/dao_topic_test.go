@@ -34,11 +34,12 @@ func initSampleRowsTopic(t *testing.T, testName string, dao TopicDao) {
 		_title := "Quick start " + istr
 		_icon := "default"
 		_summary := "topic " + istr
-		_pos := rand.Int()
+		_pos := rand.Intn(10242048)
+		_numPages := _pos%10 + 1
 		_email := istr + "@libro"
 		_age := float64(18 + i)
 		bo := NewTopic(_tagVersion, _app, _title, _icon, _summary)
-		bo.SetPosition(_pos)
+		bo.SetPosition(_pos).SetNumPages(_numPages)
 		bo.SetDataAttr("props.owner", "App"+istr)
 		bo.SetDataAttr("props.email", _email)
 		bo.SetDataAttr("age", _age)
@@ -64,8 +65,9 @@ func doTestTopicDaoCreateGet(t *testing.T, name string, dao TopicDao) {
 	_icon := "default"
 	_summary := "topic one"
 	_pos := rand.Intn(10242048)
+	_numPages := _pos%10 + 1
 	bo0 := NewTopic(_tagVersion, _app, _title, _icon, _summary)
-	bo0.SetPosition(_pos)
+	bo0.SetPosition(_pos).SetNumPages(_numPages)
 	_email := "libro@libro"
 	_age := float64(35)
 	bo0.SetDataAttr("props.owner", _name)
@@ -109,6 +111,9 @@ func doTestTopicDaoCreateGet(t *testing.T, name string, dao TopicDao) {
 		if v1, v0 := bo1.GetPosition(), _pos; v1 != v0 {
 			t.Fatalf("%s failed: expected %#v but received %#v", name, v0, v1)
 		}
+		if v1, v0 := bo1.GetNumPages(), _numPages; v1 != v0 {
+			t.Fatalf("%s failed: expected %#v but received %#v", name, v0, v1)
+		}
 		if t1, t0 := bo1.GetTimeCreated(), bo0.GetTimeCreated(); !t1.Equal(t0) {
 			t.Fatalf("%s failed: expected %#v but received %#v", name, t0.Format(time.RFC3339), t1.Format(time.RFC3339))
 		}
@@ -130,8 +135,9 @@ func doTestTopicDaoCreateUpdateGet(t *testing.T, name string, dao TopicDao) {
 	_icon := "default"
 	_summary := "topic one"
 	_pos := rand.Intn(10242048)
+	_numPages := _pos%10 + 1
 	bo0 := NewTopic(_tagVersion, _app, _title, _icon, _summary)
-	bo0.SetPosition(_pos)
+	bo0.SetPosition(_pos).SetNumPages(_numPages)
 	_email := "libro@libro"
 	_age := float64(35)
 	bo0.SetDataAttr("props.owner", _name)
@@ -141,7 +147,7 @@ func doTestTopicDaoCreateUpdateGet(t *testing.T, name string, dao TopicDao) {
 		t.Fatalf("%s failed: %#v / %s", name+"/Create", ok, err)
 	}
 
-	bo0.SetAppId(_appId + "-new").SetIcon(_icon + "-new").SetTitle(_title + "-new").SetSummary(_summary + "-new").SetPosition(_pos + 1).SetTagVersion(_tagVersion + 3)
+	bo0.SetAppId(_appId + "-new").SetIcon(_icon + "-new").SetTitle(_title + "-new").SetSummary(_summary + "-new").SetPosition(_pos + 1).SetNumPages(_numPages + 2).SetTagVersion(_tagVersion + 3)
 	bo0.SetDataAttr("props.owner", _name+"-new")
 	bo0.SetDataAttr("props.email", _email+"-new")
 	bo0.SetDataAttr("age", _age+2)
@@ -185,6 +191,9 @@ func doTestTopicDaoCreateUpdateGet(t *testing.T, name string, dao TopicDao) {
 		if v1, v0 := bo1.GetPosition(), _pos+1; v1 != v0 {
 			t.Fatalf("%s failed: expected %#v but received %#v", name, v0, v1)
 		}
+		if v1, v0 := bo1.GetNumPages(), _numPages+2; v1 != v0 {
+			t.Fatalf("%s failed: expected %#v but received %#v", name, v0, v1)
+		}
 		if t1, t0 := bo1.GetTimeCreated(), bo0.GetTimeCreated(); !t1.Equal(t0) {
 			t.Fatalf("%s failed: expected %#v but received %#v", name, t0.Format(time.RFC3339), t1.Format(time.RFC3339))
 		}
@@ -206,8 +215,9 @@ func doTestTopicDaoCreateDelete(t *testing.T, name string, dao TopicDao) {
 	_icon := "default"
 	_summary := "topic one"
 	_pos := rand.Intn(10242048)
+	_numPages := _pos%10 + 1
 	bo0 := NewTopic(_tagVersion, _app, _title, _icon, _summary)
-	bo0.SetPosition(_pos)
+	bo0.SetPosition(_pos).SetNumPages(_numPages)
 	_email := "libro@libro"
 	_age := float64(35)
 	bo0.SetDataAttr("props.owner", _name)
