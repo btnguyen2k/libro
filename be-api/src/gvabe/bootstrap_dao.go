@@ -14,7 +14,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"main/src/gvabe/bo/app"
+	"main/src/gvabe/bo/product"
 	"main/src/gvabe/bo/doc"
 	"main/src/gvabe/bo/user"
 	"main/src/respicite"
@@ -109,18 +109,18 @@ func _createUserDaoMongo(mc *prom.MongoConnect) user.UserDao {
 	return user.NewUserDaoMongo(mc, user.TableUser, strings.Index(url, "replicaSet=") >= 0)
 }
 
-func _createAppDaoSql(sqlc *prom.SqlConnect) app.AppDao {
+func _createAppDaoSql(sqlc *prom.SqlConnect) product.ProductDao {
 	if sqlc.GetDbFlavor() == prom.FlavorCosmosDb {
-		return app.NewAppDaoCosmosdb(sqlc, app.TableApp, true)
+		return product.NewProductDaoCosmosdb(sqlc, product.TableProduct, true)
 	}
-	return app.NewAppDaoSql(sqlc, app.TableApp, true)
+	return product.NewProductDaoSql(sqlc, product.TableProduct, true)
 }
-func _createAppDaoDynamodb(adc *prom.AwsDynamodbConnect) app.AppDao {
-	return app.NewAppDaoDynamodb(adc, app.TableApp)
+func _createAppDaoDynamodb(adc *prom.AwsDynamodbConnect) product.ProductDao {
+	return product.NewProductDaoDynamodb(adc, product.TableProduct)
 }
-func _createAppDaoMongo(mc *prom.MongoConnect) app.AppDao {
+func _createAppDaoMongo(mc *prom.MongoConnect) product.ProductDao {
 	url := mc.GetUrl()
-	return app.NewAppDaoMongo(mc, app.TableApp, strings.Index(url, "replicaSet=") >= 0)
+	return product.NewProductDaoMongo(mc, product.TableProduct, strings.Index(url, "replicaSet=") >= 0)
 }
 
 func _createTopicDaoSql(sqlc *prom.SqlConnect) doc.TopicDao {
@@ -337,8 +337,8 @@ func _createMongoCollections(mc *prom.MongoConnect) {
 	if err := henge.InitMongoCollection(mc, user.TableUser); err != nil {
 		log.Printf("[WARN] creating collection %s (%s): %s\n", user.TableUser, "MongoDB", err)
 	}
-	if err := henge.InitMongoCollection(mc, app.TableApp); err != nil {
-		log.Printf("[WARN] creating collection %s (%s): %s\n", app.TableApp, "MongoDB", err)
+	if err := henge.InitMongoCollection(mc, product.TableProduct); err != nil {
+		log.Printf("[WARN] creating collection %s (%s): %s\n", product.TableProduct, "MongoDB", err)
 	}
 	if err := henge.InitMongoCollection(mc, doc.TableTopic); err != nil {
 		log.Printf("[WARN] creating collection %s (%s): %s\n", doc.TableTopic, "MongoDB", err)
@@ -467,7 +467,7 @@ func _initSamples() {
 	}
 
 	log.Printf("[INFO] Sample app [%s] not found, creating one...", demoAppId)
-	demoApp = app.NewApp(goapi.AppVersionNumber, demoAppId, "Demo", "Demo application", true)
+	demoApp = product.NewProduct(goapi.AppVersionNumber, demoAppId, "Demo", "Demo application", true)
 	result, err := appDao.Create(demoApp)
 	if err != nil && err != godal.ErrGdaoDuplicatedEntry {
 		panic(fmt.Sprintf("error while creating sample app [%s]: %s", demoAppId, err))
@@ -501,6 +501,19 @@ func _initSamples() {
 	if !result {
 		log.Printf("[ERROR] Cannot create topic [%s]", topic.GetTitle())
 	}
+	topicList, err := topicDao.GetAll(demoApp, nil, nil)
+	if err != nil {
+		panic(fmt.Sprintf("error while getting topic list for app %s: %s", demoAppId, err))
+	} else {
+		demoApp.SetNumTopics(len(topicList))
+		result, err = appDao.Update(demoApp)
+		if err != nil {
+			panic(fmt.Sprintf("error while updating app %s: %s", demoAppId, err))
+		}
+		if !result {
+			log.Printf("[ERROR] Cannot update app [%s]", demoAppId)
+		}
+	}
 
 	page := doc.NewPage(goapi.AppVersionNumber, topic, "Download", "download", "Download: "+shortLorem, longLorerm)
 	page.SetPosition(1).SetId(topic.GetId() + "-" + re.ReplaceAllString(strings.ToLower(page.GetTitle()), ""))
@@ -524,6 +537,19 @@ func _initSamples() {
 		log.Printf("[ERROR] Cannot create page [%s]", page.GetTitle())
 	}
 
+	pageList, err := pageDao.GetAll(topic, nil, nil)
+	if err != nil {
+		panic(fmt.Sprintf("error while getting page list for topic %s: %s", topic.GetId(), err))
+	} else {
+		topic.SetNumPages(len(pageList))
+		result, err = topicDao.Update(topic)
+		if err != nil {
+			panic(fmt.Sprintf("error while updating topic %s: %s", topic.GetId(), err))
+		}
+		if !result {
+			log.Printf("[ERROR] Cannot update topic [%s]", topic.GetId())
+		}
+	}
 	/*----------------------------------------------------------------------*/
 	topic = doc.NewTopic(goapi.AppVersionNumber, demoApp, "Components", "cogs", shortLorem)
 	topic.SetPosition(2).SetId(re.ReplaceAllString(strings.ToLower(topic.GetTitle()), ""))
@@ -534,6 +560,19 @@ func _initSamples() {
 	}
 	if !result {
 		log.Printf("[ERROR] Cannot create topic [%s]", topic.GetTitle())
+	}
+	topicList, err = topicDao.GetAll(demoApp, nil, nil)
+	if err != nil {
+		panic(fmt.Sprintf("error while getting topic list for app %s: %s", demoAppId, err))
+	} else {
+		demoApp.SetNumTopics(len(topicList))
+		result, err = appDao.Update(demoApp)
+		if err != nil {
+			panic(fmt.Sprintf("error while updating app %s: %s", demoAppId, err))
+		}
+		if !result {
+			log.Printf("[ERROR] Cannot update app [%s]", demoAppId)
+		}
 	}
 
 	page = doc.NewPage(goapi.AppVersionNumber, topic, "Dashboards", "dashboards", "Dashboards: "+shortLorem, longLorerm)
@@ -547,7 +586,7 @@ func _initSamples() {
 		log.Printf("[ERROR] Cannot create page [%s]", page.GetTitle())
 	}
 
-	page = doc.NewPage(goapi.AppVersionNumber, topic, "App", "app", "App: "+shortLorem, longLorerm)
+	page = doc.NewPage(goapi.AppVersionNumber, topic, "Product", "app", "Product: "+shortLorem, longLorerm)
 	page.SetPosition(2).SetId(topic.GetId() + "-" + re.ReplaceAllString(strings.ToLower(page.GetTitle()), ""))
 	log.Printf("[INFO] Creating page (%s:%s -> %s)...", demoAppId, topic.GetTitle(), page.GetTitle())
 	result, err = pageDao.Create(page)
@@ -569,6 +608,19 @@ func _initSamples() {
 		log.Printf("[ERROR] Cannot create page [%s]", page.GetTitle())
 	}
 
+	pageList, err = pageDao.GetAll(topic, nil, nil)
+	if err != nil {
+		panic(fmt.Sprintf("error while getting page list for topic %s: %s", topic.GetId(), err))
+	} else {
+		topic.SetNumPages(len(pageList))
+		result, err = topicDao.Update(topic)
+		if err != nil {
+			panic(fmt.Sprintf("error while updating topic %s: %s", topic.GetId(), err))
+		}
+		if !result {
+			log.Printf("[ERROR] Cannot update topic [%s]", topic.GetId())
+		}
+	}
 	/*----------------------------------------------------------------------*/
 	topic = doc.NewTopic(goapi.AppVersionNumber, demoApp, "FAQs", "lightbulb", "Layout for FAQ page. "+shortLorem)
 	topic.SetPosition(3).SetId(re.ReplaceAllString(strings.ToLower(topic.GetTitle()), ""))
@@ -580,6 +632,19 @@ func _initSamples() {
 	if !result {
 		log.Printf("[ERROR] Cannot create topic [%s]", topic.GetTitle())
 	}
+	topicList, err = topicDao.GetAll(demoApp, nil, nil)
+	if err != nil {
+		panic(fmt.Sprintf("error while getting topic list for app %s: %s", demoAppId, err))
+	} else {
+		demoApp.SetNumTopics(len(topicList))
+		result, err = appDao.Update(demoApp)
+		if err != nil {
+			panic(fmt.Sprintf("error while updating app %s: %s", demoAppId, err))
+		}
+		if !result {
+			log.Printf("[ERROR] Cannot update app [%s]", demoAppId)
+		}
+	}
 
 	page = doc.NewPage(goapi.AppVersionNumber, topic, "General", "general", "General: "+shortLorem, longLorerm)
 	page.SetPosition(1).SetId(topic.GetId() + "-" + re.ReplaceAllString(strings.ToLower(page.GetTitle()), ""))
@@ -590,5 +655,19 @@ func _initSamples() {
 	}
 	if !result {
 		log.Printf("[ERROR] Cannot create page [%s]", page.GetTitle())
+	}
+
+	pageList, err = pageDao.GetAll(topic, nil, nil)
+	if err != nil {
+		panic(fmt.Sprintf("error while getting page list for topic %s: %s", topic.GetId(), err))
+	} else {
+		topic.SetNumPages(len(pageList))
+		result, err = topicDao.Update(topic)
+		if err != nil {
+			panic(fmt.Sprintf("error while updating topic %s: %s", topic.GetId(), err))
+		}
+		if !result {
+			log.Printf("[ERROR] Cannot update topic [%s]", topic.GetId())
+		}
 	}
 }

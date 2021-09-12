@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/btnguyen2k/consu/reddo"
-	"main/src/gvabe/bo/app"
+	"main/src/gvabe/bo/product"
 )
 
 const numSampleRowsPage = 100
@@ -18,7 +18,7 @@ func initSampleRowsPage(t *testing.T, testName string, dao PageDao) {
 	numTopics := 1 + rand.Intn(numSampleRowsPage/10)
 	topicList = make([]*Topic, numTopics)
 	_tagVersion := uint64(1337)
-	_app := app.NewApp(_tagVersion, "libro", "Libro", "Libro description", true)
+	_app := product.NewProduct(_tagVersion, "libro", "Libro", "Libro description", true)
 	for i := 0; i < numTopics; i++ {
 		istr := "topic" + fmt.Sprintf("%03d", i)
 		_title := "Quick start " + istr
@@ -43,7 +43,7 @@ func initSampleRowsPage(t *testing.T, testName string, dao PageDao) {
 		_age := float64(18 + i)
 		bo := NewPage(_tagVersion, _topic, _title, _icon, _summary, _content)
 		bo.SetPosition(_pos)
-		bo.SetDataAttr("props.owner", "App"+istr)
+		bo.SetDataAttr("props.owner", "Product"+istr)
 		bo.SetDataAttr("props.email", _email)
 		bo.SetDataAttr("age", _age)
 		if ok, err := dao.Create(bo); err != nil || !ok {
@@ -62,7 +62,7 @@ func doTestPageDaoCreateGet(t *testing.T, name string, dao PageDao) {
 	_name := "Libro"
 	_desc := "Libro description"
 	_isPublished := true
-	_app := app.NewApp(_tagVersion, _appId, _name, _desc, _isPublished)
+	_app := product.NewProduct(_tagVersion, _appId, _name, _desc, _isPublished)
 
 	_title := "Quick start"
 	_icon := "default"
@@ -138,7 +138,7 @@ func doTestPageDaoCreateUpdateGet(t *testing.T, name string, dao PageDao) {
 	_name := "Libro"
 	_desc := "Libro description"
 	_isPublished := true
-	_app := app.NewApp(_tagVersion, _appId, _name, _desc, _isPublished)
+	_app := product.NewProduct(_tagVersion, _appId, _name, _desc, _isPublished)
 
 	_title := "Quick start"
 	_icon := "default"
@@ -226,7 +226,7 @@ func doTestPageDaoCreateDelete(t *testing.T, name string, dao PageDao) {
 	_name := "Libro"
 	_desc := "Libro description"
 	_isPublished := true
-	_app := app.NewApp(_tagVersion, _appId, _name, _desc, _isPublished)
+	_app := product.NewProduct(_tagVersion, _appId, _name, _desc, _isPublished)
 
 	_title := "Quick start"
 	_icon := "default"

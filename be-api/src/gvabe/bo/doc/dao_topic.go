@@ -3,7 +3,7 @@ package doc
 import (
 	"github.com/btnguyen2k/godal"
 	"github.com/btnguyen2k/henge"
-	"main/src/gvabe/bo/app"
+	"main/src/gvabe/bo/product"
 )
 
 const (
@@ -26,10 +26,10 @@ type TopicDao interface {
 	Get(id string) (*Topic, error)
 
 	// GetN retrieves N business objects from storage
-	GetN(app *app.App, fromOffset, maxNumRows int, filter godal.FilterOpt, sorting *godal.SortingOpt) ([]*Topic, error)
+	GetN(app *product.Product, fromOffset, maxNumRows int, filter godal.FilterOpt, sorting *godal.SortingOpt) ([]*Topic, error)
 
 	// GetAll retrieves all available business objects from storage
-	GetAll(app *app.App, filter godal.FilterOpt, sorting *godal.SortingOpt) ([]*Topic, error)
+	GetAll(app *product.Product, filter godal.FilterOpt, sorting *godal.SortingOpt) ([]*Topic, error)
 
 	// Update modifies an existing business object
 	Update(bo *Topic) (bool, error)
@@ -66,7 +66,7 @@ func (dao *BaseTopicDaoImpl) Get(id string) (*Topic, error) {
 }
 
 // GetN implements TopicDao.GetN
-func (dao *BaseTopicDaoImpl) GetN(app *app.App, fromOffset, maxNumRows int, filter godal.FilterOpt, sorting *godal.SortingOpt) ([]*Topic, error) {
+func (dao *BaseTopicDaoImpl) GetN(app *product.Product, fromOffset, maxNumRows int, filter godal.FilterOpt, sorting *godal.SortingOpt) ([]*Topic, error) {
 	if app == nil {
 		return make([]*Topic, 0), nil
 	}
@@ -85,7 +85,7 @@ func (dao *BaseTopicDaoImpl) GetN(app *app.App, fromOffset, maxNumRows int, filt
 }
 
 // GetAll implements TopicDao.GetAll
-func (dao *BaseTopicDaoImpl) GetAll(app *app.App, filter godal.FilterOpt, sorting *godal.SortingOpt) ([]*Topic, error) {
+func (dao *BaseTopicDaoImpl) GetAll(app *product.Product, filter godal.FilterOpt, sorting *godal.SortingOpt) ([]*Topic, error) {
 	return dao.GetN(app, 0, 0, filter, sorting)
 }
 

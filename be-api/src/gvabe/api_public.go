@@ -14,7 +14,7 @@ import (
 )
 
 // API handler "info"
-func apiInfo(_ *itineris.ApiContext, auth *itineris.ApiAuth, _ *itineris.ApiParams) *itineris.ApiResult {
+func apiInfo(_ *itineris.ApiContext, _ *itineris.ApiAuth, _ *itineris.ApiParams) *itineris.ApiResult {
 	var publicPEM []byte
 	if pubDER, err := x509.MarshalPKIXPublicKey(rsaPubKey); err == nil {
 		pubBlock := pem.Block{

@@ -8,7 +8,7 @@ import (
 
 	"github.com/btnguyen2k/henge"
 	"main/src/gvabe/bo"
-	"main/src/gvabe/bo/app"
+	"main/src/gvabe/bo/product"
 	"main/src/utils"
 )
 
@@ -19,7 +19,7 @@ func TestNewTopic(t *testing.T) {
 	_name := "Libro"
 	_desc := "Libro description"
 	_isPublished := true
-	_app := app.NewApp(_tagVersion, _appId, _name, _desc, _isPublished)
+	_app := product.NewProduct(_tagVersion, _appId, _name, _desc, _isPublished)
 
 	_title := "Quick start"
 	_icon := "default"
@@ -118,7 +118,7 @@ func TestTopic_ToMap(t *testing.T) {
 	_name := "Libro"
 	_desc := "Libro description"
 	_isPublished := true
-	_app := app.NewApp(_tagVersion, _appId, _name, _desc, _isPublished)
+	_app := product.NewProduct(_tagVersion, _appId, _name, _desc, _isPublished)
 
 	_title := "Quick start"
 	_icon := "default"
@@ -182,7 +182,7 @@ func TestTopic_json(t *testing.T) {
 	_name := "Libro"
 	_desc := "Libro description"
 	_isPublished := true
-	_app := app.NewApp(_tagVersion, _appId, _name, _desc, _isPublished)
+	_app := product.NewProduct(_tagVersion, _appId, _name, _desc, _isPublished)
 
 	_title := "Quick start"
 	_icon := "default"

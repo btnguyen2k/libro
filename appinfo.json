@@ -1,0 +1,7 @@
+{
+    "name"       : "Libro - Application Document Management System",
+    "shortname"  : "Libro",
+    "initial"    : "LIB",
+    "version"    : "0.1.0",
+    "description": "An application document management system"
+}

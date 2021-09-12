@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/btnguyen2k/consu/reddo"
-	"main/src/gvabe/bo/app"
+	"main/src/gvabe/bo/product"
 )
 
 const numSampleRowsTopic = 100
@@ -16,14 +16,14 @@ const numSampleRowsTopic = 100
 func initSampleRowsTopic(t *testing.T, testName string, dao TopicDao) {
 	rand.Seed(time.Now().UnixNano())
 	numApps := 1 + rand.Intn(numSampleRowsTopic/10)
-	appList = make([]*app.App, numApps)
+	appList = make([]*product.Product, numApps)
 	_tagVersion := uint64(1337)
 	for i := 0; i < numApps; i++ {
 		_appId := "libro" + fmt.Sprintf("%02d", i)
 		_name := "Libro" + _appId
 		_desc := "Libro description " + _appId
 		_isPublished := rand.Int()%7 == 0
-		_app := app.NewApp(_tagVersion, _appId, _name, _desc, _isPublished)
+		_app := product.NewProduct(_tagVersion, _appId, _name, _desc, _isPublished)
 		appList[i] = _app
 	}
 	topicList = make([]*Topic, numSampleRowsTopic)
@@ -40,7 +40,7 @@ func initSampleRowsTopic(t *testing.T, testName string, dao TopicDao) {
 		_age := float64(18 + i)
 		bo := NewTopic(_tagVersion, _app, _title, _icon, _summary)
 		bo.SetPosition(_pos).SetNumPages(_numPages)
-		bo.SetDataAttr("props.owner", "App"+istr)
+		bo.SetDataAttr("props.owner", "Product"+istr)
 		bo.SetDataAttr("props.email", _email)
 		bo.SetDataAttr("age", _age)
 		if ok, err := dao.Create(bo); err != nil || !ok {
@@ -59,7 +59,7 @@ func doTestTopicDaoCreateGet(t *testing.T, name string, dao TopicDao) {
 	_name := "Libro"
 	_desc := "Libro description"
 	_isPublished := true
-	_app := app.NewApp(_tagVersion, _appId, _name, _desc, _isPublished)
+	_app := product.NewProduct(_tagVersion, _appId, _name, _desc, _isPublished)
 
 	_title := "Quick start"
 	_icon := "default"
@@ -129,7 +129,7 @@ func doTestTopicDaoCreateUpdateGet(t *testing.T, name string, dao TopicDao) {
 	_name := "Libro"
 	_desc := "Libro description"
 	_isPublished := true
-	_app := app.NewApp(_tagVersion, _appId, _name, _desc, _isPublished)
+	_app := product.NewProduct(_tagVersion, _appId, _name, _desc, _isPublished)
 
 	_title := "Quick start"
 	_icon := "default"
@@ -209,7 +209,7 @@ func doTestTopicDaoCreateDelete(t *testing.T, name string, dao TopicDao) {
 	_name := "Libro"
 	_desc := "Libro description"
 	_isPublished := true
-	_app := app.NewApp(_tagVersion, _appId, _name, _desc, _isPublished)
+	_app := product.NewProduct(_tagVersion, _appId, _name, _desc, _isPublished)
 
 	_title := "Quick start"
 	_icon := "default"

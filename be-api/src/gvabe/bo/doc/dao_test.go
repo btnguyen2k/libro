@@ -1,11 +1,11 @@
 package doc
 
 import (
-	"main/src/gvabe/bo/app"
+	"main/src/gvabe/bo/product"
 )
 
 var (
-	appList        []*app.App
+	appList        []*product.Product
 	topicList      []*Topic
 	pageList       []*Page
 	appTopicCount  map[string]int

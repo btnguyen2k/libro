@@ -8,12 +8,12 @@ import (
 	"github.com/btnguyen2k/consu/reddo"
 	"github.com/btnguyen2k/henge"
 	"main/src/gvabe/bo"
-	"main/src/gvabe/bo/app"
+	"main/src/gvabe/bo/product"
 	"main/src/utils"
 )
 
 // NewTopic is helper function to create new Topic bo.
-func NewTopic(appVersion uint64, app *app.App, title, icon, summary string) *Topic {
+func NewTopic(appVersion uint64, app *product.Product, title, icon, summary string) *Topic {
 	id := utils.UniqueId()
 	bo := &Topic{
 		UniversalBo: henge.NewUniversalBo(id, appVersion),

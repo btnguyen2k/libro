@@ -46,9 +46,9 @@ The business object `App` represents a registered application.
 
 |Name   |Type  |Description|
 |-------|------|-----------|
-|name |string|App's name, for displaying purpose|
-|isvis|bool  |Flag to mark if the app is enabled/visible|
-|desc |string|Description text|
+|name   |string|App's name, for displaying purpose|
+|ispub  |bool  |Flag to mark if the app is enabled/published|
+|desc   |string|Description text|
 
 > `App` inherites other attibutes from [henge](https://github.com/btnguyen2k/henge)'s BO.
 

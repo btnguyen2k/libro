@@ -20,7 +20,8 @@ func initApiHandlers(router *itineris.ApiRouter) {
 	router.SetHandler("verifyLoginToken", apiVerifyLoginToken)
 	router.SetHandler("systemInfo", apiSystemInfo)
 
-	router.SetHandler("adminAppList", apiAdminAppList)
+	router.SetHandler("adminProductList", apiAdminProductList)
+	router.SetHandler("adminStats", apiAdminStats)
 
 	// router.SetHandler("myFeed", apiMyFeed)
 	// router.SetHandler("myBlog", apiMyBlog)
