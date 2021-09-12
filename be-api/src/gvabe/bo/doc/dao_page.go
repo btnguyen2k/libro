@@ -9,8 +9,8 @@ const (
 	// TablePage is name of the database table to store document page records.
 	TablePage = "libro_page"
 
-	// PageColAppId is name of database column for document page's app-id.
-	PageColAppId = "zaid"
+	// PageColProductId is name of database column for document page's product-id.
+	PageColProductId = "zpid"
 
 	// PageColTopicId is name of database column for document page's topic-id.
 	PageColTopicId = "ztid"

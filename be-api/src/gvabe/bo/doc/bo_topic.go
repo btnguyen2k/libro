@@ -13,13 +13,13 @@ import (
 )
 
 // NewTopic is helper function to create new Topic bo.
-func NewTopic(appVersion uint64, app *product.Product, title, icon, summary string) *Topic {
+func NewTopic(tagVersion uint64, prod *product.Product, title, icon, summary string) *Topic {
 	id := utils.UniqueId()
 	bo := &Topic{
-		UniversalBo: henge.NewUniversalBo(id, appVersion),
+		UniversalBo: henge.NewUniversalBo(id, tagVersion),
 	}
 	return bo.
-		SetAppId(app.GetId()).
+		SetProductId(prod.GetId()).
 		SetTitle(title).
 		SetIcon(icon).
 		SetSummary(summary).
@@ -35,10 +35,10 @@ func NewTopicFromUbo(ubo *henge.UniversalBo) *Topic {
 	}
 	ubo = ubo.Clone()
 	bo := &Topic{UniversalBo: ubo}
-	if v, err := ubo.GetExtraAttrAs(TopicFieldAppId, reddo.TypeString); err != nil {
+	if v, err := ubo.GetExtraAttrAs(TopicFieldProductId, reddo.TypeString); err != nil {
 		return nil
 	} else {
-		bo.appId, _ = v.(string)
+		bo.productId, _ = v.(string)
 	}
 	if v, err := ubo.GetDataAttrAs(TopicAttrTitle, reddo.TypeString); err != nil {
 		return nil
@@ -69,8 +69,8 @@ func NewTopicFromUbo(ubo *henge.UniversalBo) *Topic {
 }
 
 const (
-	// TopicFieldAppId holds id of the application that the document topic belongs to
-	TopicFieldAppId = "app"
+	// TopicFieldProductId holds id of the product that the document topic belongs to
+	TopicFieldProductId = "prod"
 
 	// TopicAttrTitle is document topic's title
 	TopicAttrTitle = "title"
@@ -95,7 +95,7 @@ const (
 //   - Topic inherits unique id from bo.UniversalBo
 type Topic struct {
 	*henge.UniversalBo `json:"_ubo"`
-	appId              string `json:"app"`
+	productId          string `json:"prod"`
 	title              string `json:"title"`
 	icon               string `json:"icon"`
 	summary            string `json:"summary"`
@@ -119,7 +119,7 @@ func (t *Topic) ToMap(postFunc henge.FuncPostUboToMap) map[string]interface{} {
 	result := map[string]interface{}{
 		henge.FieldId: t.GetId(),
 		bo.SerKeyFields: map[string]interface{}{
-			TopicFieldAppId: t.appId,
+			TopicFieldProductId: t.productId,
 		},
 		bo.SerKeyAttrs: map[string]interface{}{
 			TopicAttrTitle:    t.title,
@@ -142,7 +142,7 @@ func (t *Topic) MarshalJSON() ([]byte, error) {
 	m := map[string]interface{}{
 		topicAttrUbo: t.UniversalBo.Clone(),
 		bo.SerKeyFields: map[string]interface{}{
-			TopicFieldAppId: t.appId,
+			TopicFieldProductId: t.productId,
 		},
 		bo.SerKeyAttrs: map[string]interface{}{
 			TopicAttrTitle:    t.title,
@@ -170,7 +170,7 @@ func (t *Topic) UnmarshalJSON(data []byte) error {
 		}
 	}
 	if _fields, ok := m[bo.SerKeyFields].(map[string]interface{}); ok {
-		if t.appId, err = reddo.ToString(_fields[TopicFieldAppId]); err != nil {
+		if t.productId, err = reddo.ToString(_fields[TopicFieldProductId]); err != nil {
 			return err
 		}
 	}
@@ -199,14 +199,14 @@ func (t *Topic) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-// GetAppId returns value of topic's 'app-id' attribute.
-func (t *Topic) GetAppId() string {
-	return t.appId
+// GetProductId returns value of topic's 'product-id' attribute.
+func (t *Topic) GetProductId() string {
+	return t.productId
 }
 
-// SetAppId sets value of topic's 'app-id' attribute.
-func (t *Topic) SetAppId(v string) *Topic {
-	t.appId = strings.ToLower(strings.TrimSpace(v))
+// SetProductId sets value of topic's 'product-id' attribute.
+func (t *Topic) SetProductId(v string) *Topic {
+	t.productId = strings.ToLower(strings.TrimSpace(v))
 	return t
 }
 
@@ -267,7 +267,7 @@ func (t *Topic) SetNumPages(v int) *Topic {
 
 // sync is called to synchronize BO's attributes to its UniversalBo.
 func (t *Topic) sync() *Topic {
-	t.SetExtraAttr(TopicFieldAppId, t.appId)
+	t.SetExtraAttr(TopicFieldProductId, t.productId)
 	t.SetDataAttr(TopicAttrTitle, t.title)
 	t.SetDataAttr(TopicAttrIcon, t.icon)
 	t.SetDataAttr(TopicAttrSummary, t.summary)

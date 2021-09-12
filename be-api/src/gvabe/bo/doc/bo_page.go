@@ -12,14 +12,14 @@ import (
 )
 
 // NewPage is helper function to create new Page bo.
-func NewPage(appVersion uint64, topic *Topic, title, icon, summary, content string) *Page {
+func NewPage(tagVersion uint64, topic *Topic, title, icon, summary, content string) *Page {
 	id := utils.UniqueId()
 	bo := &Page{
-		UniversalBo: henge.NewUniversalBo(id, appVersion),
+		UniversalBo: henge.NewUniversalBo(id, tagVersion),
 	}
 	position := time.Now().Unix()
 	return bo.
-		SetAppId(topic.GetAppId()).
+		SetProductId(topic.GetProductId()).
 		SetTopicId(topic.GetId()).
 		SetTitle(title).
 		SetIcon(icon).
@@ -36,10 +36,10 @@ func NewPageFromUbo(ubo *henge.UniversalBo) *Page {
 	}
 	ubo = ubo.Clone()
 	bo := &Page{UniversalBo: ubo}
-	if v, err := ubo.GetExtraAttrAs(PageFieldAppId, reddo.TypeString); err != nil {
+	if v, err := ubo.GetExtraAttrAs(PageFieldProductId, reddo.TypeString); err != nil {
 		return nil
 	} else {
-		bo.appId, _ = v.(string)
+		bo.productId, _ = v.(string)
 	}
 	if v, err := ubo.GetExtraAttrAs(PageFieldTopicId, reddo.TypeString); err != nil {
 		return nil
@@ -75,8 +75,8 @@ func NewPageFromUbo(ubo *henge.UniversalBo) *Page {
 }
 
 const (
-	// PageFieldAppId holds id of the application that the document page belongs to
-	PageFieldAppId = "app"
+	// PageFieldProductId holds id of the product that the document page belongs to
+	PageFieldProductId = "prod"
 
 	// PageFieldTopicId holds id of the topic that the document page belongs to
 	PageFieldTopicId = "topic"
@@ -104,7 +104,7 @@ const (
 //   - Page inherits unique id from bo.UniversalBo
 type Page struct {
 	*henge.UniversalBo `json:"_ubo"`
-	appId              string `json:"app"`
+	productId          string `json:"prod"`
 	topicId            string `json:"topic"`
 	title              string `json:"title"`
 	icon               string `json:"icon"`
@@ -129,8 +129,8 @@ func (p *Page) ToMap(postFunc henge.FuncPostUboToMap) map[string]interface{} {
 	result := map[string]interface{}{
 		henge.FieldId: p.GetId(),
 		bo.SerKeyFields: map[string]interface{}{
-			PageFieldAppId:   p.appId,
-			PageFieldTopicId: p.topicId,
+			PageFieldProductId: p.productId,
+			PageFieldTopicId:   p.topicId,
 		},
 		bo.SerKeyAttrs: map[string]interface{}{
 			PageAttrTitle:    p.title,
@@ -153,8 +153,8 @@ func (p *Page) MarshalJSON() ([]byte, error) {
 	m := map[string]interface{}{
 		topicAttrUbo: p.UniversalBo.Clone(),
 		bo.SerKeyFields: map[string]interface{}{
-			PageFieldAppId:   p.appId,
-			PageFieldTopicId: p.topicId,
+			PageFieldProductId: p.productId,
+			PageFieldTopicId:   p.topicId,
 		},
 		bo.SerKeyAttrs: map[string]interface{}{
 			PageAttrTitle:    p.title,
@@ -182,7 +182,7 @@ func (p *Page) UnmarshalJSON(data []byte) error {
 		}
 	}
 	if _fields, ok := m[bo.SerKeyFields].(map[string]interface{}); ok {
-		if p.appId, err = reddo.ToString(_fields[PageFieldAppId]); err != nil {
+		if p.productId, err = reddo.ToString(_fields[PageFieldProductId]); err != nil {
 			return err
 		}
 		if p.topicId, err = reddo.ToString(_fields[PageFieldTopicId]); err != nil {
@@ -212,14 +212,14 @@ func (p *Page) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-// GetAppId returns value of page's 'app-id' attribute.
-func (p *Page) GetAppId() string {
-	return p.appId
+// GetProductId returns value of page's 'product-id' attribute.
+func (p *Page) GetProductId() string {
+	return p.productId
 }
 
-// SetAppId sets value of page's 'app-id' attribute.
-func (p *Page) SetAppId(v string) *Page {
-	p.appId = strings.ToLower(strings.TrimSpace(v))
+// SetProductId sets value of page's 'product-id' attribute.
+func (p *Page) SetProductId(v string) *Page {
+	p.productId = strings.ToLower(strings.TrimSpace(v))
 	return p
 }
 
@@ -228,7 +228,7 @@ func (p *Page) GetTopicId() string {
 	return p.topicId
 }
 
-// SetTopicId sets value of page's 'app-id' attribute.
+// SetTopicId sets value of page's 'topic-id' attribute.
 func (p *Page) SetTopicId(v string) *Page {
 	p.topicId = strings.ToLower(strings.TrimSpace(v))
 	return p
@@ -291,7 +291,7 @@ func (p *Page) SetContent(v string) *Page {
 
 // sync is called to synchronize BO's attributes to its UniversalBo.
 func (p *Page) sync() *Page {
-	p.SetExtraAttr(PageFieldAppId, p.appId)
+	p.SetExtraAttr(PageFieldProductId, p.productId)
 	p.SetExtraAttr(PageFieldTopicId, p.topicId)
 	p.SetDataAttr(PageAttrTitle, p.title)
 	p.SetDataAttr(PageAttrIcon, p.icon)

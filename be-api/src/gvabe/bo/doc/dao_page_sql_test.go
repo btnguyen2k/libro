@@ -35,11 +35,11 @@ func sqlInitTablePage(sqlc *prom.SqlConnect, table string) error {
 		spec := &henge.CosmosdbCollectionSpec{Pk: henge.CosmosdbColId}
 		err = henge.InitCosmosdbCollection(sqlc, table, spec)
 	case prom.FlavorMySql:
-		err = henge.InitMysqlTable(sqlc, table, map[string]string{PageColAppId: "VARCHAR(32)", PageColTopicId: "VARCHAR(32)"})
+		err = henge.InitMysqlTable(sqlc, table, map[string]string{PageColProductId: "VARCHAR(32)", PageColTopicId: "VARCHAR(32)"})
 	case prom.FlavorPgSql:
-		err = henge.InitPgsqlTable(sqlc, table, map[string]string{PageColAppId: "VARCHAR(32)", PageColTopicId: "VARCHAR(32)"})
+		err = henge.InitPgsqlTable(sqlc, table, map[string]string{PageColProductId: "VARCHAR(32)", PageColTopicId: "VARCHAR(32)"})
 	case prom.FlavorSqlite:
-		err = henge.InitSqliteTable(sqlc, table, map[string]string{PageColAppId: "VARCHAR(32)", PageColTopicId: "VARCHAR(32)"})
+		err = henge.InitSqliteTable(sqlc, table, map[string]string{PageColProductId: "VARCHAR(32)", PageColTopicId: "VARCHAR(32)"})
 	}
 	return err
 }

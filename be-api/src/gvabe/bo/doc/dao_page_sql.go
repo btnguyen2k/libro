@@ -9,6 +9,6 @@ import (
 func NewPageDaoSql(sqlc *prom.SqlConnect, tableName string, txModeOnWrite bool) PageDao {
 	dao := &BasePageDaoImpl{}
 	dao.UniversalDao = henge.NewUniversalDaoSql(sqlc, tableName, txModeOnWrite,
-		map[string]string{PageColAppId: PageFieldAppId, PageColTopicId: PageFieldTopicId})
+		map[string]string{PageColProductId: PageFieldProductId, PageColTopicId: PageFieldTopicId})
 	return dao
 }

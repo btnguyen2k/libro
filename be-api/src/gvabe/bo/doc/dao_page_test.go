@@ -18,14 +18,14 @@ func initSampleRowsPage(t *testing.T, testName string, dao PageDao) {
 	numTopics := 1 + rand.Intn(numSampleRowsPage/10)
 	topicList = make([]*Topic, numTopics)
 	_tagVersion := uint64(1337)
-	_app := product.NewProduct(_tagVersion, "libro", "Libro", "Libro description", true)
+	_prod := product.NewProduct(_tagVersion, "libro", "Libro", "Libro description", true)
 	for i := 0; i < numTopics; i++ {
 		istr := "topic" + fmt.Sprintf("%03d", i)
 		_title := "Quick start " + istr
 		_icon := "default"
 		_summary := "topic " + istr
 		_pos := rand.Int()
-		_topic := NewTopic(_tagVersion, _app, _title, _icon, _summary)
+		_topic := NewTopic(_tagVersion, _prod, _title, _icon, _summary)
 		_topic.SetPosition(_pos)
 		topicList[i] = _topic
 	}
@@ -58,17 +58,17 @@ func initSampleRowsPage(t *testing.T, testName string, dao PageDao) {
 
 func doTestPageDaoCreateGet(t *testing.T, name string, dao PageDao) {
 	_tagVersion := uint64(1337)
-	_appId := "libro"
+	_prodId := "libro"
 	_name := "Libro"
 	_desc := "Libro description"
 	_isPublished := true
-	_app := product.NewProduct(_tagVersion, _appId, _name, _desc, _isPublished)
+	_prod := product.NewProduct(_tagVersion, _prodId, _name, _desc, _isPublished)
 
 	_title := "Quick start"
 	_icon := "default"
 	_summary := "topic one"
 	_pos := rand.Intn(10242048)
-	_topic := NewTopic(_tagVersion, _app, _title, _icon, _summary)
+	_topic := NewTopic(_tagVersion, _prod, _title, _icon, _summary)
 	_topic.SetPosition(_pos)
 
 	_content := "page one"
@@ -102,7 +102,7 @@ func doTestPageDaoCreateGet(t *testing.T, name string, dao PageDao) {
 		if v1, v0 := bo1.GetId(), _id; v1 != v0 {
 			t.Fatalf("%s failed: expected %#v but received %#v", name, v0, v1)
 		}
-		if v1, v0 := bo1.GetAppId(), _app.GetId(); v1 != v0 {
+		if v1, v0 := bo1.GetProductId(), _prod.GetId(); v1 != v0 {
 			t.Fatalf("%s failed: expected %#v but received %#v", name, v0, v1)
 		}
 		if v1, v0 := bo1.GetTopicId(), _topic.GetId(); v1 != v0 {
@@ -134,17 +134,17 @@ func doTestPageDaoCreateGet(t *testing.T, name string, dao PageDao) {
 
 func doTestPageDaoCreateUpdateGet(t *testing.T, name string, dao PageDao) {
 	_tagVersion := uint64(1337)
-	_appId := "libro"
+	_prodId := "libro"
 	_name := "Libro"
 	_desc := "Libro description"
 	_isPublished := true
-	_app := product.NewProduct(_tagVersion, _appId, _name, _desc, _isPublished)
+	_prod := product.NewProduct(_tagVersion, _prodId, _name, _desc, _isPublished)
 
 	_title := "Quick start"
 	_icon := "default"
 	_summary := "topic one"
 	_pos := rand.Intn(10242048)
-	_topic := NewTopic(_tagVersion, _app, _title, _icon, _summary)
+	_topic := NewTopic(_tagVersion, _prod, _title, _icon, _summary)
 	_topic.SetPosition(_pos)
 
 	_content := "page one"
@@ -159,7 +159,7 @@ func doTestPageDaoCreateUpdateGet(t *testing.T, name string, dao PageDao) {
 		t.Fatalf("%s failed: %#v / %s", name+"/Create", ok, err)
 	}
 
-	bo0.SetAppId(_appId + "-new").SetTopicId(_topic.GetId() + "-new").
+	bo0.SetProductId(_prodId + "-new").SetTopicId(_topic.GetId() + "-new").
 		SetIcon(_icon + "-new").SetTitle(_title + "-new").SetSummary(_summary + "-new").SetPosition(_pos + 2).SetContent(_content + "-new").
 		SetTagVersion(_tagVersion + 3)
 	bo0.SetDataAttr("props.owner", _name+"-new")
@@ -190,7 +190,7 @@ func doTestPageDaoCreateUpdateGet(t *testing.T, name string, dao PageDao) {
 		if v1, v0 := bo1.GetId(), _id; v1 != v0 {
 			t.Fatalf("%s failed: expected %#v but received %#v", name, v0, v1)
 		}
-		if v1, v0 := bo1.GetAppId(), _app.GetId()+"-new"; v1 != v0 {
+		if v1, v0 := bo1.GetProductId(), _prod.GetId()+"-new"; v1 != v0 {
 			t.Fatalf("%s failed: expected %#v but received %#v", name, v0, v1)
 		}
 		if v1, v0 := bo1.GetTopicId(), _topic.GetId()+"-new"; v1 != v0 {
@@ -222,17 +222,17 @@ func doTestPageDaoCreateUpdateGet(t *testing.T, name string, dao PageDao) {
 
 func doTestPageDaoCreateDelete(t *testing.T, name string, dao PageDao) {
 	_tagVersion := uint64(1337)
-	_appId := "libro"
+	_prodId := "libro"
 	_name := "Libro"
 	_desc := "Libro description"
 	_isPublished := true
-	_app := product.NewProduct(_tagVersion, _appId, _name, _desc, _isPublished)
+	_prod := product.NewProduct(_tagVersion, _prodId, _name, _desc, _isPublished)
 
 	_title := "Quick start"
 	_icon := "default"
 	_summary := "topic one"
 	_pos := rand.Intn(10242048)
-	_topic := NewTopic(_tagVersion, _app, _title, _icon, _summary)
+	_topic := NewTopic(_tagVersion, _prod, _title, _icon, _summary)
 	_topic.SetPosition(_pos)
 
 	_content := "page one"

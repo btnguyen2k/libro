@@ -5,9 +5,9 @@ import (
 )
 
 var (
-	appList        []*product.Product
-	topicList      []*Topic
+	prodList  []*product.Product
+	topicList []*Topic
 	pageList       []*Page
-	appTopicCount  map[string]int
+	prodTopicCount map[string]int
 	topicPageCount map[string]int
 )

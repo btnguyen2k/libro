@@ -9,9 +9,9 @@ import (
 )
 
 // NewUser is helper function to create new User bo
-func NewUser(appVersion uint64, id, maskId string) *User {
+func NewUser(tagVersion uint64, id, maskId string) *User {
 	user := &User{
-		UniversalBo: henge.NewUniversalBo(id, appVersion),
+		UniversalBo: henge.NewUniversalBo(id, tagVersion),
 	}
 	return user.SetMaskId(maskId).sync()
 }

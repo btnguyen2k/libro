@@ -12,7 +12,7 @@ func NewTopicDaoCosmosdb(sqlc *prom.SqlConnect, tableName string, txModeOnWrite 
 	dao := &BaseTopicDaoImpl{}
 	spec := &henge.CosmosdbDaoSpec{
 		// PkName:        henge.CosmosdbColId,
-		PkName:        TopicColAppId,
+		PkName:        TopicColProductId,
 		TxModeOnWrite: txModeOnWrite,
 	}
 	dao.UniversalDao = henge.NewUniversalDaoCosmosdbSql(sqlc, tableName, spec)

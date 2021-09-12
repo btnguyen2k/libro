@@ -10,8 +10,8 @@ const (
 	// TableTopic is name of the database table to store document topic records.
 	TableTopic = "libro_topic"
 
-	// TopicColAppId is name of database column for document topic's app-id.
-	TopicColAppId = "zaid"
+	// TopicColProductId is name of database column for document topic's product-id.
+	TopicColProductId = "zpid"
 )
 
 // TopicDao defines API to access Topic storage
@@ -26,10 +26,10 @@ type TopicDao interface {
 	Get(id string) (*Topic, error)
 
 	// GetN retrieves N business objects from storage
-	GetN(app *product.Product, fromOffset, maxNumRows int, filter godal.FilterOpt, sorting *godal.SortingOpt) ([]*Topic, error)
+	GetN(prod *product.Product, fromOffset, maxNumRows int, filter godal.FilterOpt, sorting *godal.SortingOpt) ([]*Topic, error)
 
 	// GetAll retrieves all available business objects from storage
-	GetAll(app *product.Product, filter godal.FilterOpt, sorting *godal.SortingOpt) ([]*Topic, error)
+	GetAll(prod *product.Product, filter godal.FilterOpt, sorting *godal.SortingOpt) ([]*Topic, error)
 
 	// Update modifies an existing business object
 	Update(bo *Topic) (bool, error)
@@ -66,12 +66,12 @@ func (dao *BaseTopicDaoImpl) Get(id string) (*Topic, error) {
 }
 
 // GetN implements TopicDao.GetN
-func (dao *BaseTopicDaoImpl) GetN(app *product.Product, fromOffset, maxNumRows int, filter godal.FilterOpt, sorting *godal.SortingOpt) ([]*Topic, error) {
-	if app == nil {
+func (dao *BaseTopicDaoImpl) GetN(prod *product.Product, fromOffset, maxNumRows int, filter godal.FilterOpt, sorting *godal.SortingOpt) ([]*Topic, error) {
+	if prod == nil {
 		return make([]*Topic, 0), nil
 	}
 	myFilter := (&godal.FilterOptAnd{}).Add(filter).
-		Add(godal.FilterOptFieldOpValue{FieldName: TopicFieldAppId, Operator: godal.FilterOpEqual, Value: app.GetId()})
+		Add(godal.FilterOptFieldOpValue{FieldName: TopicFieldProductId, Operator: godal.FilterOpEqual, Value: prod.GetId()})
 	uboList, err := dao.UniversalDao.GetN(fromOffset, maxNumRows, myFilter, sorting)
 	if err != nil {
 		return nil, err
@@ -85,8 +85,8 @@ func (dao *BaseTopicDaoImpl) GetN(app *product.Product, fromOffset, maxNumRows i
 }
 
 // GetAll implements TopicDao.GetAll
-func (dao *BaseTopicDaoImpl) GetAll(app *product.Product, filter godal.FilterOpt, sorting *godal.SortingOpt) ([]*Topic, error) {
-	return dao.GetN(app, 0, 0, filter, sorting)
+func (dao *BaseTopicDaoImpl) GetAll(prod *product.Product, filter godal.FilterOpt, sorting *godal.SortingOpt) ([]*Topic, error) {
+	return dao.GetN(prod, 0, 0, filter, sorting)
 }
 
 // Update implements TopicDao.Update

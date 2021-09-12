@@ -15,21 +15,21 @@ const numSampleRowsTopic = 100
 
 func initSampleRowsTopic(t *testing.T, testName string, dao TopicDao) {
 	rand.Seed(time.Now().UnixNano())
-	numApps := 1 + rand.Intn(numSampleRowsTopic/10)
-	appList = make([]*product.Product, numApps)
+	numProds := 1 + rand.Intn(numSampleRowsTopic/10)
+	prodList = make([]*product.Product, numProds)
 	_tagVersion := uint64(1337)
-	for i := 0; i < numApps; i++ {
-		_appId := "libro" + fmt.Sprintf("%02d", i)
-		_name := "Libro" + _appId
-		_desc := "Libro description " + _appId
+	for i := 0; i < numProds; i++ {
+		_prodId := "libro" + fmt.Sprintf("%02d", i)
+		_name := "Libro" + _prodId
+		_desc := "Libro description " + _prodId
 		_isPublished := rand.Int()%7 == 0
-		_app := product.NewProduct(_tagVersion, _appId, _name, _desc, _isPublished)
-		appList[i] = _app
+		_prod := product.NewProduct(_tagVersion, _prodId, _name, _desc, _isPublished)
+		prodList[i] = _prod
 	}
 	topicList = make([]*Topic, numSampleRowsTopic)
-	appTopicCount = make(map[string]int)
+	prodTopicCount = make(map[string]int)
 	for i := 0; i < numSampleRowsTopic; i++ {
-		_app := appList[rand.Intn(numApps)]
+		_prod := prodList[rand.Intn(numProds)]
 		istr := fmt.Sprintf("%03d", i)
 		_title := "Quick start " + istr
 		_icon := "default"
@@ -38,7 +38,7 @@ func initSampleRowsTopic(t *testing.T, testName string, dao TopicDao) {
 		_numPages := _pos%10 + 1
 		_email := istr + "@libro"
 		_age := float64(18 + i)
-		bo := NewTopic(_tagVersion, _app, _title, _icon, _summary)
+		bo := NewTopic(_tagVersion, _prod, _title, _icon, _summary)
 		bo.SetPosition(_pos).SetNumPages(_numPages)
 		bo.SetDataAttr("props.owner", "Product"+istr)
 		bo.SetDataAttr("props.email", _email)
@@ -48,25 +48,25 @@ func initSampleRowsTopic(t *testing.T, testName string, dao TopicDao) {
 		}
 		topicList[i] = bo
 
-		counter := appTopicCount[_app.GetId()]
-		appTopicCount[_app.GetId()] = counter + 1
+		counter := prodTopicCount[_prod.GetId()]
+		prodTopicCount[_prod.GetId()] = counter + 1
 	}
 }
 
 func doTestTopicDaoCreateGet(t *testing.T, name string, dao TopicDao) {
 	_tagVersion := uint64(1337)
-	_appId := "libro"
+	_prodId := "libro"
 	_name := "Libro"
 	_desc := "Libro description"
 	_isPublished := true
-	_app := product.NewProduct(_tagVersion, _appId, _name, _desc, _isPublished)
+	_prod := product.NewProduct(_tagVersion, _prodId, _name, _desc, _isPublished)
 
 	_title := "Quick start"
 	_icon := "default"
 	_summary := "topic one"
 	_pos := rand.Intn(10242048)
 	_numPages := _pos%10 + 1
-	bo0 := NewTopic(_tagVersion, _app, _title, _icon, _summary)
+	bo0 := NewTopic(_tagVersion, _prod, _title, _icon, _summary)
 	bo0.SetPosition(_pos).SetNumPages(_numPages)
 	_email := "libro@libro"
 	_age := float64(35)
@@ -96,7 +96,7 @@ func doTestTopicDaoCreateGet(t *testing.T, name string, dao TopicDao) {
 		if v1, v0 := bo1.GetId(), _id; v1 != v0 {
 			t.Fatalf("%s failed: expected %#v but received %#v", name, v0, v1)
 		}
-		if v1, v0 := bo1.GetAppId(), _app.GetId(); v1 != v0 {
+		if v1, v0 := bo1.GetProductId(), _prod.GetId(); v1 != v0 {
 			t.Fatalf("%s failed: expected %#v but received %#v", name, v0, v1)
 		}
 		if v1, v0 := bo1.GetIcon(), _icon; v1 != v0 {
@@ -125,18 +125,18 @@ func doTestTopicDaoCreateGet(t *testing.T, name string, dao TopicDao) {
 
 func doTestTopicDaoCreateUpdateGet(t *testing.T, name string, dao TopicDao) {
 	_tagVersion := uint64(1337)
-	_appId := "libro"
+	_prodId := "libro"
 	_name := "Libro"
 	_desc := "Libro description"
 	_isPublished := true
-	_app := product.NewProduct(_tagVersion, _appId, _name, _desc, _isPublished)
+	_prod := product.NewProduct(_tagVersion, _prodId, _name, _desc, _isPublished)
 
 	_title := "Quick start"
 	_icon := "default"
 	_summary := "topic one"
 	_pos := rand.Intn(10242048)
 	_numPages := _pos%10 + 1
-	bo0 := NewTopic(_tagVersion, _app, _title, _icon, _summary)
+	bo0 := NewTopic(_tagVersion, _prod, _title, _icon, _summary)
 	bo0.SetPosition(_pos).SetNumPages(_numPages)
 	_email := "libro@libro"
 	_age := float64(35)
@@ -147,7 +147,7 @@ func doTestTopicDaoCreateUpdateGet(t *testing.T, name string, dao TopicDao) {
 		t.Fatalf("%s failed: %#v / %s", name+"/Create", ok, err)
 	}
 
-	bo0.SetAppId(_appId + "-new").SetIcon(_icon + "-new").SetTitle(_title + "-new").SetSummary(_summary + "-new").SetPosition(_pos + 1).SetNumPages(_numPages + 2).SetTagVersion(_tagVersion + 3)
+	bo0.SetProductId(_prodId + "-new").SetIcon(_icon + "-new").SetTitle(_title + "-new").SetSummary(_summary + "-new").SetPosition(_pos + 1).SetNumPages(_numPages + 2).SetTagVersion(_tagVersion + 3)
 	bo0.SetDataAttr("props.owner", _name+"-new")
 	bo0.SetDataAttr("props.email", _email+"-new")
 	bo0.SetDataAttr("age", _age+2)
@@ -176,7 +176,7 @@ func doTestTopicDaoCreateUpdateGet(t *testing.T, name string, dao TopicDao) {
 		if v1, v0 := bo1.GetId(), _id; v1 != v0 {
 			t.Fatalf("%s failed: expected %#v but received %#v", name, v0, v1)
 		}
-		if v1, v0 := bo1.GetAppId(), _app.GetId()+"-new"; v1 != v0 {
+		if v1, v0 := bo1.GetProductId(), _prod.GetId()+"-new"; v1 != v0 {
 			t.Fatalf("%s failed: expected %#v but received %#v", name, v0, v1)
 		}
 		if v1, v0 := bo1.GetIcon(), _icon+"-new"; v1 != v0 {
@@ -205,18 +205,18 @@ func doTestTopicDaoCreateUpdateGet(t *testing.T, name string, dao TopicDao) {
 
 func doTestTopicDaoCreateDelete(t *testing.T, name string, dao TopicDao) {
 	_tagVersion := uint64(1337)
-	_appId := "libro"
+	_prodId := "libro"
 	_name := "Libro"
 	_desc := "Libro description"
 	_isPublished := true
-	_app := product.NewProduct(_tagVersion, _appId, _name, _desc, _isPublished)
+	_prod := product.NewProduct(_tagVersion, _prodId, _name, _desc, _isPublished)
 
 	_title := "Quick start"
 	_icon := "default"
 	_summary := "topic one"
 	_pos := rand.Intn(10242048)
 	_numPages := _pos%10 + 1
-	bo0 := NewTopic(_tagVersion, _app, _title, _icon, _summary)
+	bo0 := NewTopic(_tagVersion, _prod, _title, _icon, _summary)
 	bo0.SetPosition(_pos).SetNumPages(_numPages)
 	_email := "libro@libro"
 	_age := float64(35)
@@ -240,9 +240,9 @@ func doTestTopicDaoCreateDelete(t *testing.T, name string, dao TopicDao) {
 
 func doTestTopicDaoGetAll(t *testing.T, name string, dao TopicDao) {
 	initSampleRowsTopic(t, name, dao)
-	for _, app := range appList {
-		boList, err := dao.GetAll(app, nil, nil)
-		expected := appTopicCount[app.GetId()]
+	for _, prod := range prodList {
+		boList, err := dao.GetAll(prod, nil, nil)
+		expected := prodTopicCount[prod.GetId()]
 		if err != nil || len(boList) != expected {
 			t.Fatalf("%s failed: expected %#v but received %#v (error %s)", name+"/GetAll", expected, len(boList), err)
 		}
@@ -251,15 +251,15 @@ func doTestTopicDaoGetAll(t *testing.T, name string, dao TopicDao) {
 
 func doTestTopicDaoGetN(t *testing.T, name string, dao TopicDao) {
 	initSampleRowsTopic(t, name, dao)
-	for _, app := range appList {
+	for _, prod := range prodList {
 		startOffset := rand.Intn(5)
 		numRowsLimit := rand.Intn(10) + 1
-		boList, err := dao.GetN(app, startOffset, numRowsLimit, nil, nil)
-		expected := appTopicCount[app.GetId()]
+		boList, err := dao.GetN(prod, startOffset, numRowsLimit, nil, nil)
+		expected := prodTopicCount[prod.GetId()]
 		expected = int(math.Min(math.Max(0, float64(expected-startOffset)), float64(numRowsLimit)))
 		if err != nil || len(boList) != expected {
-			// fmt.Printf("%s - %#v - %#v / %#v\n", app.GetId(), startOffset, numRowsLimit, appTopicCount)
-			t.Fatalf("%s failed: expected %#v but received %#v (error %s)", name+"/"+app.GetId(), expected, len(boList), err)
+			// fmt.Printf("%s - %#v - %#v / %#v\n", prod.GetId(), startOffset, numRowsLimit, prodTopicCount)
+			t.Fatalf("%s failed: expected %#v but received %#v (error %s)", name+"/"+prod.GetId(), expected, len(boList), err)
 		}
 	}
 }

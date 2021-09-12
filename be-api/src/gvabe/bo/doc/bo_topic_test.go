@@ -15,18 +15,18 @@ import (
 func TestNewTopic(t *testing.T) {
 	name := "TestNewTopic"
 	_tagVersion := uint64(1337)
-	_appId := "libro"
+	_prodId := "libro"
 	_name := "Libro"
 	_desc := "Libro description"
 	_isPublished := true
-	_app := product.NewProduct(_tagVersion, _appId, _name, _desc, _isPublished)
+	_prod := product.NewProduct(_tagVersion, _prodId, _name, _desc, _isPublished)
 
 	_title := "Quick start"
 	_icon := "default"
 	_summary := "topic one"
 	_pos := rand.Intn(10242048)
 	_numPages := _pos%10 + 1
-	topic := NewTopic(_tagVersion, _app, _title, _icon, _summary)
+	topic := NewTopic(_tagVersion, _prod, _title, _icon, _summary)
 	if topic == nil {
 		t.Fatalf("%s failed: nil", name)
 	}
@@ -39,8 +39,8 @@ func TestNewTopic(t *testing.T) {
 	if id := topic.GetId(); id != _id {
 		t.Fatalf("%s failed: expected id to be %#v but received %#v", name, _id, id)
 	}
-	if appId := topic.GetAppId(); appId != _app.GetId() {
-		t.Fatalf("%s failed: expected app-id to be %#v but received %#v", name, _app.GetId(), appId)
+	if prodId := topic.GetProductId(); prodId != _prod.GetId() {
+		t.Fatalf("%s failed: expected product-id to be %#v but received %#v", name, _prod.GetId(), prodId)
 	}
 	if title := topic.GetTitle(); title != _title {
 		t.Fatalf("%s failed: expected title to be %#v but received %#v", name, _title, title)
@@ -67,14 +67,14 @@ func TestNewTopicFromUbo(t *testing.T) {
 	}
 	_tagVersion := uint64(1337)
 	_id := utils.UniqueId()
-	_appId := "libro"
+	_prodId := "libro"
 	_title := "Quick start"
 	_icon := "default"
 	_summary := "topic one"
 	_pos := rand.Intn(10242048)
 	_numPages := _pos%10 + 1
 	ubo := henge.NewUniversalBo(_id, _tagVersion)
-	ubo.SetExtraAttr(TopicFieldAppId, _appId)
+	ubo.SetExtraAttr(TopicFieldProductId, _prodId)
 	ubo.SetDataAttr(TopicAttrTitle, _title)
 	ubo.SetDataAttr(TopicAttrIcon, _icon)
 	ubo.SetDataAttr(TopicAttrSummary, _summary)
@@ -91,8 +91,8 @@ func TestNewTopicFromUbo(t *testing.T) {
 	if id := topic.GetId(); id != _id {
 		t.Fatalf("%s failed: expected id to be %#v but received %#v", name, _id, id)
 	}
-	if appId := topic.GetAppId(); appId != _appId {
-		t.Fatalf("%s failed: expected app-id to be %#v but received %#v", name, _appId, appId)
+	if prodId := topic.GetProductId(); prodId != _prodId {
+		t.Fatalf("%s failed: expected product-id to be %#v but received %#v", name, _prodId, prodId)
 	}
 	if title := topic.GetTitle(); title != _title {
 		t.Fatalf("%s failed: expected title to be %#v but received %#v", name, _title, title)
@@ -114,18 +114,18 @@ func TestNewTopicFromUbo(t *testing.T) {
 func TestTopic_ToMap(t *testing.T) {
 	name := "TestTopic_ToMap"
 	_tagVersion := uint64(1337)
-	_appId := "libro"
+	_prodId := "libro"
 	_name := "Libro"
 	_desc := "Libro description"
 	_isPublished := true
-	_app := product.NewProduct(_tagVersion, _appId, _name, _desc, _isPublished)
+	_prod := product.NewProduct(_tagVersion, _prodId, _name, _desc, _isPublished)
 
 	_title := "Quick start"
 	_icon := "default"
 	_summary := "topic one"
 	_pos := rand.Intn(10242048)
 	_numPages := _pos%10 + 1
-	topic := NewTopic(_tagVersion, _app, _title, _icon, _summary)
+	topic := NewTopic(_tagVersion, _prod, _title, _icon, _summary)
 	if topic == nil {
 		t.Fatalf("%s failed: nil", name)
 	}
@@ -136,7 +136,7 @@ func TestTopic_ToMap(t *testing.T) {
 	expected := map[string]interface{}{
 		henge.FieldId: _id,
 		bo.SerKeyFields: map[string]interface{}{
-			TopicFieldAppId: _app.GetId(),
+			TopicFieldProductId: _prod.GetId(),
 		},
 		bo.SerKeyAttrs: map[string]interface{}{
 			TopicAttrTitle:    _title,
@@ -160,7 +160,7 @@ func TestTopic_ToMap(t *testing.T) {
 	expected = map[string]interface{}{
 		"FieldId": _id,
 		"SerKeyFields": map[string]interface{}{
-			TopicFieldAppId: _app.GetId(),
+			TopicFieldProductId: _prod.GetId(),
 		},
 		"SerKeyAttrs": map[string]interface{}{
 			TopicAttrTitle:    _title,
@@ -178,18 +178,18 @@ func TestTopic_ToMap(t *testing.T) {
 func TestTopic_json(t *testing.T) {
 	name := "TestTopic_json"
 	_tagVersion := uint64(1337)
-	_appId := "libro"
+	_prodId := "libro"
 	_name := "Libro"
 	_desc := "Libro description"
 	_isPublished := true
-	_app := product.NewProduct(_tagVersion, _appId, _name, _desc, _isPublished)
+	_prod := product.NewProduct(_tagVersion, _prodId, _name, _desc, _isPublished)
 
 	_title := "Quick start"
 	_icon := "default"
 	_summary := "topic one"
 	_pos := rand.Intn(10242048)
 	_numPages := _pos%10 + 1
-	topic1 := NewTopic(_tagVersion, _app, _title, _icon, _summary)
+	topic1 := NewTopic(_tagVersion, _prod, _title, _icon, _summary)
 	if topic1 == nil {
 		t.Fatalf("%s failed: nil", name)
 	}
@@ -207,8 +207,8 @@ func TestTopic_json(t *testing.T) {
 	if topic1.GetId() != topic2.GetId() {
 		t.Fatalf("%s failed: expected %#v but received %#v", name, topic1.GetId(), topic2.GetId())
 	}
-	if topic1.GetAppId() != topic2.GetAppId() {
-		t.Fatalf("%s failed: expected %#v but received %#v", name, topic1.GetAppId(), topic2.GetAppId())
+	if topic1.GetProductId() != topic2.GetProductId() {
+		t.Fatalf("%s failed: expected %#v but received %#v", name, topic1.GetProductId(), topic2.GetProductId())
 	}
 	if topic1.GetTitle() != topic2.GetTitle() {
 		t.Fatalf("%s failed: expected %#v but received %#v", name, topic1.GetTitle(), topic2.GetTitle())
