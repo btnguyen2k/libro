@@ -7,10 +7,10 @@ import (
 
 const (
 	// MappingFieldSrc is name of BO field to hold 'source' value.
-	MappingFieldSrc = "Src"
+	MappingFieldSrc = "src"
 
 	// MappingFieldDest is name of BO field to hold 'destination' value.
-	MappingFieldDest = "Dest"
+	MappingFieldDest = "dest"
 
 	// MappingFieldCreatedOn is name of BO field to hold 'created-on' value.
 	MappingFieldCreatedOn = "time"
@@ -18,8 +18,8 @@ const (
 
 // Mapping represents a mapping {source -> destination}
 type Mapping struct {
-	Src       string    `json:"Src"`  // source
-	Dest      string    `json:"Dest"` // destination
+	Src       string    `json:"src"`  // source
+	Dest      string    `json:"dest"` // destination
 	CreatedOn time.Time `json:"time"` // timestamp when this mapping is created
 }
 

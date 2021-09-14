@@ -1,12 +1,18 @@
 package gvabe
 
 import (
+	"fmt"
+	"regexp"
+	"strings"
 	"time"
 
+	"github.com/btnguyen2k/consu/reddo"
 	"github.com/btnguyen2k/henge"
+	"main/src/goapi"
 	"main/src/gvabe/bo/product"
 	"main/src/gvabe/bo/user"
 	"main/src/itineris"
+	"main/src/utils"
 )
 
 func authenticateApiCall(ctx *itineris.ApiContext) (*user.User, *itineris.ApiResult) {
@@ -20,7 +26,38 @@ func authenticateApiCall(ctx *itineris.ApiContext) (*user.User, *itineris.ApiRes
 	return user, nil
 }
 
-var funcAppToMapTransform = func(m map[string]interface{}) map[string]interface{} {
+// apiAdminStats handles API call "adminStats"
+func apiAdminStats(ctx *itineris.ApiContext, _ *itineris.ApiAuth, _ *itineris.ApiParams) *itineris.ApiResult {
+	_, authResult := authenticateApiCall(ctx)
+	if authResult != nil {
+		return authResult
+	}
+
+	prodList, err := productDao.GetAll(nil, nil)
+	if err != nil {
+		return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage(err.Error())
+	}
+	numProds := len(prodList)
+	numTopics, numPages := 0, 0
+	for _, prod := range prodList {
+		topicList, err := topicDao.GetAll(prod, nil, nil)
+		if err != nil {
+			return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage(err.Error())
+		}
+		numTopics += len(topicList)
+		for _, topic := range topicList {
+			numPages += topic.GetNumPages()
+		}
+	}
+	data := map[string]interface{}{
+		"num_products": numProds,
+		"num_topics":   numTopics,
+		"num_pages":    numPages,
+	}
+	return itineris.NewApiResult(itineris.StatusOk).SetData(data)
+}
+
+var funcProductToMapTransform = func(m map[string]interface{}) map[string]interface{} {
 	// transform input map
 	result := map[string]interface{}{
 		"id":           m[henge.FieldId],
@@ -38,9 +75,9 @@ var funcAppToMapTransform = func(m map[string]interface{}) map[string]interface{
 
 	// populate "domains" field
 	if id, ok := result["id"].(string); ok {
-		domainAppMappings, _ := domainAppMappingDao.Rget(id)
+		domainProductMappings, _ := domainProductMappingDao.Rget(id)
 		domainList := make([]string, 0)
-		for _, mapping := range domainAppMappings {
+		for _, mapping := range domainProductMappings {
 			domainList = append(domainList, mapping.Src)
 		}
 		result["domains"] = domainList
@@ -54,43 +91,62 @@ func apiAdminProductList(ctx *itineris.ApiContext, _ *itineris.ApiAuth, _ *itine
 	if authResult != nil {
 		return authResult
 	}
-	appList, err := appDao.GetAll(nil, nil)
+
+	prodList, err := productDao.GetAll(nil, nil)
 	if err != nil {
 		return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage(err.Error())
 	}
 	data := make([]map[string]interface{}, 0)
-	for _, a := range appList {
-		data = append(data, a.ToMap(funcAppToMapTransform))
+	for _, prod := range prodList {
+		data = append(data, prod.ToMap(funcProductToMapTransform))
 	}
 	return itineris.NewApiResult(itineris.StatusOk).SetData(data)
 }
 
-// apiAdminStats handles API call "adminStats"
-func apiAdminStats(ctx *itineris.ApiContext, _ *itineris.ApiAuth, _ *itineris.ApiParams) *itineris.ApiResult {
+// apiAdminAddProduct handles API call "adminAddProduct"
+func apiAdminAddProduct(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *itineris.ApiParams) *itineris.ApiResult {
 	_, authResult := authenticateApiCall(ctx)
 	if authResult != nil {
 		return authResult
 	}
-	appList, err := appDao.GetAll(nil, nil)
-	if err != nil {
-		return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage(err.Error())
+
+	// extract params
+	isPublished := _extractParam(params, "is_published", reddo.TypeBool, false, nil)
+	name := _extractParam(params, "name", reddo.TypeString, "", nil)
+	if name == "" {
+		return itineris.NewApiResult(itineris.StatusErrorClient).SetMessage("name is empty")
 	}
-	numApps := len(appList)
-	numTopics, numPages := 0, 0
-	for _, app := range appList {
-		topicList, err := topicDao.GetAll(app, nil, nil)
+	desc := _extractParam(params, "description", reddo.TypeString, "", nil)
+	domains := _extractParam(params, "domains", reddo.TypeString, "", nil)
+	domains = strings.ToLower(domains.(string))
+
+	domainList := regexp.MustCompile(`[,\s]+`).Split(domains.(string), -1)
+	for _, domain := range domainList {
+		mapping, err := domainProductMappingDao.Get(domain)
 		if err != nil {
 			return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage(err.Error())
 		}
-		numTopics += len(topicList)
-		for _, topic := range topicList {
-			numPages += topic.GetNumPages()
+		if mapping != nil {
+			return itineris.NewApiResult(itineris.StatusNoPermission).SetMessage(fmt.Sprintf("domain %s has been used", domains))
 		}
 	}
-	data := map[string]interface{}{
-		"num_apps":   numApps,
-		"num_topics": numTopics,
-		"num_pages":  numPages,
+
+	// create product
+	product := product.NewProduct(goapi.AppVersionNumber, utils.UniqueIdSmall(), name.(string), desc.(string), isPublished.(bool))
+	result, err := productDao.Create(product)
+	if err != nil || !result {
+		return itineris.NewApiResult(itineris.StatusErrorServer).
+			SetMessage(fmt.Sprintf("cannot create product %s (error: %s)", name, err))
 	}
-	return itineris.NewApiResult(itineris.StatusOk).SetData(data)
+
+	// map domains
+	for _, domain := range domainList {
+		result, err := domainProductMappingDao.Set(domain, product.GetId())
+		if err != nil || !result {
+			return itineris.NewApiResult(201).
+				SetMessage(fmt.Sprintf("Product %s created, but cannot map domain %s to product (error: %s)", name, domain, err))
+		}
+	}
+
+	return itineris.NewApiResult(itineris.StatusOk)
 }

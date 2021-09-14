@@ -34,7 +34,7 @@ const (
 	loginSessionTtl        = 3600 * 8
 	loginSessionNearExpiry = 3600 * 3
 
-	tblMappingDomainApp = "m2o_domain_app"
+	tblMappingDomainProduct = "m2o_domain_prod"
 )
 
 func encryptPassword(salt, rawPassword string) string {

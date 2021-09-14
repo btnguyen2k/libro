@@ -15,9 +15,9 @@ func M2oDaoMongoInitCollection(mc *prom.MongoConnect, collectionName string) err
 	}
 	indexes := []interface{}{
 		map[string]interface{}{
-			"key":    bson.D{{MappingFieldDest, 1}, {MappingFieldSrc, 1}},
-			"name":   "uidx_src_dest",
-			"unique": true,
+			"key":    bson.D{{MappingFieldDest, 1}},
+			"name":   "idx_dest",
+			"unique": false,
 		},
 	}
 	_, err = mc.CreateCollectionIndexes(collectionName, indexes)
@@ -28,12 +28,28 @@ func M2oDaoMongoInitCollection(mc *prom.MongoConnect, collectionName string) err
 func NewM2oDaoMongo(mc *prom.MongoConnect, collectionName string, txMode bool) *M2oDaoMongo {
 	dao := &M2oDaoMongo{}
 	gdao := mongo.NewGenericDaoMongo(mc, godal.NewAbstractGenericDao(dao)).SetTxModeOnWrite(txMode)
+	gdao.SetRowMapper(&myM2oDaoMongoRowMapper{&mongo.GenericRowMapperMongo{}})
 	dao.BaseM2oDao = &BaseM2oDao{
 		IGenericDao: gdao,
 		storageId:   collectionName,
 	}
 	dao.mc = mc
 	return dao
+}
+
+type myM2oDaoMongoRowMapper struct {
+	*mongo.GenericRowMapperMongo
+}
+
+// ToRow implements godal.IRowMapper.ToRow.
+func (m *myM2oDaoMongoRowMapper) ToRow(_ string, bo godal.IGenericBo) (interface{}, error) {
+	if bo == nil {
+		return nil, nil
+	}
+	result := make(map[string]interface{})
+	err := bo.GboTransferViaJson(&result)
+	result["_id"] = result[MappingFieldSrc]
+	return result, err
 }
 
 // M2oDaoMongo is MongoDB-implementation of M2oDao

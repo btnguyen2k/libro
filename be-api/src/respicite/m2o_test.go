@@ -5,8 +5,8 @@ import (
 )
 
 func doTestM2mDao_GetNotExist(t *testing.T, testName string, dao M2oDao) {
-	if result, err := dao.Get("not-exist"); result != nil || err != ErrNotFound {
-		t.Fatalf("%s failed: expected (nil, ErrNotFound) but received (%#v, %T)", testName, result, err)
+	if result, err := dao.Get("not-exist"); result != nil || err != nil {
+		t.Fatalf("%s failed: expected (nil, nil) but received (%#v, %T)", testName, result, err)
 	}
 }
 
@@ -36,6 +36,10 @@ func doTestM2mDao_SetDuplicated(t *testing.T, testName string, dao M2oDao) {
 	if result, err := dao.Set(src, dest); err != ErrDuplicated || !result {
 		t.Fatalf("%s failed: %#v / %s", testName+"/Set{2}", result, err)
 	}
+
+	if result, err := dao.Set(src, dest+"-new"); err != ErrDuplicated || !result {
+		t.Fatalf("%s failed: %#v / %s", testName+"/Set{2}", result, err)
+	}
 }
 
 func doTestM2mDao_SetRemove(t *testing.T, testName string, dao M2oDao) {
@@ -56,8 +60,8 @@ func doTestM2mDao_SetRemove(t *testing.T, testName string, dao M2oDao) {
 		t.Fatalf("%s failed: %T / %s", testName+"/Remove", result, err)
 	}
 
-	if result, err := dao.Get(src); result != nil || err != ErrNotFound {
-		t.Fatalf("%s failed: expected (nil, ErrNotFound) but received (%#v, %T)", testName+"/Get", result, err)
+	if result, err := dao.Get(src); result != nil || err != nil {
+		t.Fatalf("%s failed: expected (nil, nil) but received (%#v, %T)", testName+"/Get", result, err)
 	}
 }
 

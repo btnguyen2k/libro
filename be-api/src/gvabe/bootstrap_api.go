@@ -21,6 +21,7 @@ func initApiHandlers(router *itineris.ApiRouter) {
 	router.SetHandler("systemInfo", apiSystemInfo)
 
 	router.SetHandler("adminProductList", apiAdminProductList)
+	router.SetHandler("adminAddProduct", apiAdminAddProduct)
 	router.SetHandler("adminStats", apiAdminStats)
 
 	// router.SetHandler("myFeed", apiMyFeed)
@@ -75,117 +76,6 @@ func _extractParam(params *itineris.ApiParams, paramName string, typ reflect.Typ
 	}
 	return v
 }
-
-// var funcPostToMapTransform = func(m map[string]interface{}) map[string]interface{} {
-// 	u, _ := userDaov2.Get(m[blog.PostFieldOwnerId].(string))
-// 	// transform input map
-// 	result := map[string]interface{}{
-// 		"id":             m[henge.FieldId],
-// 		"t_created":      m[henge.FieldTimeCreated],
-// 		"is_public":      m[blog.PostFieldIsPublic],
-// 		"owner_id":       m[blog.PostFieldOwnerId],
-// 		"title":          m[blog.PostAttrTitle],
-// 		"content":        m[blog.PostAttrContent],
-// 		"num_comments":   m[blog.PostAttrNumComments],
-// 		"num_votes_up":   m[blog.PostAttrNumVotesUp],
-// 		"num_votes_down": m[blog.PostAttrNumVotesDown],
-// 	}
-// 	if t, ok := result["t_created"].(time.Time); ok {
-// 		result["t_created"] = t.In(time.UTC)
-// 	}
-// 	if u != nil {
-// 		result["owner"] = u.ToMap(func(m map[string]interface{}) map[string]interface{} {
-// 			return map[string]interface{}{
-// 				"id":           m[henge.FieldId],
-// 				"mid":          m[user.UserFieldMaskId],
-// 				"is_admin":     m[user.UserAttrIsAdmin],
-// 				"display_name": m[user.UserAttrDisplayName],
-// 			}
-// 		})
-// 	}
-// 	return result
-// }
-
-// /*
-// apiMyFeed handles API call "myFeed"
-//
-// @available since template-v0.2.0
-// */
-// func apiMyFeed(ctx *itineris.ApiContext, _ *itineris.ApiAuth, _ *itineris.ApiParams) *itineris.ApiResult {
-// 	_, user, err := _currentUserFromContext(ctx)
-// 	if err != nil {
-// 		return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage(err.Error())
-// 	}
-// 	if user == nil {
-// 		return itineris.NewApiResult(itineris.StatusNoPermission).SetMessage("user not found")
-// 	}
-// 	blogPostList, err := blogPostDaov2.GetUserFeedAll(user)
-// 	if err != nil {
-// 		return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage(err.Error())
-// 	}
-// 	data := make([]map[string]interface{}, 0)
-// 	for _, p := range blogPostList {
-// 		data = append(data, p.ToMap(funcPostToMapTransform))
-// 	}
-// 	return itineris.NewApiResult(itineris.StatusOk).SetData(data)
-// }
-
-// /*
-// apiMyBlog handles API call "myBlog"
-//
-// @available since template-v0.2.0
-// */
-// func apiMyBlog(ctx *itineris.ApiContext, _ *itineris.ApiAuth, _ *itineris.ApiParams) *itineris.ApiResult {
-// 	_, user, err := _currentUserFromContext(ctx)
-// 	if err != nil {
-// 		return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage(err.Error())
-// 	}
-// 	if user == nil {
-// 		return itineris.NewApiResult(itineris.StatusNoPermission).SetMessage("user not found")
-// 	}
-// 	blogPostList, err := blogPostDaov2.GetUserPostsAll(user)
-// 	if err != nil {
-// 		return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage(err.Error())
-// 	}
-// 	data := make([]map[string]interface{}, 0)
-// 	for _, p := range blogPostList {
-// 		data = append(data, p.ToMap(funcPostToMapTransform))
-// 	}
-// 	return itineris.NewApiResult(itineris.StatusOk).SetData(data)
-// }
-
-// /*
-// apiCreateBlogPost handles API call "createBlogPost"
-//
-// @available since template-v0.2.0
-// */
-// func apiCreateBlogPost(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *itineris.ApiParams) *itineris.ApiResult {
-// 	_, user, err := _currentUserFromContext(ctx)
-// 	if err != nil {
-// 		return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage(err.Error())
-// 	}
-// 	if user == nil {
-// 		return itineris.NewApiResult(itineris.StatusNoPermission).SetMessage("user not found")
-// 	}
-// 	isPublic := _extractParam(params, "is_public", reddo.TypeBool, false, nil)
-// 	title := _extractParam(params, "title", reddo.TypeString, "", nil)
-// 	if title == "" {
-// 		return itineris.NewApiResult(itineris.StatusErrorClient).SetMessage("title is empty")
-// 	}
-// 	content := _extractParam(params, "content", reddo.TypeString, "", nil)
-// 	if content == "" {
-// 		return itineris.NewApiResult(itineris.StatusErrorClient).SetMessage("content is empty")
-// 	}
-// 	blogPost := blog.NewBlogPost(goapi.AppVersionNumber, user, isPublic.(bool), title.(string), content.(string))
-// 	ok, err := blogPostDaov2.Create(blogPost)
-// 	if err != nil {
-// 		return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage(err.Error())
-// 	}
-// 	if !ok {
-// 		return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage("cannot create blog post")
-// 	}
-// 	return itineris.NewApiResult(itineris.StatusOk)
-// }
 
 // /*
 // apiGetBlogPost handles API call "getBlogPost"

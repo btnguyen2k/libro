@@ -1,112 +1,10 @@
 <template>
   <div>
-    <!--
-    <CRow>
-      <CCol sm="6" lg="4">
-        <CWidgetProgress
-            :header="String(stats.num_apps)"
-            text="Applications"
-            footer="Lorem ipsum dolor sit amet enim."
-            color="gradient-primary"
-            inverse :value="25"
-        />
-      </CCol>
-      <CCol sm="6" lg="4">
-        <CWidgetProgress
-            :header="String(stats.num_topics)"
-            text="Topics"
-            footer="Lorem ipsum dolor sit amet enim."
-            color="gradient-info"
-            inverse :value="25"
-        />
-      </CCol>
-      <CCol sm="6" lg="4">
-        <CWidgetProgress
-            :header="String(stats.num_pages)"
-            text="Pages"
-            footer="Lorem ipsum dolor sit amet enim."
-            color="gradient-success"
-            inverse :value="25"
-        />
-      </CCol>
-    </CRow>
-    -->
-
-    <!--
-    <CRow>
-      <CCol sm="6" lg="4">
-        <CWidgetProgressIcon
-            :header="String(stats.num_apps)"
-            text="Applications"
-            color="gradient-primary"
-            inverse
-        >
-          <CIcon name="cil-applications" height="36"/>
-        </CWidgetProgressIcon>
-      </CCol>
-      <CCol sm="6" lg="4">
-        <CWidgetProgressIcon
-            :header="String(stats.num_topics)"
-            text="Topics"
-            color="gradient-info"
-            inverse
-        >
-          <CIcon name="cil-storage" height="36"/>
-        </CWidgetProgressIcon>
-      </CCol>
-      <CCol sm="6" lg="4">
-        <CWidgetProgressIcon
-            :header="String(stats.num_pages)"
-            text="Pages"
-            color="gradient-success"
-            inverse
-        >
-          <CIcon name="cil-notes" height="36"/>
-        </CWidgetProgressIcon>
-      </CCol>
-    </CRow>
-    -->
-
-    <!--
     <CRow>
       <CCol col="12" sm="6" lg="4">
         <CWidgetIcon
-            :header="String(stats.num_apps)"
-            text="Applications"
-            color="gradient-primary"
-            :icon-padding="false"
-        >
-          <CIcon name="cil-applications" width="24"/>
-        </CWidgetIcon>
-      </CCol>
-      <CCol col="12" sm="6" lg="4">
-        <CWidgetIcon
-            :header="String(stats.num_topics)"
-            text="Topics"
-            color="gradient-info"
-            :icon-padding="false"
-        >
-          <CIcon name="cil-storage" width="24"/>
-        </CWidgetIcon>
-      </CCol>
-      <CCol col="12" sm="6" lg="4">
-        <CWidgetIcon
-            :header="String(stats.num_pages)"
-            text="Pages"
-            color="gradient-success"
-            :icon-padding="false"
-        >
-          <CIcon name="cil-notes" width="24"/>
-        </CWidgetIcon>
-      </CCol>
-    </CRow>
-    -->
-
-    <CRow>
-      <CCol col="12" sm="6" lg="4">
-        <CWidgetIcon
-            :header="String(stats.num_apps)"
-            :text="$t('message.applications')"
+            :header="String(stats.num_products)"
+            :text="$t('message.products')"
             color="gradient-primary"
             :icon-padding="false"
         >
@@ -153,11 +51,11 @@
       <CCol sm="12">
         <CCard accent-color="info">
           <CCardHeader>
-            <strong>{{ $t('message.applications') }}</strong>
+            <strong>{{ $t('message.products') }}</strong>
             <div class="card-header-actions">
-              <CButton class="btn-sm btn-primary" @click="clickAddApp">
+              <CButton class="btn-sm btn-primary" @click="clickAddProduct">
                 <CIcon name="cil-plus"/>
-                {{ $t('message.add_app') }}
+                {{ $t('message.add_product') }}
               </CButton>
             </div>
           </CCardHeader>
@@ -233,30 +131,27 @@ export default {
           console.error("Error getting stats: " + err)
         })
 
-    // let appList = []
-    clientUtils.apiDoGet(clientUtils.apiAdminAppList,
+    clientUtils.apiDoGet(clientUtils.apiAdminProductList,
         (apiRes) => {
           if (apiRes.status == 200) {
-            // appList = apiRes.data
-            vue.appList = apiRes.data
-            console.log(vue.appList)
+            vue.prodList = apiRes.data
           } else {
-            console.error("Getting app list was unsuccessful: " + apiRes)
+            console.error("Getting product list was unsuccessful: " + apiRes)
           }
         },
         (err) => {
-          console.error("Error getting app list: " + err)
+          console.error("Error getting product list: " + err)
         })
   },
   data() {
     return {
       stats: {},
-      appList: [],
+      prodList: [],
     }
   },
   methods: {
-    clickAddApp() {
-      this.$router.push({name: "AddApp"})
+    clickAddProduct() {
+      this.$router.push({name: "AddProduct"})
     },
     // voteValue(post) {
     //   return this.blogPostVotes[post.id]

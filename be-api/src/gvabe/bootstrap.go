@@ -24,11 +24,11 @@ import (
 )
 
 var (
-	userDao  user.UserDao
-	appDao   product.ProductDao
-	topicDao doc.TopicDao
-	pageDao             doc.PageDao
-	domainAppMappingDao respicite.M2oDao
+	userDao    user.UserDao
+	productDao product.ProductDao
+	topicDao   doc.TopicDao
+	pageDao                 doc.PageDao
+	domainProductMappingDao respicite.M2oDao
 )
 
 // MyBootstrapper implements goapi.IBootstrapper

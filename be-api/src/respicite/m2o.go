@@ -10,7 +10,7 @@ import (
 // M2oDao defines many-to-one mapping API
 type M2oDao interface {
 	// Get fetches a mapping {Src->Dest} from storage.
-	// If the mapping does not exist, this function returns (nil, ErrNotFound).
+	// If the mapping does not exist, this function returns (nil, nil).
 	Get(src string) (*Mapping, error)
 
 	// Rget fetches all mappings {Src->Dest} from storage.
@@ -41,8 +41,6 @@ func (dao *BaseM2oDao) ToMapping(gbo godal.IGenericBo) *Mapping {
 	}
 	if dest, err := gbo.GboGetAttr(MappingFieldDest, reddo.TypeString); err == nil && dest != nil {
 		result.Dest = dest.(string)
-		// t := Dest.(string)
-		// result.Dest = &t
 	}
 	if t, err := gbo.GboGetTimeWithLayout(MappingFieldCreatedOn, time.RFC3339); err == nil {
 		result.CreatedOn = t
@@ -67,11 +65,12 @@ func (dao *BaseM2oDao) Get(src string) (*Mapping, error) {
 	if err != nil {
 		return nil, err
 	}
-	mapping, err := dao.ToMapping(gbo), nil
-	if mapping == nil {
-		err = ErrNotFound
-	}
-	return mapping, err
+	return dao.ToMapping(gbo), nil
+	// mapping, err := dao.ToMapping(gbo), nil
+	// if mapping == nil {
+	// 	err = ErrNotFound
+	// }
+	// return mapping, err
 }
 
 // Rget implements M2oDao.Rget

@@ -14,8 +14,8 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"main/src/gvabe/bo/product"
 	"main/src/gvabe/bo/doc"
+	"main/src/gvabe/bo/product"
 	"main/src/gvabe/bo/user"
 	"main/src/respicite"
 
@@ -109,16 +109,16 @@ func _createUserDaoMongo(mc *prom.MongoConnect) user.UserDao {
 	return user.NewUserDaoMongo(mc, user.TableUser, strings.Index(url, "replicaSet=") >= 0)
 }
 
-func _createAppDaoSql(sqlc *prom.SqlConnect) product.ProductDao {
+func _createProductDaoSql(sqlc *prom.SqlConnect) product.ProductDao {
 	if sqlc.GetDbFlavor() == prom.FlavorCosmosDb {
 		return product.NewProductDaoCosmosdb(sqlc, product.TableProduct, true)
 	}
 	return product.NewProductDaoSql(sqlc, product.TableProduct, true)
 }
-func _createAppDaoDynamodb(adc *prom.AwsDynamodbConnect) product.ProductDao {
+func _createProductDaoDynamodb(adc *prom.AwsDynamodbConnect) product.ProductDao {
 	return product.NewProductDaoDynamodb(adc, product.TableProduct)
 }
-func _createAppDaoMongo(mc *prom.MongoConnect) product.ProductDao {
+func _createProductDaoMongo(mc *prom.MongoConnect) product.ProductDao {
 	url := mc.GetUrl()
 	return product.NewProductDaoMongo(mc, product.TableProduct, strings.Index(url, "replicaSet=") >= 0)
 }
@@ -330,8 +330,8 @@ func _createPageDaoMongo(mc *prom.MongoConnect) doc.PageDao {
 
 // TODO change this function to implement application's business logic
 func _createMongoCollections(mc *prom.MongoConnect) {
-	if err := respicite.M2oDaoMongoInitCollection(mc, tblMappingDomainApp); err != nil {
-		log.Printf("[WARN] creating collection %s (%s): %s\n", tblMappingDomainApp, "MongoDB", err)
+	if err := respicite.M2oDaoMongoInitCollection(mc, tblMappingDomainProduct); err != nil {
+		log.Printf("[WARN] creating collection %s (%s): %s\n", tblMappingDomainProduct, "MongoDB", err)
 	}
 
 	if err := henge.InitMongoCollection(mc, user.TableUser); err != nil {
@@ -409,10 +409,10 @@ func initDaos() {
 
 		// create DAOs
 		userDao = _createUserDaoMongo(mc)
-		appDao = _createAppDaoMongo(mc)
+		productDao = _createProductDaoMongo(mc)
 		topicDao = _createTopicDaoMongo(mc)
 		pageDao = _createPageDaoMongo(mc)
-		domainAppMappingDao = _createM2oMappingDaoMongo(mc, tblMappingDomainApp)
+		domainProductMappingDao = _createM2oMappingDaoMongo(mc, tblMappingDomainProduct)
 	}
 
 	_initUsers()
@@ -457,33 +457,33 @@ func _initUsers() {
 }
 
 func _initSamples() {
-	demoAppId := "demo"
-	demoApp, err := appDao.Get(demoAppId)
+	demoProdId := "demo"
+	demoProd, err := productDao.Get(demoProdId)
 	if err != nil {
-		panic(fmt.Sprintf("error while getting app [%s]: %s", demoAppId, err))
+		panic(fmt.Sprintf("error while getting product [%s]: %s", demoProdId, err))
 	}
-	if demoApp != nil {
+	if demoProd != nil {
 		return
 	}
 
-	log.Printf("[INFO] Sample app [%s] not found, creating one...", demoAppId)
-	demoApp = product.NewProduct(goapi.AppVersionNumber, demoAppId, "Demo", "Demo application", true)
-	result, err := appDao.Create(demoApp)
+	log.Printf("[INFO] Sample product [%s] not found, creating one...", demoProdId)
+	demoProd = product.NewProduct(goapi.AppVersionNumber, demoProdId, "Demo", "Demo product", true)
+	result, err := productDao.Create(demoProd)
 	if err != nil && err != godal.ErrGdaoDuplicatedEntry {
-		panic(fmt.Sprintf("error while creating sample app [%s]: %s", demoAppId, err))
+		panic(fmt.Sprintf("error while creating sample product [%s]: %s", demoProdId, err))
 	}
 	if !result {
-		log.Printf("[ERROR] Cannot create sample app [%s]", demoAppId)
+		log.Printf("[ERROR] Cannot create sample product [%s]", demoProdId)
 	}
 
 	domain := "localhost"
-	log.Printf("[INFO] Creating mapping {domain:%s -> app:%s}...", domain, demoAppId)
-	result, err = domainAppMappingDao.Set("localhost", demoAppId)
+	log.Printf("[INFO] Creating mapping {domain:%s -> product:%s}...", domain, demoProdId)
+	result, err = domainProductMappingDao.Set("localhost", demoProdId)
 	if err != nil && err != respicite.ErrDuplicated {
-		panic(fmt.Sprintf("error while creating mapping {domain:%s -> app:%s}: %s", domain, demoAppId, err))
+		panic(fmt.Sprintf("error while creating mapping {domain:%s -> product:%s}: %s", domain, demoProdId, err))
 	}
 	if !result {
-		log.Printf("[ERROR] Cannot create sample app [%s]", demoAppId)
+		log.Printf("[ERROR] Cannot create mapping {domain:%s -> product:%s}...", domain, demoProdId)
 	}
 
 	re := regexp.MustCompile(`\W+`)
@@ -491,36 +491,36 @@ func _initSamples() {
 	longLorerm := "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi nec imperdiet turpis. Curabitur aliquet pulvinar ultrices. Etiam at posuere leo. Proin ultrices ex et dapibus feugiat link example aenean purus leo, faucibus at elit vel, aliquet scelerisque dui. Etiam quis elit euismod, imperdiet augue sit amet, imperdiet odio. Aenean sem erat, hendrerit eu gravida id, dignissim ut ante. Nam consequat porttitor libero euismod congue."
 
 	/*----------------------------------------------------------------------*/
-	topic := doc.NewTopic(goapi.AppVersionNumber, demoApp, "Quick Start", "paper-plane", "Demo example. "+shortLorem)
+	topic := doc.NewTopic(goapi.AppVersionNumber, demoProd, "Quick Start", "paper-plane", "Demo example. "+shortLorem)
 	topic.SetPosition(1).SetId(re.ReplaceAllString(strings.ToLower(topic.GetTitle()), ""))
-	log.Printf("[INFO] Creating topic (%s -> %s)...", demoAppId, topic.GetTitle())
+	log.Printf("[INFO] Creating topic (%s -> %s)...", demoProdId, topic.GetTitle())
 	result, err = topicDao.Create(topic)
 	if err != nil && err != godal.ErrGdaoDuplicatedEntry {
-		panic(fmt.Sprintf("error while creating topic (%s -> %s): %s", demoAppId, topic.GetTitle(), err))
+		panic(fmt.Sprintf("error while creating topic (%s -> %s): %s", demoProdId, topic.GetTitle(), err))
 	}
 	if !result {
 		log.Printf("[ERROR] Cannot create topic [%s]", topic.GetTitle())
 	}
-	topicList, err := topicDao.GetAll(demoApp, nil, nil)
+	topicList, err := topicDao.GetAll(demoProd, nil, nil)
 	if err != nil {
-		panic(fmt.Sprintf("error while getting topic list for app %s: %s", demoAppId, err))
+		panic(fmt.Sprintf("error while getting topic list for product %s: %s", demoProdId, err))
 	} else {
-		demoApp.SetNumTopics(len(topicList))
-		result, err = appDao.Update(demoApp)
+		demoProd.SetNumTopics(len(topicList))
+		result, err = productDao.Update(demoProd)
 		if err != nil {
-			panic(fmt.Sprintf("error while updating app %s: %s", demoAppId, err))
+			panic(fmt.Sprintf("error while updating product %s: %s", demoProdId, err))
 		}
 		if !result {
-			log.Printf("[ERROR] Cannot update app [%s]", demoAppId)
+			log.Printf("[ERROR] Cannot update product [%s]", demoProdId)
 		}
 	}
 
 	page := doc.NewPage(goapi.AppVersionNumber, topic, "Download", "download", "Download: "+shortLorem, longLorerm)
 	page.SetPosition(1).SetId(topic.GetId() + "-" + re.ReplaceAllString(strings.ToLower(page.GetTitle()), ""))
-	log.Printf("[INFO] Creating page (%s:%s -> %s)...", demoAppId, topic.GetTitle(), page.GetTitle())
+	log.Printf("[INFO] Creating page (%s:%s -> %s)...", demoProdId, topic.GetTitle(), page.GetTitle())
 	result, err = pageDao.Create(page)
 	if err != nil && err != godal.ErrGdaoDuplicatedEntry {
-		panic(fmt.Sprintf("error while creating page (%s:%s -> %s): %s", demoAppId, topic.GetTitle(), page.GetTitle(), err))
+		panic(fmt.Sprintf("error while creating page (%s:%s -> %s): %s", demoProdId, topic.GetTitle(), page.GetTitle(), err))
 	}
 	if !result {
 		log.Printf("[ERROR] Cannot create page [%s]", page.GetTitle())
@@ -528,10 +528,10 @@ func _initSamples() {
 
 	page = doc.NewPage(goapi.AppVersionNumber, topic, "Installation", "installation", "Installation: "+shortLorem, longLorerm)
 	page.SetPosition(2).SetId(topic.GetId() + "-" + re.ReplaceAllString(strings.ToLower(page.GetTitle()), ""))
-	log.Printf("[INFO] Creating page (%s:%s -> %s)...", demoAppId, topic.GetTitle(), page.GetTitle())
+	log.Printf("[INFO] Creating page (%s:%s -> %s)...", demoProdId, topic.GetTitle(), page.GetTitle())
 	result, err = pageDao.Create(page)
 	if err != nil && err != godal.ErrGdaoDuplicatedEntry {
-		panic(fmt.Sprintf("error while creating page (%s:%s -> %s): %s", demoAppId, topic.GetTitle(), page.GetTitle(), err))
+		panic(fmt.Sprintf("error while creating page (%s:%s -> %s): %s", demoProdId, topic.GetTitle(), page.GetTitle(), err))
 	}
 	if !result {
 		log.Printf("[ERROR] Cannot create page [%s]", page.GetTitle())
@@ -551,47 +551,47 @@ func _initSamples() {
 		}
 	}
 	/*----------------------------------------------------------------------*/
-	topic = doc.NewTopic(goapi.AppVersionNumber, demoApp, "Components", "cogs", shortLorem)
+	topic = doc.NewTopic(goapi.AppVersionNumber, demoProd, "Components", "cogs", shortLorem)
 	topic.SetPosition(2).SetId(re.ReplaceAllString(strings.ToLower(topic.GetTitle()), ""))
-	log.Printf("[INFO] Creating topic (%s -> %s)...", demoAppId, topic.GetTitle())
+	log.Printf("[INFO] Creating topic (%s -> %s)...", demoProdId, topic.GetTitle())
 	result, err = topicDao.Create(topic)
 	if err != nil && err != godal.ErrGdaoDuplicatedEntry {
-		panic(fmt.Sprintf("error while creating topic (%s -> %s): %s", demoAppId, topic.GetTitle(), err))
+		panic(fmt.Sprintf("error while creating topic (%s -> %s): %s", demoProdId, topic.GetTitle(), err))
 	}
 	if !result {
 		log.Printf("[ERROR] Cannot create topic [%s]", topic.GetTitle())
 	}
-	topicList, err = topicDao.GetAll(demoApp, nil, nil)
+	topicList, err = topicDao.GetAll(demoProd, nil, nil)
 	if err != nil {
-		panic(fmt.Sprintf("error while getting topic list for app %s: %s", demoAppId, err))
+		panic(fmt.Sprintf("error while getting topic list for product %s: %s", demoProdId, err))
 	} else {
-		demoApp.SetNumTopics(len(topicList))
-		result, err = appDao.Update(demoApp)
+		demoProd.SetNumTopics(len(topicList))
+		result, err = productDao.Update(demoProd)
 		if err != nil {
-			panic(fmt.Sprintf("error while updating app %s: %s", demoAppId, err))
+			panic(fmt.Sprintf("error while updating product %s: %s", demoProdId, err))
 		}
 		if !result {
-			log.Printf("[ERROR] Cannot update app [%s]", demoAppId)
+			log.Printf("[ERROR] Cannot update product [%s]", demoProdId)
 		}
 	}
 
 	page = doc.NewPage(goapi.AppVersionNumber, topic, "Dashboards", "dashboards", "Dashboards: "+shortLorem, longLorerm)
 	page.SetPosition(1).SetId(topic.GetId() + "-" + re.ReplaceAllString(strings.ToLower(page.GetTitle()), ""))
-	log.Printf("[INFO] Creating page (%s:%s -> %s)...", demoAppId, topic.GetTitle(), page.GetTitle())
+	log.Printf("[INFO] Creating page (%s:%s -> %s)...", demoProdId, topic.GetTitle(), page.GetTitle())
 	result, err = pageDao.Create(page)
 	if err != nil && err != godal.ErrGdaoDuplicatedEntry {
-		panic(fmt.Sprintf("error while creating page (%s:%s -> %s): %s", demoAppId, topic.GetTitle(), page.GetTitle(), err))
+		panic(fmt.Sprintf("error while creating page (%s:%s -> %s): %s", demoProdId, topic.GetTitle(), page.GetTitle(), err))
 	}
 	if !result {
 		log.Printf("[ERROR] Cannot create page [%s]", page.GetTitle())
 	}
 
-	page = doc.NewPage(goapi.AppVersionNumber, topic, "Product", "app", "Product: "+shortLorem, longLorerm)
+	page = doc.NewPage(goapi.AppVersionNumber, topic, "Product", "product", "Product: "+shortLorem, longLorerm)
 	page.SetPosition(2).SetId(topic.GetId() + "-" + re.ReplaceAllString(strings.ToLower(page.GetTitle()), ""))
-	log.Printf("[INFO] Creating page (%s:%s -> %s)...", demoAppId, topic.GetTitle(), page.GetTitle())
+	log.Printf("[INFO] Creating page (%s:%s -> %s)...", demoProdId, topic.GetTitle(), page.GetTitle())
 	result, err = pageDao.Create(page)
 	if err != nil && err != godal.ErrGdaoDuplicatedEntry {
-		panic(fmt.Sprintf("error while creating page (%s:%s -> %s): %s", demoAppId, topic.GetTitle(), page.GetTitle(), err))
+		panic(fmt.Sprintf("error while creating page (%s:%s -> %s): %s", demoProdId, topic.GetTitle(), page.GetTitle(), err))
 	}
 	if !result {
 		log.Printf("[ERROR] Cannot create page [%s]", page.GetTitle())
@@ -599,10 +599,10 @@ func _initSamples() {
 
 	page = doc.NewPage(goapi.AppVersionNumber, topic, "UI", "ui", "UI: "+shortLorem, longLorerm)
 	page.SetPosition(3).SetId(topic.GetId() + "-" + re.ReplaceAllString(strings.ToLower(page.GetTitle()), ""))
-	log.Printf("[INFO] Creating page (%s:%s -> %s)...", demoAppId, topic.GetTitle(), page.GetTitle())
+	log.Printf("[INFO] Creating page (%s:%s -> %s)...", demoProdId, topic.GetTitle(), page.GetTitle())
 	result, err = pageDao.Create(page)
 	if err != nil && err != godal.ErrGdaoDuplicatedEntry {
-		panic(fmt.Sprintf("error while creating page (%s:%s -> %s): %s", demoAppId, topic.GetTitle(), page.GetTitle(), err))
+		panic(fmt.Sprintf("error while creating page (%s:%s -> %s): %s", demoProdId, topic.GetTitle(), page.GetTitle(), err))
 	}
 	if !result {
 		log.Printf("[ERROR] Cannot create page [%s]", page.GetTitle())
@@ -622,36 +622,36 @@ func _initSamples() {
 		}
 	}
 	/*----------------------------------------------------------------------*/
-	topic = doc.NewTopic(goapi.AppVersionNumber, demoApp, "FAQs", "lightbulb", "Layout for FAQ page. "+shortLorem)
+	topic = doc.NewTopic(goapi.AppVersionNumber, demoProd, "FAQs", "lightbulb", "Layout for FAQ page. "+shortLorem)
 	topic.SetPosition(3).SetId(re.ReplaceAllString(strings.ToLower(topic.GetTitle()), ""))
-	log.Printf("[INFO] Creating topic (%s -> %s)...", demoAppId, topic.GetTitle())
+	log.Printf("[INFO] Creating topic (%s -> %s)...", demoProdId, topic.GetTitle())
 	result, err = topicDao.Create(topic)
 	if err != nil && err != godal.ErrGdaoDuplicatedEntry {
-		panic(fmt.Sprintf("error while creating topic (%s -> %s): %s", demoAppId, topic.GetTitle(), err))
+		panic(fmt.Sprintf("error while creating topic (%s -> %s): %s", demoProdId, topic.GetTitle(), err))
 	}
 	if !result {
 		log.Printf("[ERROR] Cannot create topic [%s]", topic.GetTitle())
 	}
-	topicList, err = topicDao.GetAll(demoApp, nil, nil)
+	topicList, err = topicDao.GetAll(demoProd, nil, nil)
 	if err != nil {
-		panic(fmt.Sprintf("error while getting topic list for app %s: %s", demoAppId, err))
+		panic(fmt.Sprintf("error while getting topic list for product %s: %s", demoProdId, err))
 	} else {
-		demoApp.SetNumTopics(len(topicList))
-		result, err = appDao.Update(demoApp)
+		demoProd.SetNumTopics(len(topicList))
+		result, err = productDao.Update(demoProd)
 		if err != nil {
-			panic(fmt.Sprintf("error while updating app %s: %s", demoAppId, err))
+			panic(fmt.Sprintf("error while updating product %s: %s", demoProdId, err))
 		}
 		if !result {
-			log.Printf("[ERROR] Cannot update app [%s]", demoAppId)
+			log.Printf("[ERROR] Cannot update product [%s]", demoProdId)
 		}
 	}
 
 	page = doc.NewPage(goapi.AppVersionNumber, topic, "General", "general", "General: "+shortLorem, longLorerm)
 	page.SetPosition(1).SetId(topic.GetId() + "-" + re.ReplaceAllString(strings.ToLower(page.GetTitle()), ""))
-	log.Printf("[INFO] Creating page (%s:%s -> %s)...", demoAppId, topic.GetTitle(), page.GetTitle())
+	log.Printf("[INFO] Creating page (%s:%s -> %s)...", demoProdId, topic.GetTitle(), page.GetTitle())
 	result, err = pageDao.Create(page)
 	if err != nil && err != godal.ErrGdaoDuplicatedEntry {
-		panic(fmt.Sprintf("error while creating page (%s:%s -> %s): %s", demoAppId, topic.GetTitle(), page.GetTitle(), err))
+		panic(fmt.Sprintf("error while creating page (%s:%s -> %s): %s", demoProdId, topic.GetTitle(), page.GetTitle(), err))
 	}
 	if !result {
 		log.Printf("[ERROR] Cannot create page [%s]", page.GetTitle())

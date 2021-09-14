@@ -22,11 +22,21 @@ const messages = {
             error_parse_login_token: 'Error parsing login-token',
             dashboard: 'Dashboard',
 
-            applications: "Applications",
+            products: "Products",
             topics: "Topics",
             pages: "Pages",
 
-            add_app: "Add New App",
+            product_is_published: "Published",
+            product_is_published_msg: "Product's documents are visible only when published",
+            product_name: "Name",
+            product_name_msg: "Display name of the product",
+            product_desc: "Description",
+            product_desc_msg: "Summary description of the product",
+            product_domains: "Domain names",
+            product_domains_msg: "Product documents are accessible via these domain names (one domain per line)",
+
+            add_product: "Add new product",
+            product_added_msg: 'Product "{name}" has been created successfully.'
         }
     },
     vi: {
@@ -48,11 +58,21 @@ const messages = {
             error_parse_login_token: 'Có lỗi khi xử lý login-token',
             dashboard: 'Trang nhà',
 
-            applications: "Ứng dụng",
+            products: "Sản phẩm",
             topics: "Chủ đề",
             pages: "Trang tài liệu",
 
-            add_app: "Thêm Ứng Dụng",
+            product_is_published: "Đăng tải",
+            product_is_published_msg: "Tài liệu của sản phẩm chỉ xem được khi trạng thái là 'Đăng tải'",
+            product_name: "Tên",
+            product_name_msg: "Tên hiển thị của sản phẩm",
+            product_desc: "Mô tả",
+            product_desc_msg: "Mô tả ngắn về sản phẩm",
+            product_domains: "Tên miền",
+            product_domains_msg: "Tài liệu của sản phẩm truy cập được từ các tên miền này (mỗi tên miền 1 dòng)",
+
+            add_product: "Thêm sản phẩm",
+            product_added_msg: 'Sản phẩm "{name}" đã được tạo thành công.'
         }
     }
 }

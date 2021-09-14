@@ -6,11 +6,11 @@ import Router from 'vue-router'
 const TheContainer = () => import('@/containers/TheContainer')
 
 // Views
-const Dashboard = () => import('@/views/gva/Dashboard')
-const MyBlog = () => import('@/views/gva/blog/MyBlog')
-const CreatePost = () => import('@/views/gva/blog/CreatePost')
-const EditPost = () => import('@/views/gva/blog/EditPost')
-const DeletePost = () => import('@/views/gva/blog/DeletePost')
+const Dashboard = () => import('@/views/libro/Dashboard')
+const ProductList = () => import('@/views/libro/product/ProductList')
+const AddProduct = () => import('@/views/libro/product/AddProduct')
+const EditProduct = () => import('@/views/libro/product/EditProduct')
+const DeleteProduct = () => import('@/views/libro/product/DeleteProduct')
 
 // Views - Pages
 const Login = () => import('@/views/gva/pages/Login')
@@ -24,7 +24,7 @@ let router = new Router({
     mode: 'hash', // https://router.vuejs.org/api/#mode
     linkActiveClass: 'active',
     scrollBehavior: () => ({y: 0}),
-    base: "/app/",
+    base: "/admin/",
     routes: configRoutes()
 })
 
@@ -49,7 +49,6 @@ router.beforeEach((to, from, next) => {
                         //redirect to login page if session verification failed
                         console.error("Session verification failed: " + JSON.stringify(apiRes))
                         return next({name: "Login", query: {returnUrl: router.resolve(to, from).href}})
-                        // return next({name: "Login", query: {returnUrl: to.fullPath}})
                     } else {
                         utils.localStorageSet(utils.lskeyLoginSessionLastCheck, lastUserTokenCheck)
                         next()
@@ -59,7 +58,6 @@ router.beforeEach((to, from, next) => {
                     console.error("Session verification error: " + err)
                     //redirect to login page if cannot verify session
                     return next({name: "Login", query: {returnUrl: router.resolve(to, from).href}})
-                    // return next({name: "Login", query: {returnUrl: to.fullPath}})
                 })
         } else {
             next()
@@ -88,7 +86,7 @@ function configRoutes() {
                     component: Dashboard
                 },
                 {
-                    path: 'posts', meta: {label: i18n.t('message.blog')},
+                    path: 'products', meta: {label: i18n.t('message.products')},
                     component: {
                         render(c) {
                             return c('router-view')
@@ -97,28 +95,28 @@ function configRoutes() {
                     children: [
                         {
                             path: '',
-                            meta: {label: i18n.t('message.my_blog')},
-                            name: 'MyBlog',
-                            component: MyBlog,
+                            meta: {label: i18n.t('message.products')},
+                            name: 'ProductList',
+                            component: ProductList,
                             props: true, //[props=true] to pass flashMsg
                         },
                         {
-                            path: '_create',
-                            meta: {label: i18n.t('message.create_blog_post')},
-                            name: 'CreatePost',
-                            component: CreatePost,
+                            path: '_add',
+                            meta: {label: i18n.t('message.add_product')},
+                            name: 'AddProduct',
+                            component: AddProduct,
                         },
                         {
                             path: '_edit/:id',
-                            meta: {label: i18n.t('message.edit_blog_post')},
-                            name: 'EditPost',
-                            component: EditPost,
+                            meta: {label: i18n.t('message.edit_product')},
+                            name: 'EditProduct',
+                            component: EditProduct,
                         },
                         {
                             path: '_delete/:id',
-                            meta: {label: i18n.t('message.delete_blog_post')},
-                            name: 'DeletePost',
-                            component: DeletePost,
+                            meta: {label: i18n.t('message.delete_product')},
+                            name: 'DeleteProduct',
+                            component: DeleteProduct,
                         },
                     ]
                 },
