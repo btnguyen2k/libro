@@ -7,7 +7,6 @@ export default [
         _children: [
             {
                 _name: 'CSidebarNavItem',
-                //name: 'Dashboard',
                 name: i18n.t('message.dashboard'),
                 to: {name: 'Dashboard'},
                 icon: 'cil-wallpaper',
@@ -18,18 +17,17 @@ export default [
             },
             {
                 _name: 'CSidebarNavItem',
-                // name: 'My Blog',
-                name: i18n.t('message.my_blog'),
-                to: {name: 'MyBlog'},
-                icon: 'cil-address-book',
+                name: i18n.t('message.products'),
+                to: {name: 'ProductList'},
+                icon: 'cil-applications',
             },
-            {
-                _name: 'CSidebarNavItem',
-                // name: 'Create Blog Post',
-                name: i18n.t('message.create_blog_post'),
-                to: {name: 'CreatePost'},
-                icon: 'cil-image-plus',
-            },
+            // {
+            //     _name: 'CSidebarNavItem',
+            //     // name: 'Create Blog Post',
+            //     name: i18n.t('message.create_blog_post'),
+            //     to: {name: 'CreatePost'},
+            //     icon: 'cil-image-plus',
+            // },
         ]
     }
 ]

@@ -7,8 +7,10 @@ import (
 	"time"
 
 	"github.com/btnguyen2k/consu/reddo"
+	"github.com/btnguyen2k/consu/semita"
 	"github.com/btnguyen2k/henge"
 	"main/src/goapi"
+	"main/src/gvabe/bo"
 	"main/src/gvabe/bo/product"
 	"main/src/gvabe/bo/user"
 	"main/src/itineris"
@@ -58,15 +60,17 @@ func apiAdminStats(ctx *itineris.ApiContext, _ *itineris.ApiAuth, _ *itineris.Ap
 }
 
 var funcProductToMapTransform = func(m map[string]interface{}) map[string]interface{} {
+	s := semita.NewSemita(m)
+
 	// transform input map
 	result := map[string]interface{}{
-		"id":           m[henge.FieldId],
-		"t_created":    m[henge.FieldTimeCreated],
-		"is_published": m[product.ProdAttrIsPublished],
-		"name":         m[product.ProdAttrName],
-		"desc":         m[product.ProdAttrDesc],
-		"domains":      make([]string, 0),
+		"id":        m[henge.FieldId],
+		"t_created": m[henge.FieldTimeCreated],
+		"domains":   make([]string, 0),
 	}
+	result["is_published"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, product.ProdAttrIsPublished), reddo.TypeBool)
+	result["name"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, product.ProdAttrName), reddo.TypeString)
+	result["desc"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, product.ProdAttrDesc), reddo.TypeString)
 
 	// convert "creation timestamp" to UTC
 	if t, ok := result["t_created"].(time.Time); ok {
@@ -82,6 +86,7 @@ var funcProductToMapTransform = func(m map[string]interface{}) map[string]interf
 		}
 		result["domains"] = domainList
 	}
+
 	return result
 }
 

@@ -3,53 +3,47 @@
     <CCol sm="12">
       <CCard accent-color="info">
         <CCardHeader>
-          <strong>{{ $tc('message.blog_posts', blogPostList.data.length, {count: blogPostList.data.length}) }}</strong>
+          <strong>{{ $t('message.products') }}</strong>
           <div class="card-header-actions">
-            <CButton class="btn-sm btn-primary" @click="clickCreateBlogPost">
+            <CButton class="btn-sm btn-primary" @click="clickAddProduct">
               <CIcon name="cil-image-plus"/>
-              {{ $t('message.create_blog_post') }}
+              {{ $t('message.add_product') }}
             </CButton>
           </div>
         </CCardHeader>
         <CCardBody>
           <p v-if="flashMsg" class="alert alert-success">{{ flashMsg }}</p>
-          <CDataTable :items="blogPostList.data" :fields="[
-              {key:'public',label:''},
-              {key:'created',label:$t('message.blog_tcreated')},
-              {key:'title',label:$t('message.blog_title')},
-              {key:'num_comments',label:$t('message.blog_comments')},
-              {key:'num_votes_up',label:$t('message.blog_votes')+' ↑',_style:'white-space: nowrap'},
-              {key:'num_votes_down',label:$t('message.blog_votes')+' ↓',_style:'white-space: nowrap'},
+          <CDataTable :items="prodList" :fields="[
+              {key:'is_published',label:''},
+              {key:'name',label:$t('message.product_name')},
+              {key:'domains',label:$t('message.product_domains')},
               {key:'actions',label:$t('message.actions'),_style:'text-align: center'}
             ]">
-            <template #public="{item}">
-              <td>
-                <CIcon :name="`${item.is_public?'cil-check':'cil-check-alt'}`"
-                       :style="`color: ${item.is_public?'green':'grey'}`"/>
+            <template #is_published="{item}">
+              <td class="col-1">
+                <CIcon :name="`${item.is_published?'cil-check':'cil-check-alt'}`"
+                       :style="`color: ${item.is_published?'green':'grey'}`"/>
               </td>
             </template>
-            <template #created="{item}">
-              <td style="font-size: smaller; white-space: nowrap">{{item.t_created.substring(0,19)}} (GMT{{item.t_created.substring(26)}})</td>
+            <template #name="{item}">
+              <td class="col-6">
+                {{ item.name }}
+                <br />
+                <span style="font-size: smaller">{{ item.desc }}</span>
+              </td>
             </template>
-            <template #title="{item}">
-              <td style="font-size: smaller">{{item.title}}</td>
-            </template>
-            <template #num_comments="{item}">
-              <td style="font-size: smaller; text-align: center">{{item.num_comments}}</td>
-            </template>
-            <template #num_votes_up="{item}">
-              <td style="font-size: smaller; text-align: center">{{item.num_votes_up}}</td>
-            </template>
-            <template #num_votes_down="{item}">
-              <td style="font-size: smaller; text-align: center">{{item.num_votes_down}}</td>
+            <template #domains="{item}">
+              <td class="col-4">
+                {{ item.domains }}
+              </td>
             </template>
             <template #actions="{item}">
-              <td style="font-size: smaller; white-space: nowrap; text-align: center">
-                <CLink @click="clickEditBlogPost(item.id)" :label="$t('message.action_edit')" class="btn btn-sm btn-primary">
+              <td style="white-space: nowrap; text-align: center">
+                <CLink @click="clickEditProduct(item.id)" :label="$t('message.action_edit')" class="btn btn-sm btn-primary">
                   <CIcon name="cil-pencil"/>
                 </CLink>
                 &nbsp;
-                <CLink @click="clickDeleteBlogPost(item.id)" :label="$t('message.action_delete')" class="btn btn-sm btn-danger">
+                <CLink @click="clickDeleteProduct(item.id)" :label="$t('message.action_delete')" class="btn btn-sm btn-danger">
                   <CIcon name="cil-trash"/>
                 </CLink>
               </td>
@@ -65,34 +59,37 @@
 import clientUtils from "@/utils/api_client";
 
 export default {
-  name: 'MyBlog',
-  data: () => {
-    let blogPostList = {data: []}
-    clientUtils.apiDoGet(clientUtils.apiMyBlog,
+  name: 'Products',
+  mounted() {
+    const vue = this
+    clientUtils.apiDoGet(clientUtils.apiAdminProductList,
         (apiRes) => {
           if (apiRes.status == 200) {
-            blogPostList.data = apiRes.data
+            vue.prodList = apiRes.data
+            console.log(apiRes)
           } else {
-            console.error("Getting blog post list was unsuccessful: " + apiRes)
+            console.error("Getting product list was unsuccessful: " + apiRes)
           }
         },
         (err) => {
-          console.error("Error getting blog post list: " + err)
+          console.error("Error getting product list: " + err)
         })
+  },
+  data: () => {
     return {
-      blogPostList: blogPostList,
+      prodList: [],
     }
   },
   props: ["flashMsg"],
   methods: {
-    clickCreateBlogPost() {
-      this.$router.push({name: "CreatePost"})
+    clickAddProduct() {
+      this.$router.push({name: "AddProduct"})
     },
-    clickEditBlogPost(id) {
-      this.$router.push({name: "EditPost", params: {id: id.toString()}})
+    clickEditProduct(id) {
+      this.$router.push({name: "EditProduct", params: {id: id.toString()}})
     },
-    clickDeleteBlogPost(id) {
-      this.$router.push({name: "DeletePost", params: {id: id.toString()}})
+    clickDeleteProduct(id) {
+      this.$router.push({name: "DeleteProduct", params: {id: id.toString()}})
     },
   }
 }

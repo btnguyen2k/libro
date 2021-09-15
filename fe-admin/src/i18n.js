@@ -20,6 +20,7 @@ const messages = {
             demo_msg: "This is instance is for demo purpose only. Login with default account <strong>admin@local/s3cr3t</strong>.<br/>Or you can login with your <u>social account</u> via \"Login with social account\" link (your social account credential <u>will not</u> be stored on the server).",
             wait: 'Please wait...',
             error_parse_login_token: 'Error parsing login-token',
+            home: 'Home',
             dashboard: 'Dashboard',
 
             products: "Products",
@@ -56,7 +57,8 @@ const messages = {
             demo_msg: 'Bản triển khai này dành do mục đích thử nghiệm. Đăng nhập với tài khoản <strong>admin@local/s3cr3t</strong>.<br/>Hoặc đăng nhập với <i>tài khoản mxh</i> (nhấn vào đường dẫn "Đăng nhập với tài khoản mxh").',
             wait: 'Vui lòng giờ giây lát...',
             error_parse_login_token: 'Có lỗi khi xử lý login-token',
-            dashboard: 'Trang nhà',
+            home: 'Trang nhà',
+            dashboard: 'Tổng hợp',
 
             products: "Sản phẩm",
             topics: "Chủ đề",
