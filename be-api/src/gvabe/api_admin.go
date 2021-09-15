@@ -23,13 +23,13 @@ func authenticateApiCall(ctx *itineris.ApiContext) (*user.User, *itineris.ApiRes
 		return nil, itineris.NewApiResult(itineris.StatusErrorServer).SetMessage(err.Error())
 	}
 	if user == nil {
-		return nil, itineris.NewApiResult(itineris.StatusNoPermission).SetMessage("user not found")
+		return nil, itineris.NewApiResult(itineris.StatusNoPermission).SetMessage("action denied")
 	}
 	return user, nil
 }
 
-// apiAdminStats handles API call "adminStats"
-func apiAdminStats(ctx *itineris.ApiContext, _ *itineris.ApiAuth, _ *itineris.ApiParams) *itineris.ApiResult {
+// apiAdminGetStats handles API call "adminGetStats"
+func apiAdminGetStats(ctx *itineris.ApiContext, _ *itineris.ApiAuth, _ *itineris.ApiParams) *itineris.ApiResult {
 	_, authResult := authenticateApiCall(ctx)
 	if authResult != nil {
 		return authResult
@@ -90,8 +90,8 @@ var funcProductToMapTransform = func(m map[string]interface{}) map[string]interf
 	return result
 }
 
-// apiAdminProductList handles API call "adminProductList"
-func apiAdminProductList(ctx *itineris.ApiContext, _ *itineris.ApiAuth, _ *itineris.ApiParams) *itineris.ApiResult {
+// apiAdminGetProductList handles API call "adminGetProductList"
+func apiAdminGetProductList(ctx *itineris.ApiContext, _ *itineris.ApiAuth, _ *itineris.ApiParams) *itineris.ApiResult {
 	_, authResult := authenticateApiCall(ctx)
 	if authResult != nil {
 		return authResult
@@ -153,5 +153,61 @@ func apiAdminAddProduct(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *i
 		}
 	}
 
+	return itineris.NewApiResult(itineris.StatusOk)
+}
+
+// apiAdminGetProduct handles API call "adminGetProduct"
+func apiAdminGetProduct(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *itineris.ApiParams) *itineris.ApiResult {
+	_, authResult := authenticateApiCall(ctx)
+	if authResult != nil {
+		return authResult
+	}
+
+	id := _extractParam(params, "id", reddo.TypeString, "", nil)
+	product, err := productDao.Get(id.(string))
+	if err != nil {
+		return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage(err.Error())
+	}
+	if product == nil {
+		return itineris.NewApiResult(itineris.StatusNotFound).SetMessage("product not found")
+	}
+	return itineris.NewApiResult(itineris.StatusOk).SetData(product.ToMap(funcProductToMapTransform))
+}
+
+// apiAdminDeleteProduct handles API call "adminDeleteProduct"
+func apiAdminDeleteProduct(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *itineris.ApiParams) *itineris.ApiResult {
+	_, authResult := authenticateApiCall(ctx)
+	if authResult != nil {
+		return authResult
+	}
+
+	id := _extractParam(params, "id", reddo.TypeString, "", nil)
+	product, err := productDao.Get(id.(string))
+	if err != nil {
+		return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage(err.Error())
+	}
+	if product == nil {
+		return itineris.NewApiResult(itineris.StatusNotFound).SetMessage("product not found")
+	}
+
+	domainProductMappings, err := domainProductMappingDao.Rget(product.GetId())
+	if err != nil {
+		return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage(err.Error())
+	}
+	for _, mapping := range domainProductMappings {
+		_, err := domainProductMappingDao.Remove(mapping.Src, mapping.Dest)
+		if err != nil {
+			msg := fmt.Sprintf("error while unmapping domain %s (product has not been deleted): %s", mapping.Src, err)
+			return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage(msg)
+		}
+	}
+
+	_, err = productDao.Delete(product)
+	if err != nil {
+		return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage(err.Error())
+	}
+	// if !ok {
+	// 	return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage("cannot delete product")
+	// }
 	return itineris.NewApiResult(itineris.StatusOk)
 }

@@ -16,7 +16,7 @@ export default [
                 name: i18n.t('message.products'),
                 to: {name: 'ProductList'},
                 icon: 'cil-applications',
-                exact: false, //set extract=false to this item "active" for sub-actions (create/edit/delete)
+                exact: false, //[extract=false] to make this item "active" on child-action (create/edit/delete)
             },
         ]
     }

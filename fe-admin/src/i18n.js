@@ -36,8 +36,13 @@ const messages = {
             product_domains: "Domain names",
             product_domains_msg: "Product documents are accessible via these domain names (one domain per line)",
 
+            error_product_not_found: 'Product "{id}" not found.',
+
             add_product: "Add new product",
-            product_added_msg: 'Product "{name}" has been created successfully.'
+            product_added_msg: 'Product "{name}" has been created successfully.',
+
+            delete_product: "Delete product",
+            product_deleted_msg: 'Product "{name}" has been deleted successfully.',
         }
     },
     vi: {
@@ -73,8 +78,13 @@ const messages = {
             product_domains: "Tên miền",
             product_domains_msg: "Tài liệu của sản phẩm truy cập được từ các tên miền này (mỗi tên miền 1 dòng)",
 
+            error_product_not_found: 'Không tìm thấy sản phẩm "{id}".',
+
             add_product: "Thêm sản phẩm",
-            product_added_msg: 'Sản phẩm "{name}" đã được tạo thành công.'
+            product_added_msg: 'Sản phẩm "{name}" đã được tạo thành công.',
+
+            delete_product: "Xoá sản phẩm",
+            product_deleted_msg: 'Sản phẩm "{name}" đã được xoá thành công.',
         }
     }
 }

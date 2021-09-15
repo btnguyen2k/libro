@@ -20,9 +20,12 @@ func initApiHandlers(router *itineris.ApiRouter) {
 	router.SetHandler("verifyLoginToken", apiVerifyLoginToken)
 	router.SetHandler("systemInfo", apiSystemInfo)
 
-	router.SetHandler("adminProductList", apiAdminProductList)
+	router.SetHandler("adminGetStats", apiAdminGetStats)
+	router.SetHandler("adminGetProductList", apiAdminGetProductList)
 	router.SetHandler("adminAddProduct", apiAdminAddProduct)
-	router.SetHandler("adminStats", apiAdminStats)
+	router.SetHandler("adminGetProduct", apiAdminGetProduct)
+	// router.SetHandler("adminUpdateProduct", apiAdminUpdateProduct)
+	router.SetHandler("adminDeleteProduct", apiAdminDeleteProduct)
 
 	// router.SetHandler("myFeed", apiMyFeed)
 	// router.SetHandler("myBlog", apiMyBlog)
@@ -77,33 +80,6 @@ func _extractParam(params *itineris.ApiParams, paramName string, typ reflect.Typ
 	return v
 }
 
-// /*
-// apiGetBlogPost handles API call "getBlogPost"
-//
-// @available since template-v0.2.0
-// */
-// func apiGetBlogPost(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *itineris.ApiParams) *itineris.ApiResult {
-// 	_, user, err := _currentUserFromContext(ctx)
-// 	if err != nil {
-// 		return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage(err.Error())
-// 	}
-// 	resultNoPermission := itineris.NewApiResult(itineris.StatusNoPermission).SetMessage("current user has no permission to view this post")
-// 	if user == nil {
-// 		return resultNoPermission
-// 	}
-// 	id := _extractParam(params, "id", reddo.TypeString, "", nil)
-// 	blogPost, err := blogPostDaov2.Get(id.(string))
-// 	if err != nil {
-// 		return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage(err.Error())
-// 	}
-// 	if blogPost == nil {
-// 		return itineris.NewApiResult(itineris.StatusNotFound).SetMessage("post not found")
-// 	}
-// 	if !blogPost.IsPublic() && blogPost.GetOwnerId() != user.GetId() {
-// 		return resultNoPermission
-// 	}
-// 	return itineris.NewApiResult(itineris.StatusOk).SetData(blogPost.ToMap(funcPostToMapTransform))
-// }
 
 // /*
 // apiUpdateBlogPost handles API call "updateBlogPost"
@@ -146,41 +122,6 @@ func _extractParam(params *itineris.ApiParams, paramName string, typ reflect.Typ
 // 	}
 // 	if !ok {
 // 		return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage("cannot update blog post")
-// 	}
-// 	return itineris.NewApiResult(itineris.StatusOk)
-// }
-
-// /*
-// apiDeleteBlogPost handles API call "deleteBlogPost"
-//
-// @available since template-v0.2.0
-// */
-// func apiDeleteBlogPost(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *itineris.ApiParams) *itineris.ApiResult {
-// 	_, user, err := _currentUserFromContext(ctx)
-// 	if err != nil {
-// 		return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage(err.Error())
-// 	}
-// 	resultNoPermission := itineris.NewApiResult(itineris.StatusNoPermission).SetMessage("current user has no permission to delete this post")
-// 	if user == nil {
-// 		return resultNoPermission
-// 	}
-// 	id := _extractParam(params, "id", reddo.TypeString, "", nil)
-// 	blogPost, err := blogPostDaov2.Get(id.(string))
-// 	if err != nil {
-// 		return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage(err.Error())
-// 	}
-// 	if blogPost == nil {
-// 		return itineris.NewApiResult(itineris.StatusNotFound).SetMessage("post not found")
-// 	}
-// 	if blogPost.GetOwnerId() != user.GetId() {
-// 		return resultNoPermission
-// 	}
-// 	ok, err := blogPostDaov2.Delete(blogPost)
-// 	if err != nil {
-// 		return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage(err.Error())
-// 	}
-// 	if !ok {
-// 		return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage("cannot delete blog post")
 // 	}
 // 	return itineris.NewApiResult(itineris.StatusOk)
 // }

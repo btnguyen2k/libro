@@ -25,6 +25,7 @@ let apiVerifyLoginToken = "/api/verifyLoginToken"
 
 let apiAdminStats = "/api/admin/stats"
 let apiAdminProductList = "/api/admin/products"
+let apiAdminProduct = "/api/admin/product"
 
 let apiMyBlog = '/api/myblog'
 let apiMyFeed = '/api/myfeed'
@@ -107,6 +108,7 @@ export default {
 
     apiAdminStats,
     apiAdminProductList,
+    apiAdminProduct,
 
     apiMyBlog,
     apiMyFeed,

@@ -23,15 +23,15 @@
         </CHeaderNavLink>
       </CHeaderNavItem>
       <CHeaderNavItem class="px-3">
-        <CHeaderNavLink :to="{name:'MyBlog'}">
-          {{ $t('message.my_blog') }}
+        <CHeaderNavLink :to="{name:'ProductList'}">
+          {{ $t('message.products') }}
         </CHeaderNavLink>
       </CHeaderNavItem>
-      <CHeaderNavItem class="px-3">
-        <CHeaderNavLink :to="{name:'CreatePost'}">
-          {{ $t('message.create_blog_post') }}
-        </CHeaderNavLink>
-      </CHeaderNavItem>
+<!--      <CHeaderNavItem class="px-3">-->
+<!--        <CHeaderNavLink :to="{name:'CreatePost'}">-->
+<!--          {{ $t('message.create_blog_post') }}-->
+<!--        </CHeaderNavLink>-->
+<!--      </CHeaderNavItem>-->
     </CHeaderNav>
     <CHeaderNav class="mr-4">
       <CHeaderNavItem class="d-md-down-none mx-2">

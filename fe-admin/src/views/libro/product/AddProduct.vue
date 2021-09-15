@@ -66,17 +66,9 @@
 <script>
 import router from "@/router"
 import clientUtils from "@/utils/api_client"
-// import marked from "marked"
-// import DOMPurify from "dompurify"
 
 export default {
   name: 'AddProduct',
-  // computed: {
-  //   previewContent() {
-  //     const html = marked(this.form.content)
-  //     return DOMPurify.sanitize(html, {ADD_ATTR: ['target']})
-  //   }
-  // },
   data() {
     return {
       form: {name: "", desc: "", isPublished: false, domains: ""},

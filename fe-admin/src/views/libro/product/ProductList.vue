@@ -74,7 +74,7 @@ export default {
           console.error("Error getting product list: " + err)
         })
   },
-  data: () => {
+  data() {
     return {
       prodList: [],
     }
