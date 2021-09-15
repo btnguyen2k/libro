@@ -10,24 +10,14 @@ export default [
                 name: i18n.t('message.dashboard'),
                 to: {name: 'Dashboard'},
                 icon: 'cil-wallpaper',
-                // badge: {
-                //     color: 'primary',
-                //     text: 'NEW'
-                // }
             },
             {
                 _name: 'CSidebarNavItem',
                 name: i18n.t('message.products'),
                 to: {name: 'ProductList'},
                 icon: 'cil-applications',
+                exact: false, //set extract=false to this item "active" for sub-actions (create/edit/delete)
             },
-            // {
-            //     _name: 'CSidebarNavItem',
-            //     // name: 'Create Blog Post',
-            //     name: i18n.t('message.create_blog_post'),
-            //     to: {name: 'CreatePost'},
-            //     icon: 'cil-image-plus',
-            // },
         ]
     }
 ]

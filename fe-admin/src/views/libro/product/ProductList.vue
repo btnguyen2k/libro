@@ -66,7 +66,6 @@ export default {
         (apiRes) => {
           if (apiRes.status == 200) {
             vue.prodList = apiRes.data
-            console.log(apiRes)
           } else {
             console.error("Getting product list was unsuccessful: " + apiRes)
           }
