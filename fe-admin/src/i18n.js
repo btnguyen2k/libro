@@ -12,6 +12,11 @@ const messages = {
             action_edit: 'Edit',
             action_delete: 'Delete',
 
+            yes: 'Yes',
+            no: 'No',
+            ok: 'Ok',
+            cancel: 'Cancel',
+
             login: 'Login',
             login_info: 'Please sign in to continue',
             login_social: 'Login with social account',
@@ -43,6 +48,13 @@ const messages = {
 
             delete_product: "Delete product",
             product_deleted_msg: 'Product "{name}" has been deleted successfully.',
+
+            edit_product: "Edit product",
+            product_updated_msg: 'Product "{name}" has been updated successfully.',
+            product_unmap_domain: "Unmap",
+            product_unmap_domain_msg: 'Are you sure you wish to unmap domain name "{domain}"? Product documents are no longer accessible via domain name once unmapped.',
+            product_map_domain: "Map",
+            product_map_domain_msg: "Product documents are accessible via mapped domain names",
         }
     },
     vi: {
@@ -53,6 +65,11 @@ const messages = {
             action_back: 'Quay lại',
             action_edit: 'Sửa',
             action_delete: 'Xoá',
+
+            yes: 'Có',
+            no: 'Không',
+            ok: 'Đồng ý',
+            cancel: 'Huỷ',
 
             login: 'Đăng nhập',
             login_info: 'Đăng nhập để tiếp tục',
@@ -85,6 +102,13 @@ const messages = {
 
             delete_product: "Xoá sản phẩm",
             product_deleted_msg: 'Sản phẩm "{name}" đã được xoá thành công.',
+
+            edit_product: "Chỉnh sửa sản phẩm",
+            product_updated_msg: 'Sản phẩm "{name}" đã được cập nhật thành công.',
+            product_unmap_domain: "Bỏ kết nối",
+            product_unmap_domain_msg: 'Bạn có chắc bỏ kết nối tên miền "{domain}"? Tài liệu của sản phẩm sẽ không còn truy cập được qua tên miền sau khi bỏ kết nối.',
+            product_map_domain: "Kết nối",
+            product_map_domain_msg: "Tài liệu của sản phẩm truy cập được từ các tên miền sau khi được kết nối",
         }
     }
 }

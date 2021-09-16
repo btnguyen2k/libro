@@ -3,54 +3,68 @@
     <CRow>
       <CCol sm="12">
         <CCard>
-          <CCardHeader><h5>{{ $t('message.edit_blog_post') }}</h5></CCardHeader>
+          <CCardHeader><h5>{{ $t('message.edit_product') }}</h5></CCardHeader>
           <CForm @submit.prevent="doSubmit" method="post">
             <CCardBody>
-              <p v-if="!found" class="alert alert-danger">Blog Post [{{ this.$route.params.id }}] not found</p>
+              <p v-if="foundStatus<0" class="alert alert-info">{{ $t('message.wait') }}</p>
+              <p v-if="foundStatus==0" class="alert alert-danger">
+                {{ $t('message.error_product_not_found', {id: this.$route.params.id}) }}</p>
               <p v-if="errorMsg!=''" class="alert alert-danger">{{ errorMsg }}</p>
-              <div class="form-group form-row" v-if="found">
+              <div class="form-group form-row" v-if="foundStatus>0">
                 <CCol :sm="{offset:3,size:9}" class="form-inline">
-                  <CInputCheckbox inline :label="$t('message.blog_public')" :checked.sync="post.is_public"/>
-                  <small>({{ $t('message.blog_public_msg') }})</small>
+                  <CInputCheckbox inline :label="$t('message.product_is_published')"
+                                  :checked.sync="product.is_published"/>
+                  <small>({{ $t('message.product_is_published_msg') }})</small>
                 </CCol>
               </div>
-              <CInput v-if="found"
+              <CInput v-if="foundStatus>0"
                       type="text"
-                      v-model="post.title"
-                      :label="$t('message.blog_title')"
-                      :placeholder="$t('message.blog_title_msg')"
+                      :value="product.name"
+                      :label="$t('message.product_name')"
+                      :placeholder="$t('message.product_name_msg')"
+                      v-c-tooltip.hover="$t('message.product_name_msg')"
                       horizontal
                       required
                       was-validated
               />
-              <CTabs v-if="found">
-                <CTab active>
-                  <template slot="title">
-                    <CIcon name="cib-markdown"/>
-                    {{ $t('message.blog_editor') }}
-                  </template>
-                  <CTextarea
-                      rows="10"
-                      type="text"
-                      v-model="post.content"
-                      :label="$t('message.blog_content')"
-                      :placeholder="$t('message.blog_content_msg')"
-                      horizontal
-                      required
-                      was-validated
-                  />
-                </CTab>
-                <CTab>
-                  <template slot="title">
-                    <CIcon name="cil-calculator"/>
-                    {{ $t('message.blog_preview') }}
-                  </template>
-                  <div v-html="previewContent"></div>
-                </CTab>
-              </CTabs>
+              <CTextarea v-if="foundStatus>0"
+                         rows="2"
+                         type="text"
+                         :value="product.desc"
+                         :label="$t('message.product_desc')"
+                         :placeholder="$t('message.product_desc_msg')"
+                         v-c-tooltip.hover="$t('message.product_desc_msg')"
+                         horizontal
+                         required
+                         was-validated
+              />
+              <div class="form-group form-row" v-if="foundStatus>0">
+                <CCol sm="3">
+                  {{ $t('message.product_domains') }}
+                </CCol>
+                <CCol sm="9">
+                  <CInput type="text" v-c-tooltip.hover="$t('message.product_map_domain_msg')">
+                    <template #append>
+                      <CButton color="primary">{{ $t('message.product_map_domain') }}</CButton>
+                    </template>
+                  </CInput>
+                  <CDropdown v-for="domain in product.domains"
+                             size="sm"
+                             :toggler-text="domain"
+                             color="info"
+                             class="m-0 d-block"
+                             :label="$t('message.product_domains')"
+                  >
+                    <CDropdownItem @click="clickUnmapDomain(domain)">{{
+                        $t('message.product_unmap_domain')
+                      }}
+                    </CDropdownItem>
+                  </CDropdown>
+                </CCol>
+              </div>
             </CCardBody>
             <CCardFooter>
-              <CButton v-if="found" type="submit" color="primary" style="width: 96px">
+              <CButton v-if="foundStatus>0" type="submit" color="primary" style="width: 96px">
                 <CIcon name="cil-save"/>
                 {{ $t('message.action_save') }}
               </CButton>
@@ -63,42 +77,63 @@
         </CCard>
       </CCol>
     </CRow>
+
+    <CModal :title="$t('message.product_unmap_domain')" color="danger" :centered="true" :show.sync="modalUnmap">
+      {{ modalUnmapMessage }}
+      <template #footer>
+        <CButton @click="modalUnmap = false" color="danger" style="width: 96px">
+          <CIcon name="cil-trash"/>
+          {{ $t('message.ok') }}
+        </CButton>
+        <CButton @click="modalUnmap = false" color="secondary" class="ml-2" style="width: 96px">
+          <CIcon name="cil-arrow-circle-left"/>
+          {{ $t('message.cancel') }}
+        </CButton>
+      </template>
+    </CModal>
   </div>
 </template>
 
 <script>
 import router from "@/router"
 import clientUtils from "@/utils/api_client"
-import marked from "marked"
-import DOMPurify from "dompurify"
 
 export default {
-  name: 'EditPost',
-  computed: {
-    previewContent() {
-      return this.found ? DOMPurify.sanitize(marked(this.post.content), {ADD_ATTR: ['target']}) : ''
-    }
-  },
-  data() {
-    clientUtils.apiDoGet(clientUtils.apiPost + "/" + this.$route.params.id,
+  name: 'EditProduct',
+  mounted() {
+    const vue = this
+    clientUtils.apiDoGet(clientUtils.apiAdminProduct + "/" + vue.$route.params.id,
         (apiRes) => {
-          this.found = apiRes.status == 200
-          if (this.found) {
-            this.post = apiRes.data
+          vue.foundStatus = apiRes.status == 200 ? 1 : 0
+          if (vue.foundStatus == 1) {
+            vue.product = apiRes.data
           }
         },
         (err) => {
-          this.errorMsg = err
+          vue.errorMsg = err
         })
+  },
+  data() {
     return {
-      post: {},
+      modalUnmap: false,
+      modalUnmapMessage: "",
+      modalUnmapData: "",
+      product: {},
       errorMsg: "",
-      found: false,
+      foundStatus: -1,
     }
   },
   methods: {
     doCancel() {
-      router.push({name: "MyBlog"})
+      router.push({name: "ProductList"})
+    },
+    clickUnmapDomain(domain) {
+      this.modalUnmapData = domain
+      this.modalUnmap = true
+      this.modalUnmapMessage = this.$i18n.t('message.product_unmap_domain_msg', {domain: domain})
+    },
+    clickMapDomain(domain) {
+
     },
     doSubmit(e) {
       e.preventDefault()
@@ -110,8 +145,8 @@ export default {
               this.errorMsg = apiRes.status + ": " + apiRes.message
             } else {
               this.$router.push({
-                name: "MyBlog",
-                params: {flashMsg: this.$i18n.t('message.blog_updated_msg', {title: this.post.title})},
+                name: "ProductList",
+                params: {flashMsg: this.$i18n.t('message.product_updated_msg', {title: this.product.title})},
               })
             }
           },
