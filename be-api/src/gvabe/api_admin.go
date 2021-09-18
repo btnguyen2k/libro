@@ -14,6 +14,7 @@ import (
 	"main/src/gvabe/bo/product"
 	"main/src/gvabe/bo/user"
 	"main/src/itineris"
+	"main/src/respicite"
 	"main/src/utils"
 )
 
@@ -210,4 +211,49 @@ func apiAdminDeleteProduct(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params
 	// 	return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage("cannot delete product")
 	// }
 	return itineris.NewApiResult(itineris.StatusOk)
+}
+
+// apiAdminMapDomain handles API call "adminMapDomain"
+func apiAdminMapDomain(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *itineris.ApiParams) *itineris.ApiResult {
+	_, authResult := authenticateApiCall(ctx)
+	if authResult != nil {
+		return authResult
+	}
+
+	// extract params
+	productId := _extractParam(params, "pid", reddo.TypeString, "", nil)
+	domainName := _extractParam(params, "domain", reddo.TypeString, "", nil)
+	if productId == "" || domainName == "" {
+		return itineris.NewApiResult(itineris.StatusErrorClient).SetMessage("name is empty")
+	}
+	product, err := productDao.Get(productId.(string))
+	if err != nil {
+		return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage(err.Error())
+	}
+	if product == nil {
+		return itineris.NewApiResult(itineris.StatusNotFound).SetMessage("product not found")
+	}
+
+	domainName = strings.ToLower(domainName.(string))
+	result, err := domainProductMappingDao.Set(domainName.(string), product.GetId())
+	if err == respicite.ErrDuplicated {
+		return itineris.NewApiResult(itineris.StatusErrorClient).SetMessage(fmt.Sprintf("Domain '%s' has already been mapped to a product.", domainName))
+	}
+	if err != nil {
+		return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage(err.Error())
+	}
+	if !result {
+		return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage(fmt.Sprintf("Unknown error while mapping domain '%s' to product.", domainName))
+	}
+
+	mappings, err := domainProductMappingDao.Rget(product.GetId())
+	if err != nil {
+		return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage(err.Error())
+	}
+	domainList := make([]string, 0)
+	for _, mapping := range mappings {
+		domainList = append(domainList, mapping.Src)
+	}
+
+	return itineris.NewApiResult(itineris.StatusOk).SetData(domainList)
 }

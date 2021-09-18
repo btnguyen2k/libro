@@ -27,6 +27,8 @@ func initApiHandlers(router *itineris.ApiRouter) {
 	// router.SetHandler("adminUpdateProduct", apiAdminUpdateProduct)
 	router.SetHandler("adminDeleteProduct", apiAdminDeleteProduct)
 
+	router.SetHandler("adminMapDomain", apiAdminMapDomain)
+
 	// router.SetHandler("myFeed", apiMyFeed)
 	// router.SetHandler("myBlog", apiMyBlog)
 	// router.SetHandler("createBlogPost", apiCreateBlogPost)

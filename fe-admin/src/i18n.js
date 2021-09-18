@@ -12,10 +12,14 @@ const messages = {
             action_edit: 'Edit',
             action_delete: 'Delete',
 
+            error: 'Error',
+            info: 'Information',
+
             yes: 'Yes',
             no: 'No',
             ok: 'Ok',
             cancel: 'Cancel',
+            close: 'Close',
 
             login: 'Login',
             login_info: 'Please sign in to continue',
@@ -55,6 +59,7 @@ const messages = {
             product_unmap_domain_msg: 'Are you sure you wish to unmap domain name "{domain}"? Product documents are no longer accessible via domain name once unmapped.',
             product_map_domain: "Map",
             product_map_domain_msg: "Product documents are accessible via mapped domain names",
+            product_domain_mapped_msg: 'Domain "{domain}" has been mapped successfully.',
         }
     },
     vi: {
@@ -66,10 +71,14 @@ const messages = {
             action_edit: 'Sửa',
             action_delete: 'Xoá',
 
+            error: 'Có lỗi',
+            info: 'Thông tin',
+
             yes: 'Có',
             no: 'Không',
             ok: 'Đồng ý',
             cancel: 'Huỷ',
+            close: 'Đóng',
 
             login: 'Đăng nhập',
             login_info: 'Đăng nhập để tiếp tục',
@@ -109,6 +118,7 @@ const messages = {
             product_unmap_domain_msg: 'Bạn có chắc bỏ kết nối tên miền "{domain}"? Tài liệu của sản phẩm sẽ không còn truy cập được qua tên miền sau khi bỏ kết nối.',
             product_map_domain: "Kết nối",
             product_map_domain_msg: "Tài liệu của sản phẩm truy cập được từ các tên miền sau khi được kết nối",
+            product_domain_mapped_msg: 'Tên miền "{domain}" đã được kết nối thành công.',
         }
     }
 }
