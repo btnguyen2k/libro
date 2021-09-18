@@ -7,7 +7,9 @@
           <CForm @submit.prevent="doSubmit" method="post">
             <CCardBody>
               <p v-if="foundStatus<0" class="alert alert-info">{{ $t('message.wait') }}</p>
-              <p v-if="foundStatus==0" class="alert alert-danger">{{ $t('message.error_product_not_found', {id: this.$route.params.id}) }}</p>
+              <p v-if="foundStatus==0" class="alert alert-danger">
+                {{ $t('message.error_product_not_found', {id: $route.params.id}) }}
+              </p>
               <p v-if="errorMsg!=''" class="alert alert-danger">{{ errorMsg }}</p>
               <div class="form-group form-row" v-if="foundStatus>0">
                 <CCol :sm="{offset:3,size:9}" class="form-inline">
@@ -94,20 +96,21 @@ export default {
     },
     doSubmit(e) {
       e.preventDefault()
+      let vue = this
       clientUtils.apiDoDelete(
-          clientUtils.apiAdminProduct + "/" + this.$route.params.id,
+          clientUtils.apiAdminProduct + "/" + vue.$route.params.id,
           (apiRes) => {
             if (apiRes.status != 200) {
-              this.errorMsg = apiRes.status + ": " + apiRes.message
+              vue.errorMsg = apiRes.status + ": " + apiRes.message
             } else {
-              this.$router.push({
+              vue.$router.push({
                 name: "ProductList",
-                params: {flashMsg: this.$i18n.t('message.product_deleted_msg', {name: this.product.name})},
+                params: {flashMsg: vue.$i18n.t('message.product_deleted_msg', {name: vue.product.name})},
               })
             }
           },
           (err) => {
-            this.errorMsg = err
+            vue.errorMsg = err
           }
       )
     },

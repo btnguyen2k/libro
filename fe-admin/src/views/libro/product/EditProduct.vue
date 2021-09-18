@@ -8,7 +8,7 @@
             <CCardBody>
               <p v-if="foundStatus<0" class="alert alert-info">{{ $t('message.wait') }}</p>
               <p v-if="foundStatus==0" class="alert alert-danger">
-                {{ $t('message.error_product_not_found', {id: this.$route.params.id}) }}</p>
+                {{ $t('message.error_product_not_found', {id: $route.params.id}) }}</p>
               <p v-if="errorMsg!=''" class="alert alert-danger">{{ errorMsg }}</p>
               <div class="form-group form-row" v-if="foundStatus>0">
                 <CCol :sm="{offset:3,size:9}" class="form-inline">
@@ -178,11 +178,12 @@ export default {
     doSubmit(e) {
       e.preventDefault()
       let _saveFoundStatus = this.foundStatus
-      if (this.domainToMap != '') {
+      this.foundStatus = -1
+      let vue = this
+
+      if (vue.domainToMap != '') {
         // map domain
-        let vue = this
-        this.foundStatus = -1
-        let data = {pid: this.product.id, domain: vue.domainToMap.trim()}
+        let data = {pid: vue.product.id, domain: vue.domainToMap.trim()}
         clientUtils.apiDoPost(
             clientUtils.apiAdminDomains, data,
             (apiRes) => {
@@ -206,23 +207,26 @@ export default {
         return
       }
 
-      // let data = {is_public: this.post.is_public, title: this.post.title, content: this.post.content}
-      // clientUtils.apiDoPut(
-      //     clientUtils.apiPost + "/" + this.$route.params.id, data,
-      //     (apiRes) => {
-      //       if (apiRes.status != 200) {
-      //         this.errorMsg = apiRes.status + ": " + apiRes.message
-      //       } else {
-      //         this.$router.push({
-      //           name: "ProductList",
-      //           params: {flashMsg: this.$i18n.t('message.product_updated_msg', {title: this.product.title})},
-      //         })
-      //       }
-      //     },
-      //     (err) => {
-      //       this.errorMsg = err
-      //     }
-      // )
+      //update product
+      let data = {is_published: vue.product.isPublished, name: vue.product.name, description: vue.product.desc}
+      clientUtils.apiDoPut(
+          clientUtils.apiAdminProduct + "/" + vue.product.id, data,
+          (apiRes) => {
+            if (apiRes.status != 200) {
+              vue.errorMsg = apiRes.status + ": " + apiRes.message
+              vue.foundStatus = _saveFoundStatus
+            } else {
+              vue.$router.push({
+                name: "ProductList",
+                params: {flashMsg: vue.$i18n.t('message.product_updated_msg', {name: vue.product.name})},
+              })
+            }
+          },
+          (err) => {
+            vue.errorMsg = err
+            vue.foundStatus = _saveFoundStatus
+          }
+      )
     },
   }
 }

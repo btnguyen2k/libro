@@ -175,6 +175,41 @@ func apiAdminGetProduct(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *i
 	return itineris.NewApiResult(itineris.StatusOk).SetData(product.ToMap(funcProductToMapTransform))
 }
 
+// apiAdminUpdateProduct handles API call "adminUpdateProduct"
+func apiAdminUpdateProduct(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *itineris.ApiParams) *itineris.ApiResult {
+	_, authResult := authenticateApiCall(ctx)
+	if authResult != nil {
+		return authResult
+	}
+
+	id := _extractParam(params, "id", reddo.TypeString, "", nil)
+	product, err := productDao.Get(id.(string))
+	if err != nil {
+		return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage(err.Error())
+	}
+	if product == nil {
+		return itineris.NewApiResult(itineris.StatusNotFound).SetMessage("product not found")
+	}
+
+	// extract params
+	isPublished := _extractParam(params, "is_published", reddo.TypeBool, false, nil)
+	name := _extractParam(params, "name", reddo.TypeString, "", nil)
+	if name == "" {
+		return itineris.NewApiResult(itineris.StatusErrorClient).SetMessage("name is empty")
+	}
+	desc := _extractParam(params, "description", reddo.TypeString, "", nil)
+
+	// update product
+	product.SetPublished(isPublished.(bool)).SetName(name.(string)).SetDescription(desc.(string))
+	result, err := productDao.Update(product)
+	if err != nil || !result {
+		return itineris.NewApiResult(itineris.StatusErrorServer).
+			SetMessage(fmt.Sprintf("cannot update product %s (error: %s)", name, err))
+	}
+
+	return itineris.NewApiResult(itineris.StatusOk)
+}
+
 // apiAdminDeleteProduct handles API call "adminDeleteProduct"
 func apiAdminDeleteProduct(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *itineris.ApiParams) *itineris.ApiResult {
 	_, authResult := authenticateApiCall(ctx)

@@ -81,27 +81,27 @@ export default {
     },
     doSubmit(e) {
       e.preventDefault()
-      let data = {is_published: this.form.isPublished, name: this.form.name, description: this.form.desc, domains: this.form.domains}
+      let vue = this
+      let data = {is_published: vue.form.isPublished, name: vue.form.name, description: vue.form.desc, domains: vue.form.domains}
       clientUtils.apiDoPost(
           clientUtils.apiAdminProducts, data,
           (apiRes) => {
             if (apiRes.status == 200) {
-              this.$router.push({
+              vue.$router.push({
                 name: "ProductList",
-                params: {flashMsg: this.$i18n.t('message.product_added_msg', {name: this.form.name})},
+                params: {flashMsg: vue.$i18n.t('message.product_added_msg', {name: vue.form.name})},
               })
             } else if (apiRes.status == 201) {
-              this.$router.push({
+              vue.$router.push({
                 name: "ProductList",
                 params: {flashMsg: apiRes.message},
               })
             } else {
-              this.errorMsg = apiRes.status + ": " + apiRes.message
+              vue.errorMsg = apiRes.status + ": " + apiRes.message
             }
           },
           (err) => {
-            console.error(err)
-            this.errorMsg = err
+            vue.errorMsg = err
           }
       )
     },
