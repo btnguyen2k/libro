@@ -18,7 +18,7 @@
             color="gradient-info"
             :icon-padding="false"
         >
-          <CIcon name="cil-storage" class="mx-5 " width="24"/>
+          <CIcon name="cil-list-rich" class="mx-5 " width="24"/>
         </CWidgetIcon>
       </CCol>
       <CCol col="12" sm="6" lg="4">
@@ -131,7 +131,7 @@ export default {
           console.error("Error getting stats: " + err)
         })
 
-    clientUtils.apiDoGet(clientUtils.apiAdminProductList,
+    clientUtils.apiDoGet(clientUtils.apiAdminProducts,
         (apiRes) => {
           if (apiRes.status == 200) {
             vue.prodList = apiRes.data

@@ -67,6 +67,7 @@ import {
     cilLayers,
     cilLightbulb,
     cilList,
+    cilListRich, //Libro
     cilLocationPin,
     cilLockLocked,
     cilMagnifyingGlass,
@@ -133,6 +134,7 @@ export const iconsSet = Object.assign(
         cilLayers,
         cilLightbulb,
         cilList,
+        cilListRich, //Libro
         cilLocationPin,
         cilLockLocked,
         cilMagnifyingGlass,

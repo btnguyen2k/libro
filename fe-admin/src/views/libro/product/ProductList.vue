@@ -26,7 +26,7 @@
               </td>
             </template>
             <template #name="{item}">
-              <td class="col-6">
+              <td class="col-5">
                 {{ item.name }}
                 <br />
                 <span style="font-size: smaller">{{ item.desc }}</span>
@@ -39,12 +39,15 @@
             </template>
             <template #actions="{item}">
               <td style="white-space: nowrap; text-align: center">
-                <CLink @click="clickEditProduct(item.id)" :label="$t('message.action_edit')" class="btn btn-sm btn-primary">
-                  <CIcon name="cil-pencil"/>
+                <CLink @click="clickProductTopic(item.id)" class="btn btn-sm btn-info m-1">
+                  <CIcon name="cil-list-rich" v-c-tooltip.hover="$t('message.topics')"/>
                 </CLink>
-                &nbsp;
-                <CLink @click="clickDeleteProduct(item.id)" :label="$t('message.action_delete')" class="btn btn-sm btn-danger">
-                  <CIcon name="cil-trash"/>
+                <CLink @click="clickEditProduct(item.id)" class="btn btn-sm btn-primary m-1">
+                  <CIcon name="cil-pencil" v-c-tooltip.hover="$t('message.action_edit')"/>
+                </CLink>
+
+                <CLink @click="clickDeleteProduct(item.id)" class="btn btn-sm btn-danger m-1">
+                  <CIcon name="cil-trash" v-c-tooltip.hover="$t('message.action_delete')"/>
                 </CLink>
               </td>
             </template>
