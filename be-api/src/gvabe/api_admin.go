@@ -257,3 +257,42 @@ func apiAdminMapDomain(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *it
 
 	return itineris.NewApiResult(itineris.StatusOk).SetData(domainList)
 }
+
+// apiAdminUnmapDomain handles API call "adminUnmapDomain"
+func apiAdminUnmapDomain(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *itineris.ApiParams) *itineris.ApiResult {
+	_, authResult := authenticateApiCall(ctx)
+	if authResult != nil {
+		return authResult
+	}
+
+	// extract params
+	productId := _extractParam(params, "pid", reddo.TypeString, "", nil)
+	domainName := _extractParam(params, "domain", reddo.TypeString, "", nil)
+	if productId == "" || domainName == "" {
+		return itineris.NewApiResult(itineris.StatusErrorClient).SetMessage("name is empty")
+	}
+	product, err := productDao.Get(productId.(string))
+	if err != nil {
+		return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage(err.Error())
+	}
+	if product == nil {
+		return itineris.NewApiResult(itineris.StatusNotFound).SetMessage("product not found")
+	}
+
+	domainName = strings.ToLower(domainName.(string))
+	_, err = domainProductMappingDao.Remove(domainName.(string), product.GetId())
+	if err != nil {
+		return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage(err.Error())
+	}
+
+	mappings, err := domainProductMappingDao.Rget(product.GetId())
+	if err != nil {
+		return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage(err.Error())
+	}
+	domainList := make([]string, 0)
+	for _, mapping := range mappings {
+		domainList = append(domainList, mapping.Src)
+	}
+
+	return itineris.NewApiResult(itineris.StatusOk).SetData(domainList)
+}

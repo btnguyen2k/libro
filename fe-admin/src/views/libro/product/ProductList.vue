@@ -62,7 +62,7 @@ export default {
   name: 'Products',
   mounted() {
     const vue = this
-    clientUtils.apiDoGet(clientUtils.apiAdminProductList,
+    clientUtils.apiDoGet(clientUtils.apiAdminProducts,
         (apiRes) => {
           if (apiRes.status == 200) {
             vue.prodList = apiRes.data

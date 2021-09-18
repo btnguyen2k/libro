@@ -151,23 +151,41 @@ export default {
       this.modalUnmapMessage = this.$i18n.t('message.product_unmap_domain_msg', {domain: domain})
     },
     clickConfirmUnmapDomain(domain) {
-      this.modalUnmapShow = false
-    },
-    clickMapDomain() {
-      console.log(this.domainToMap)
+      let vue = this
+      let _saveFoundStatus = vue.foundStatus
+      vue.foundStatus = -1
+      vue.modalUnmapShow = false
+      clientUtils.apiDoDelete(
+          clientUtils.apiAdminDomain+"/"+domain.trim()+"/"+vue.product.id,
+          (apiRes) => {
+            if (apiRes.status != 200) {
+              vue.modalErrorShow = true
+              vue.modalErrorMessage = apiRes.status + ": " + apiRes.message
+            } else {
+              vue.modalInfoShow = true
+              vue.modalInfoMessage = vue.$t('message.product_domain_unmapped_msg', {domain: domain})
+              vue.product.domains = apiRes.data
+            }
+            vue.foundStatus = _saveFoundStatus
+          },
+          (err) => {
+            vue.modalErrorShow = true
+            vue.modalErrorMessage = err
+            vue.foundStatus = _saveFoundStatus
+          }
+      )
     },
     doSubmit(e) {
       e.preventDefault()
+      let _saveFoundStatus = this.foundStatus
       if (this.domainToMap != '') {
         // map domain
         let vue = this
-        let _saveFoundStatus = vue.foundStatus
         this.foundStatus = -1
         let data = {pid: this.product.id, domain: vue.domainToMap.trim()}
         clientUtils.apiDoPost(
             clientUtils.apiAdminDomains, data,
             (apiRes) => {
-              vue.foundStatus = _saveFoundStatus
               if (apiRes.status != 200) {
                 vue.modalErrorShow = true
                 vue.modalErrorMessage = apiRes.status + ": " + apiRes.message
@@ -177,6 +195,7 @@ export default {
                 vue.domainToMap = ''
                 vue.product.domains = apiRes.data
               }
+              vue.foundStatus = _saveFoundStatus
             },
             (err) => {
               vue.modalErrorShow = true

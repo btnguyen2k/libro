@@ -83,7 +83,7 @@ export default {
       e.preventDefault()
       let data = {is_published: this.form.isPublished, name: this.form.name, description: this.form.desc, domains: this.form.domains}
       clientUtils.apiDoPost(
-          clientUtils.apiAdminProductList, data,
+          clientUtils.apiAdminProducts, data,
           (apiRes) => {
             if (apiRes.status == 200) {
               this.$router.push({
