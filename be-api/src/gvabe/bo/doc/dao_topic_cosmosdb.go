@@ -18,3 +18,5 @@ func NewTopicDaoCosmosdb(sqlc *prom.SqlConnect, tableName string, txModeOnWrite 
 	dao.UniversalDao = henge.NewUniversalDaoCosmosdbSql(sqlc, tableName, spec)
 	return dao
 }
+
+/* There is no function CreateCosmosdbTableForTopics, use CreateSqlTableForTopics instead. */

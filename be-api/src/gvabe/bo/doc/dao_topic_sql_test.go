@@ -20,28 +20,16 @@ const (
 	testSqlTableTopic = "test_topic"
 )
 
-func sqlInitTableTopic(sqlc *prom.SqlConnect, table string) error {
+func sqlInitTableTopic(sqlc *prom.SqlConnect, tableName string) error {
 	rand.Seed(time.Now().UnixNano())
-	var err error
 	if sqlc.GetDbFlavor() == prom.FlavorCosmosDb {
-		_, err = sqlc.GetDB().Exec(fmt.Sprintf("CREATE DATABASE IF NOT EXISTS %s WITH MAXRU=10000", cosmosdbDbName))
+		_, err := sqlc.GetDB().Exec(fmt.Sprintf("CREATE DATABASE IF NOT EXISTS %s WITH MAXRU=10000", cosmosdbDbName))
 		if err != nil {
 			return err
 		}
 	}
-	sqlc.GetDB().Exec(fmt.Sprintf("DROP TABLE %s", table))
-	switch sqlc.GetDbFlavor() {
-	case prom.FlavorCosmosDb:
-		spec := &henge.CosmosdbCollectionSpec{Pk: henge.CosmosdbColId}
-		err = henge.InitCosmosdbCollection(sqlc, table, spec)
-	case prom.FlavorMySql:
-		err = henge.InitMysqlTable(sqlc, table, map[string]string{TopicColProductId: "VARCHAR(32)"})
-	case prom.FlavorPgSql:
-		err = henge.InitPgsqlTable(sqlc, table, map[string]string{TopicColProductId: "VARCHAR(32)"})
-	case prom.FlavorSqlite:
-		err = henge.InitSqliteTable(sqlc, table, map[string]string{TopicColProductId: "VARCHAR(32)"})
-	}
-	return err
+	sqlc.GetDB().Exec(fmt.Sprintf("DROP TABLE %s", tableName))
+	return CreateSqlTableForTopics(sqlc, tableName)
 }
 
 func initTopicDaoSql(sqlc *prom.SqlConnect) TopicDao {

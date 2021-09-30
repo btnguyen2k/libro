@@ -10,8 +10,11 @@ const (
 	// TableTopic is name of the database table to store document topic records.
 	TableTopic = "libro_topic"
 
-	// TopicColProductId is name of database column for document topic's product-id.
+	// TopicColProductId is name of database column storing document topic's product-id field.
 	TopicColProductId = "zpid"
+
+	// TopicColPosition is name of database column storing document topic's position.
+	TopicColPosition = "zpos"
 )
 
 // TopicDao defines API to access Topic storage

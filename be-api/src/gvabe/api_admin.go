@@ -11,6 +11,7 @@ import (
 	"github.com/btnguyen2k/henge"
 	"main/src/goapi"
 	"main/src/gvabe/bo"
+	"main/src/gvabe/bo/doc"
 	"main/src/gvabe/bo/product"
 	"main/src/gvabe/bo/user"
 	"main/src/itineris"
@@ -28,6 +29,8 @@ func authenticateApiCall(ctx *itineris.ApiContext) (*user.User, *itineris.ApiRes
 	}
 	return user, nil
 }
+
+/*----------------------------------------------------------------------*/
 
 // apiAdminGetStats handles API call "adminGetStats"
 func apiAdminGetStats(ctx *itineris.ApiContext, _ *itineris.ApiAuth, _ *itineris.ApiParams) *itineris.ApiResult {
@@ -60,6 +63,8 @@ func apiAdminGetStats(ctx *itineris.ApiContext, _ *itineris.ApiAuth, _ *itineris
 	return itineris.NewApiResult(itineris.StatusOk).SetData(data)
 }
 
+/*----------------------------------------------------------------------*/
+
 var funcProductToMapTransform = func(m map[string]interface{}) map[string]interface{} {
 	s := semita.NewSemita(m)
 
@@ -72,6 +77,7 @@ var funcProductToMapTransform = func(m map[string]interface{}) map[string]interf
 	result["is_published"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, product.ProdAttrIsPublished), reddo.TypeBool)
 	result["name"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, product.ProdAttrName), reddo.TypeString)
 	result["desc"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, product.ProdAttrDesc), reddo.TypeString)
+	result["num_topics"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, product.ProdAttrNumTopics), reddo.TypeInt)
 
 	// convert "creation timestamp" to UTC
 	if t, ok := result["t_created"].(time.Time); ok {
@@ -248,6 +254,8 @@ func apiAdminDeleteProduct(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params
 	return itineris.NewApiResult(itineris.StatusOk)
 }
 
+/*----------------------------------------------------------------------*/
+
 // apiAdminMapDomain handles API call "adminMapDomain"
 func apiAdminMapDomain(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *itineris.ApiParams) *itineris.ApiResult {
 	_, authResult := authenticateApiCall(ctx)
@@ -330,4 +338,56 @@ func apiAdminUnmapDomain(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *
 	}
 
 	return itineris.NewApiResult(itineris.StatusOk).SetData(domainList)
+}
+
+/*----------------------------------------------------------------------*/
+
+var funcTopicToMapTransform = func(m map[string]interface{}) map[string]interface{} {
+	s := semita.NewSemita(m)
+
+	// transform input map
+	result := map[string]interface{}{
+		"id":        m[henge.FieldId],
+		"t_created": m[henge.FieldTimeCreated],
+	}
+	result["product_id"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyFields, doc.TopicFieldProductId), reddo.TypeString)
+	result["title"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, doc.TopicAttrTitle), reddo.TypeString)
+	result["icon"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, doc.TopicAttrIcon), reddo.TypeString)
+	result["summary"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, doc.TopicAttrSummary), reddo.TypeString)
+	result["pos"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, doc.TopicFieldPosition), reddo.TypeInt)
+	result["num_pages"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, doc.TopicAttrNumPages), reddo.TypeInt)
+
+	// convert "creation timestamp" to UTC
+	if t, ok := result["t_created"].(time.Time); ok {
+		result["t_created"] = t.In(time.UTC)
+	}
+
+	return result
+}
+
+// apiAdminGetProductTopics handles API call "adminGetProductTopics"
+func apiAdminGetProductTopics(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *itineris.ApiParams) *itineris.ApiResult {
+	_, authResult := authenticateApiCall(ctx)
+	if authResult != nil {
+		return authResult
+	}
+
+	id := _extractParam(params, "id", reddo.TypeString, "", nil)
+	product, err := productDao.Get(id.(string))
+	if err != nil {
+		return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage(err.Error())
+	}
+	if product == nil {
+		return itineris.NewApiResult(itineris.StatusNotFound).SetMessage("product not found")
+	}
+
+	topicList, err := topicDao.GetAll(product, nil, nil)
+	if err != nil {
+		return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage(err.Error())
+	}
+	data := make([]map[string]interface{}, 0)
+	for _, topic := range topicList {
+		data = append(data, topic.ToMap(funcTopicToMapTransform))
+	}
+	return itineris.NewApiResult(itineris.StatusOk).SetData(data)
 }

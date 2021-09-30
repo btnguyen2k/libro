@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/btnguyen2k/consu/reddo"
+	"github.com/btnguyen2k/godal"
 	"main/src/gvabe/bo/product"
 )
 
@@ -239,27 +240,48 @@ func doTestTopicDaoCreateDelete(t *testing.T, name string, dao TopicDao) {
 }
 
 func doTestTopicDaoGetAll(t *testing.T, name string, dao TopicDao) {
+	// tstart := time.Now()
 	initSampleRowsTopic(t, name, dao)
+	// fmt.Printf("\tDEBUG - initSampleRowsTopic: %d ms\n", time.Now().Sub(tstart).Milliseconds())
 	for _, prod := range prodList {
-		boList, err := dao.GetAll(prod, nil, nil)
+		// tstart = time.Now()
+		sorting := (&godal.SortingField{FieldName: TopicFieldPosition}).ToSortingOpt()
+		boList, err := dao.GetAll(prod, nil, sorting)
 		expected := prodTopicCount[prod.GetId()]
 		if err != nil || len(boList) != expected {
 			t.Fatalf("%s failed: expected %#v but received %#v (error %s)", name+"/GetAll", expected, len(boList), err)
 		}
+		for i, n := 1, len(boList); i < n; i++ {
+			bo1, bo2 := boList[i-1], boList[i]
+			if bo1.GetPosition() > bo2.GetPosition() {
+				t.Fatalf("%s failed: out of order (%s,%v) come before (%s,%v)", name+"/GetAll", bo1.GetId(), bo1.GetPosition(), bo2.GetId(), bo2.GetPosition())
+			}
+		}
+		// fmt.Printf("\tDEBUG - GetAll(%s): %d ms\n", prod.GetId(), time.Now().Sub(tstart).Milliseconds())
 	}
 }
 
 func doTestTopicDaoGetN(t *testing.T, name string, dao TopicDao) {
+	// tstart := time.Now()
 	initSampleRowsTopic(t, name, dao)
+	// fmt.Printf("\tDEBUG - initSampleRowsTopic: %d ms\n", time.Now().Sub(tstart).Milliseconds())
 	for _, prod := range prodList {
+		// tstart = time.Now()
 		startOffset := rand.Intn(5)
 		numRowsLimit := rand.Intn(10) + 1
-		boList, err := dao.GetN(prod, startOffset, numRowsLimit, nil, nil)
+		sorting := (&godal.SortingField{FieldName: TopicFieldPosition}).ToSortingOpt()
+		boList, err := dao.GetN(prod, startOffset, numRowsLimit, nil, sorting)
 		expected := prodTopicCount[prod.GetId()]
 		expected = int(math.Min(math.Max(0, float64(expected-startOffset)), float64(numRowsLimit)))
 		if err != nil || len(boList) != expected {
-			// fmt.Printf("%s - %#v - %#v / %#v\n", prod.GetId(), startOffset, numRowsLimit, prodTopicCount)
 			t.Fatalf("%s failed: expected %#v but received %#v (error %s)", name+"/"+prod.GetId(), expected, len(boList), err)
 		}
+		for i, n := 1, len(boList); i < n; i++ {
+			bo1, bo2 := boList[i-1], boList[i]
+			if bo1.GetPosition() > bo2.GetPosition() {
+				t.Fatalf("%s failed: out of order (%s,%v) come before (%s,%v)", name+"/GetAll", bo1.GetId(), bo1.GetPosition(), bo2.GetId(), bo2.GetPosition())
+			}
+		}
+		// fmt.Printf("\tDEBUG - GetAll(%s): %d ms\n", prod.GetId(), time.Now().Sub(tstart).Milliseconds())
 	}
 }

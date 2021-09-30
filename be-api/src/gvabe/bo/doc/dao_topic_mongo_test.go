@@ -1,9 +1,11 @@
 package doc
 
 import (
+	"fmt"
 	"os"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/btnguyen2k/prom"
 )
@@ -106,13 +108,18 @@ func TestTopicDaoMongo_GetAll(t *testing.T) {
 	} else if mc == nil {
 		t.Fatalf("%s failed: nil", name)
 	}
-	err = mongoInitCollection(mc, testMongoCollectionTopic)
+	tstart := time.Now()
+	mc.GetCollection(testMongoCollectionTopic).Drop(nil)
+	err = CreateMongoCollectionForTopics(mc, testMongoCollectionTopic)
 	if err != nil {
 		t.Fatalf("%s failed: error [%s]", name+"/mongoInitCollection", err)
 	}
+	fmt.Printf("DEBUG - Init collection: %d ms\n", time.Now().Sub(tstart).Milliseconds())
+	tstart = time.Now()
 	dao := initTopicDaoMongo(mc)
 	doTestTopicDaoGetAll(t, name, dao)
 	mc.Close(nil)
+	fmt.Printf("DEBUG - doTestTopicDaoGetAll: %d ms\n", time.Now().Sub(tstart).Milliseconds())
 }
 
 func TestTopicDaoMongo_GetN(t *testing.T) {
@@ -125,11 +132,19 @@ func TestTopicDaoMongo_GetN(t *testing.T) {
 	} else if mc == nil {
 		t.Fatalf("%s failed: nil", name)
 	}
-	err = mongoInitCollection(mc, testMongoCollectionTopic)
+	tstart := time.Now()
+	mc.GetCollection(testMongoCollectionTopic).Drop(nil)
+	err = CreateMongoCollectionForTopics(mc, testMongoCollectionTopic)
+	if err != nil {
+		t.Fatalf("%s failed: error [%s]", name+"/mongoInitCollection", err)
+	}
+	fmt.Printf("DEBUG - Init collection: %d ms\n", time.Now().Sub(tstart).Milliseconds())
+	tstart = time.Now()
 	if err != nil {
 		t.Fatalf("%s failed: error [%s]", name+"/mongoInitCollection", err)
 	}
 	dao := initTopicDaoMongo(mc)
 	doTestTopicDaoGetN(t, name, dao)
 	mc.Close(nil)
+	fmt.Printf("DEBUG - doTestTopicDaoGetAll: %d ms\n", time.Now().Sub(tstart).Milliseconds())
 }

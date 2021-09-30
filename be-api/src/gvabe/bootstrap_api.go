@@ -28,6 +28,11 @@ func initApiHandlers(router *itineris.ApiRouter) {
 	router.SetHandler("adminDeleteProduct", apiAdminDeleteProduct)
 	router.SetHandler("adminMapDomain", apiAdminMapDomain)
 	router.SetHandler("adminUnmapDomain", apiAdminUnmapDomain)
+	router.SetHandler("adminGetProductTopics", apiAdminGetProductTopics)
+	// router.SetHandler("adminAddProductTopics", apiAdminAddProductTopics)
+	// router.SetHandler("adminGetTopic", apiAdminGetTopic)
+	// router.SetHandler("adminUpdateTopic", apiAdminUpdateTopic)
+	// router.SetHandler("adminDeleteTopic", apiAdminDeleteTopic)
 
 	// router.SetHandler("myFeed", apiMyFeed)
 	// router.SetHandler("myBlog", apiMyBlog)

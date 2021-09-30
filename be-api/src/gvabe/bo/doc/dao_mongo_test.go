@@ -16,12 +16,12 @@ const (
 )
 
 func mongoInitCollection(mc *prom.MongoConnect, collection string) error {
-	rand.Seed(time.Now().UnixNano())
 	mc.GetCollection(collection).Drop(nil)
 	return henge.InitMongoCollection(mc, collection)
 }
 
 func newMongoConnect(t *testing.T, testName string, db, url string) (*prom.MongoConnect, error) {
+	rand.Seed(time.Now().UnixNano())
 	db = strings.Trim(db, "\"")
 	url = strings.Trim(url, "\"")
 	if db == "" || url == "" {

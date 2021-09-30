@@ -40,6 +40,11 @@ func NewTopicFromUbo(ubo *henge.UniversalBo) *Topic {
 	} else {
 		bo.productId, _ = v.(string)
 	}
+	if v, err := ubo.GetExtraAttrAs(TopicFieldPosition, reddo.TypeInt); err != nil {
+		return nil
+	} else if temp, ok := v.(int64); ok {
+		bo.position = int(temp)
+	}
 	if v, err := ubo.GetDataAttrAs(TopicAttrTitle, reddo.TypeString); err != nil {
 		return nil
 	} else {
@@ -55,11 +60,6 @@ func NewTopicFromUbo(ubo *henge.UniversalBo) *Topic {
 	} else {
 		bo.summary, _ = v.(string)
 	}
-	if v, err := ubo.GetDataAttrAs(TopicAttrPosition, reddo.TypeInt); err != nil {
-		return nil
-	} else if temp, ok := v.(int64); ok {
-		bo.position = int(temp)
-	}
 	if v, err := ubo.GetDataAttrAs(TopicAttrNumPages, reddo.TypeInt); err != nil {
 		return nil
 	} else if temp, ok := v.(int64); ok {
@@ -72,6 +72,9 @@ const (
 	// TopicFieldProductId holds id of the product that the document topic belongs to
 	TopicFieldProductId = "prod"
 
+	// TopicFieldPosition is the relative position of document topic (for ordering purpose)
+	TopicFieldPosition = "pos"
+
 	// TopicAttrTitle is document topic's title
 	TopicAttrTitle = "title"
 
@@ -80,9 +83,6 @@ const (
 
 	// TopicAttrSummary is the summary text of document topic
 	TopicAttrSummary = "summary"
-
-	// TopicAttrPosition is the relative position of document topic (for ordering purpose)
-	TopicAttrPosition = "pos"
 
 	// TopicAttrNumPages is the number of document pages belong to this topic
 	TopicAttrNumPages = "npages"
@@ -96,10 +96,10 @@ const (
 type Topic struct {
 	*henge.UniversalBo `json:"_ubo"`
 	productId          string `json:"prod"`
+	position           int    `json:"pos"`
 	title              string `json:"title"`
 	icon               string `json:"icon"`
 	summary            string `json:"summary"`
-	position           int    `json:"pos"`
 	numPages           int    `json:"npages"`
 }
 
@@ -120,12 +120,12 @@ func (t *Topic) ToMap(postFunc henge.FuncPostUboToMap) map[string]interface{} {
 		henge.FieldId: t.GetId(),
 		bo.SerKeyFields: map[string]interface{}{
 			TopicFieldProductId: t.productId,
+			TopicFieldPosition:  t.position,
 		},
 		bo.SerKeyAttrs: map[string]interface{}{
 			TopicAttrTitle:    t.title,
 			TopicAttrIcon:     t.icon,
 			TopicAttrSummary:  t.summary,
-			TopicAttrPosition: t.position,
 			TopicAttrNumPages: t.numPages,
 		},
 	}
@@ -143,12 +143,12 @@ func (t *Topic) MarshalJSON() ([]byte, error) {
 		topicAttrUbo: t.UniversalBo.Clone(),
 		bo.SerKeyFields: map[string]interface{}{
 			TopicFieldProductId: t.productId,
+			TopicFieldPosition:  t.position,
 		},
 		bo.SerKeyAttrs: map[string]interface{}{
 			TopicAttrTitle:    t.title,
 			TopicAttrIcon:     t.icon,
 			TopicAttrSummary:  t.summary,
-			TopicAttrPosition: t.position,
 			TopicAttrNumPages: t.numPages,
 		},
 	}
@@ -173,6 +173,11 @@ func (t *Topic) UnmarshalJSON(data []byte) error {
 		if t.productId, err = reddo.ToString(_fields[TopicFieldProductId]); err != nil {
 			return err
 		}
+		if v, err := reddo.ToInt(_fields[TopicFieldPosition]); err != nil {
+			return err
+		} else {
+			t.position = int(v)
+		}
 	}
 	if _attrs, ok := m[bo.SerKeyAttrs].(map[string]interface{}); ok {
 		if t.title, err = reddo.ToString(_attrs[TopicAttrTitle]); err != nil {
@@ -183,11 +188,6 @@ func (t *Topic) UnmarshalJSON(data []byte) error {
 		}
 		if t.summary, err = reddo.ToString(_attrs[TopicAttrSummary]); err != nil {
 			return err
-		}
-		if v, err := reddo.ToInt(_attrs[TopicAttrPosition]); err != nil {
-			return err
-		} else {
-			t.position = int(v)
 		}
 		if v, err := reddo.ToInt(_attrs[TopicAttrNumPages]); err != nil {
 			return err
@@ -268,10 +268,10 @@ func (t *Topic) SetNumPages(v int) *Topic {
 // sync is called to synchronize BO's attributes to its UniversalBo.
 func (t *Topic) sync() *Topic {
 	t.SetExtraAttr(TopicFieldProductId, t.productId)
+	t.SetExtraAttr(TopicFieldPosition, t.position)
 	t.SetDataAttr(TopicAttrTitle, t.title)
 	t.SetDataAttr(TopicAttrIcon, t.icon)
 	t.SetDataAttr(TopicAttrSummary, t.summary)
-	t.SetDataAttr(TopicAttrPosition, t.position)
 	t.SetDataAttr(TopicAttrNumPages, t.numPages)
 	t.UniversalBo.Sync()
 	return t

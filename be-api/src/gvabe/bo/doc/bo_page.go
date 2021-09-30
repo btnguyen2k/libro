@@ -61,7 +61,7 @@ func NewPageFromUbo(ubo *henge.UniversalBo) *Page {
 	} else {
 		bo.summary, _ = v.(string)
 	}
-	if v, err := ubo.GetDataAttrAs(PageAttrPosition, reddo.TypeInt); err != nil {
+	if v, err := ubo.GetDataAttrAs(PageFieldPosition, reddo.TypeInt); err != nil {
 		return nil
 	} else if temp, ok := v.(int64); ok {
 		bo.position = int(temp)
@@ -81,6 +81,9 @@ const (
 	// PageFieldTopicId holds id of the topic that the document page belongs to
 	PageFieldTopicId = "topic"
 
+	// PageFieldPosition is the relative position of document page (for ordering purpose)
+	PageFieldPosition = "pos"
+
 	// PageAttrTitle is document page's title
 	PageAttrTitle = "title"
 
@@ -89,9 +92,6 @@ const (
 
 	// PageAttrSummary is the summary text of document page
 	PageAttrSummary = "summary"
-
-	// PageAttrPosition is the relative position of document page (for ordering purpose)
-	PageAttrPosition = "pos"
 
 	// PageAttrContent is the content of document page
 	PageAttrContent = "content"
@@ -106,10 +106,10 @@ type Page struct {
 	*henge.UniversalBo `json:"_ubo"`
 	productId          string `json:"prod"`
 	topicId            string `json:"topic"`
+	position           int    `json:"pos"`
 	title              string `json:"title"`
 	icon               string `json:"icon"`
 	summary            string `json:"summary"`
-	position           int    `json:"pos"`
 	content            string `json:"content"`
 }
 
@@ -131,13 +131,13 @@ func (p *Page) ToMap(postFunc henge.FuncPostUboToMap) map[string]interface{} {
 		bo.SerKeyFields: map[string]interface{}{
 			PageFieldProductId: p.productId,
 			PageFieldTopicId:   p.topicId,
+			PageFieldPosition:  p.position,
 		},
 		bo.SerKeyAttrs: map[string]interface{}{
-			PageAttrTitle:    p.title,
-			PageAttrIcon:     p.icon,
-			PageAttrSummary:  p.summary,
-			PageAttrPosition: p.position,
-			PageAttrContent:  p.content,
+			PageAttrTitle:   p.title,
+			PageAttrIcon:    p.icon,
+			PageAttrSummary: p.summary,
+			PageAttrContent: p.content,
 		},
 	}
 	if postFunc != nil {
@@ -155,13 +155,13 @@ func (p *Page) MarshalJSON() ([]byte, error) {
 		bo.SerKeyFields: map[string]interface{}{
 			PageFieldProductId: p.productId,
 			PageFieldTopicId:   p.topicId,
+			PageFieldPosition:  p.position,
 		},
 		bo.SerKeyAttrs: map[string]interface{}{
-			PageAttrTitle:    p.title,
-			PageAttrIcon:     p.icon,
-			PageAttrSummary:  p.summary,
-			PageAttrPosition: p.position,
-			PageAttrContent:  p.content,
+			PageAttrTitle:   p.title,
+			PageAttrIcon:    p.icon,
+			PageAttrSummary: p.summary,
+			PageAttrContent: p.content,
 		},
 	}
 	return json.Marshal(m)
@@ -188,6 +188,11 @@ func (p *Page) UnmarshalJSON(data []byte) error {
 		if p.topicId, err = reddo.ToString(_fields[PageFieldTopicId]); err != nil {
 			return err
 		}
+		if v, err := reddo.ToInt(_fields[PageFieldPosition]); err != nil {
+			return err
+		} else {
+			p.position = int(v)
+		}
 	}
 	if _attrs, ok := m[bo.SerKeyAttrs].(map[string]interface{}); ok {
 		if p.title, err = reddo.ToString(_attrs[PageAttrTitle]); err != nil {
@@ -198,11 +203,6 @@ func (p *Page) UnmarshalJSON(data []byte) error {
 		}
 		if p.summary, err = reddo.ToString(_attrs[PageAttrSummary]); err != nil {
 			return err
-		}
-		if v, err := reddo.ToInt(_attrs[PageAttrPosition]); err != nil {
-			return err
-		} else {
-			p.position = int(v)
 		}
 		if p.content, err = reddo.ToString(_attrs[PageAttrContent]); err != nil {
 			return err
@@ -293,10 +293,10 @@ func (p *Page) SetContent(v string) *Page {
 func (p *Page) sync() *Page {
 	p.SetExtraAttr(PageFieldProductId, p.productId)
 	p.SetExtraAttr(PageFieldTopicId, p.topicId)
+	p.SetExtraAttr(PageFieldPosition, p.position)
 	p.SetDataAttr(PageAttrTitle, p.title)
 	p.SetDataAttr(PageAttrIcon, p.icon)
 	p.SetDataAttr(PageAttrSummary, p.summary)
-	p.SetDataAttr(PageAttrPosition, p.position)
 	p.SetDataAttr(PageAttrContent, p.content)
 	p.UniversalBo.Sync()
 	return p

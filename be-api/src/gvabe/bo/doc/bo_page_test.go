@@ -89,7 +89,7 @@ func TestNewPageFromUbo(t *testing.T) {
 	ubo.SetDataAttr(PageAttrTitle, _title)
 	ubo.SetDataAttr(PageAttrIcon, _icon)
 	ubo.SetDataAttr(PageAttrSummary, _summary)
-	ubo.SetDataAttr(PageAttrPosition, _pos)
+	ubo.SetDataAttr(PageFieldPosition, _pos)
 	ubo.SetDataAttr(PageAttrContent, _content)
 
 	page := NewPageFromUbo(ubo)
@@ -160,11 +160,11 @@ func TestPage_ToMap(t *testing.T) {
 			PageFieldTopicId:   _topic.GetId(),
 		},
 		bo.SerKeyAttrs: map[string]interface{}{
-			PageAttrTitle:    _title + "-page",
-			PageAttrIcon:     _icon + "-page",
-			PageAttrSummary:  _summary + "-page",
-			PageAttrPosition: _pos + 1,
-			PageAttrContent:  _content,
+			PageAttrTitle:     _title + "-page",
+			PageAttrIcon:      _icon + "-page",
+			PageAttrSummary:   _summary + "-page",
+			PageFieldPosition: _pos + 1,
+			PageAttrContent:   _content,
 		},
 	}
 	if !reflect.DeepEqual(m, expected) {
@@ -185,11 +185,11 @@ func TestPage_ToMap(t *testing.T) {
 			PageFieldTopicId:   _topic.GetId(),
 		},
 		"SerKeyAttrs": map[string]interface{}{
-			PageAttrTitle:    _title + "-page",
-			PageAttrIcon:     _icon + "-page",
-			PageAttrSummary:  _summary + "-page",
-			PageAttrPosition: _pos + 1,
-			PageAttrContent:  _content,
+			PageAttrTitle:     _title + "-page",
+			PageAttrIcon:      _icon + "-page",
+			PageAttrSummary:   _summary + "-page",
+			PageFieldPosition: _pos + 1,
+			PageAttrContent:   _content,
 		},
 	}
 	if !reflect.DeepEqual(m, expected) {

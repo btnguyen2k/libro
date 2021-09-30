@@ -75,10 +75,10 @@ func TestNewTopicFromUbo(t *testing.T) {
 	_numPages := _pos%10 + 1
 	ubo := henge.NewUniversalBo(_id, _tagVersion)
 	ubo.SetExtraAttr(TopicFieldProductId, _prodId)
+	ubo.SetExtraAttr(TopicFieldPosition, _pos)
 	ubo.SetDataAttr(TopicAttrTitle, _title)
 	ubo.SetDataAttr(TopicAttrIcon, _icon)
 	ubo.SetDataAttr(TopicAttrSummary, _summary)
-	ubo.SetDataAttr(TopicAttrPosition, _pos)
 	ubo.SetDataAttr(TopicAttrNumPages, _numPages)
 
 	topic := NewTopicFromUbo(ubo)
@@ -137,12 +137,12 @@ func TestTopic_ToMap(t *testing.T) {
 		henge.FieldId: _id,
 		bo.SerKeyFields: map[string]interface{}{
 			TopicFieldProductId: _prod.GetId(),
+			TopicFieldPosition:  _pos,
 		},
 		bo.SerKeyAttrs: map[string]interface{}{
 			TopicAttrTitle:    _title,
 			TopicAttrIcon:     _icon,
 			TopicAttrSummary:  _summary,
-			TopicAttrPosition: _pos,
 			TopicAttrNumPages: _numPages,
 		},
 	}
@@ -161,12 +161,12 @@ func TestTopic_ToMap(t *testing.T) {
 		"FieldId": _id,
 		"SerKeyFields": map[string]interface{}{
 			TopicFieldProductId: _prod.GetId(),
+			TopicFieldPosition:  _pos,
 		},
 		"SerKeyAttrs": map[string]interface{}{
 			TopicAttrTitle:    _title,
 			TopicAttrIcon:     _icon,
 			TopicAttrSummary:  _summary,
-			TopicAttrPosition: _pos,
 			TopicAttrNumPages: _numPages,
 		},
 	}
