@@ -86,10 +86,10 @@ func TestNewPageFromUbo(t *testing.T) {
 	ubo := henge.NewUniversalBo(_id, _tagVersion)
 	ubo.SetExtraAttr(PageFieldProductId, _prodId)
 	ubo.SetExtraAttr(PageFieldTopicId, _topicId)
+	ubo.SetExtraAttr(PageFieldPosition, _pos)
 	ubo.SetDataAttr(PageAttrTitle, _title)
 	ubo.SetDataAttr(PageAttrIcon, _icon)
 	ubo.SetDataAttr(PageAttrSummary, _summary)
-	ubo.SetDataAttr(PageFieldPosition, _pos)
 	ubo.SetDataAttr(PageAttrContent, _content)
 
 	page := NewPageFromUbo(ubo)
@@ -158,13 +158,13 @@ func TestPage_ToMap(t *testing.T) {
 		bo.SerKeyFields: map[string]interface{}{
 			PageFieldProductId: _prod.GetId(),
 			PageFieldTopicId:   _topic.GetId(),
+			PageFieldPosition:  _pos + 1,
 		},
 		bo.SerKeyAttrs: map[string]interface{}{
-			PageAttrTitle:     _title + "-page",
-			PageAttrIcon:      _icon + "-page",
-			PageAttrSummary:   _summary + "-page",
-			PageFieldPosition: _pos + 1,
-			PageAttrContent:   _content,
+			PageAttrTitle:   _title + "-page",
+			PageAttrIcon:    _icon + "-page",
+			PageAttrSummary: _summary + "-page",
+			PageAttrContent: _content,
 		},
 	}
 	if !reflect.DeepEqual(m, expected) {
@@ -183,13 +183,13 @@ func TestPage_ToMap(t *testing.T) {
 		"SerKeyFields": map[string]interface{}{
 			PageFieldProductId: _prod.GetId(),
 			PageFieldTopicId:   _topic.GetId(),
+			PageFieldPosition:  _pos + 1,
 		},
 		"SerKeyAttrs": map[string]interface{}{
-			PageAttrTitle:     _title + "-page",
-			PageAttrIcon:      _icon + "-page",
-			PageAttrSummary:   _summary + "-page",
-			PageFieldPosition: _pos + 1,
-			PageAttrContent:   _content,
+			PageAttrTitle:   _title + "-page",
+			PageAttrIcon:    _icon + "-page",
+			PageAttrSummary: _summary + "-page",
+			PageAttrContent: _content,
 		},
 	}
 	if !reflect.DeepEqual(m, expected) {
