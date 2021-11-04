@@ -37,7 +37,7 @@ func initSampleRowsPage(t *testing.T, testName string, dao PageDao) {
 		_title := "Page " + istr
 		_icon := "default"
 		_summary := "page summary " + istr
-		_pos := rand.Int()
+		_pos := rand.Intn(10242048)
 		_content := "page content " + istr
 		_email := istr + "@libro"
 		_age := float64(18 + i)
@@ -264,7 +264,12 @@ func doTestPageDaoGetAll(t *testing.T, name string, dao PageDao) {
 		boList, err := dao.GetAll(topic, nil, nil)
 		expected := topicPageCount[topic.GetId()]
 		if err != nil || len(boList) != expected {
-			t.Fatalf("%s failed: expected %#v but received %#v (error %s)", name+"/GetAll", expected, len(boList), err)
+			t.Fatalf("%s failed: expected %#v but received %#v (error %s)", name, expected, len(boList), err)
+		}
+		for i, n := 1, len(boList); i < n; i++ {
+			if boList[i].GetPosition() < boList[i-1].GetPosition() {
+				t.Fatalf("%s failed: out of order %d-%d / %d-%d", name, i-1, boList[i-1].GetPosition(), i, boList[i].GetPosition())
+			}
 		}
 	}
 }
@@ -279,6 +284,11 @@ func doTestPageDaoGetN(t *testing.T, name string, dao PageDao) {
 		expected = int(math.Min(math.Max(0, float64(expected-startOffset)), float64(numRowsLimit)))
 		if err != nil || len(boList) != expected {
 			t.Fatalf("%s failed: expected %#v but received %#v (error %s)", name+"/"+topic.GetId(), expected, len(boList), err)
+		}
+		for i, n := 1, len(boList); i < n; i++ {
+			if boList[i].GetPosition() < boList[i-1].GetPosition() {
+				t.Fatalf("%s failed: out of order %d-%d / %d-%d", name, i-1, boList[i-1].GetPosition(), i, boList[i].GetPosition())
+			}
 		}
 	}
 }

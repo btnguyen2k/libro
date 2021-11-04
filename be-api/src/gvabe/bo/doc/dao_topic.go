@@ -73,6 +73,9 @@ func (dao *BaseTopicDaoImpl) GetN(prod *product.Product, fromOffset, maxNumRows 
 	if prod == nil {
 		return make([]*Topic, 0), nil
 	}
+	if sorting == nil {
+		sorting = (&godal.SortingField{FieldName: TopicFieldPosition}).ToSortingOpt()
+	}
 	myFilter := (&godal.FilterOptAnd{}).Add(filter).
 		Add(godal.FilterOptFieldOpValue{FieldName: TopicFieldProductId, Operator: godal.FilterOpEqual, Value: prod.GetId()})
 	uboList, err := dao.UniversalDao.GetN(fromOffset, maxNumRows, myFilter, sorting)

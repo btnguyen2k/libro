@@ -72,6 +72,9 @@ func (dao *BasePageDaoImpl) GetN(topic *Topic, fromOffset, maxNumRows int, filte
 	if topic == nil {
 		return make([]*Page, 0), nil
 	}
+	if sorting == nil {
+		sorting = (&godal.SortingField{FieldName: PageFieldPosition}).ToSortingOpt()
+	}
 	myFilter := (&godal.FilterOptAnd{}).Add(filter).
 		Add(godal.FilterOptFieldOpValue{FieldName: PageFieldTopicId, Operator: godal.FilterOpEqual, Value: topic.GetId()})
 	uboList, err := dao.UniversalDao.GetN(fromOffset, maxNumRows, myFilter, sorting)

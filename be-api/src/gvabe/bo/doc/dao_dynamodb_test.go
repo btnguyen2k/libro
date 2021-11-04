@@ -44,6 +44,10 @@ func dynamodbInitTable(adc *prom.AwsDynamodbConnect, table string, spec *henge.D
 	return henge.InitDynamodbTables(adc, table, spec)
 }
 
+func dynamodbInitGsi(adc *prom.AwsDynamodbConnect, table, gsi string, attrsDef []prom.AwsDynamodbNameAndType, keyAttrs []prom.AwsDynamodbNameAndType) error {
+	return adc.CreateGlobalSecondaryIndex(nil, table, gsi, 1, 1, attrsDef, keyAttrs)
+}
+
 func newDynamodbConnect(t *testing.T, testName string) (*prom.AwsDynamodbConnect, error) {
 	awsRegion := strings.ReplaceAll(os.Getenv("AWS_REGION"), `"`, "")
 	awsAccessKeyId := strings.ReplaceAll(os.Getenv("AWS_ACCESS_KEY_ID"), `"`, "")

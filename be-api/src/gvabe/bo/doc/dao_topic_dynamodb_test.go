@@ -1,6 +1,7 @@
 package doc
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/btnguyen2k/henge"
@@ -113,6 +114,13 @@ func TestTopicDaoDynamodb_GetAll(t *testing.T) {
 	if err != nil {
 		t.Fatalf("%s failed: error [%s]", name+"/dynamodbInitTable", err)
 	}
+	gsiName := strings.ReplaceAll(awsDynamodbGSITopicPos, "{tableName}", testDynamodbTableTopic)
+	err = dynamodbInitGsi(adc, testDynamodbTableTopic, gsiName,
+		[]prom.AwsDynamodbNameAndType{{Name: TopicFieldProductId, Type: prom.AwsAttrTypeString}, {Name: TopicFieldPosition, Type: prom.AwsAttrTypeNumber}},
+		[]prom.AwsDynamodbNameAndType{{Name: TopicFieldProductId, Type: prom.AwsKeyTypePartition}, {Name: TopicFieldPosition, Type: prom.AwsKeyTypeSort}})
+	if err != nil {
+		t.Fatalf("%s failed: error [%s]", name+"/dynamodbInitGsi", err)
+	}
 	dao := initTopicDaoDynamodb(adc)
 	if dao == nil {
 		t.Fatalf("%s failed: nil", name+"/initTopicDaoDynamodb")
@@ -133,6 +141,13 @@ func TestTopicDaoDynamodb_GetN(t *testing.T) {
 	err = dynamodbInitTable(adc, testDynamodbTableTopic, spec)
 	if err != nil {
 		t.Fatalf("%s failed: error [%s]", name+"/dynamodbInitTable", err)
+	}
+	gsiName := strings.ReplaceAll(awsDynamodbGSITopicPos, "{tableName}", testDynamodbTableTopic)
+	err = dynamodbInitGsi(adc, testDynamodbTableTopic, gsiName,
+		[]prom.AwsDynamodbNameAndType{{Name: TopicFieldProductId, Type: prom.AwsAttrTypeString}, {Name: TopicFieldPosition, Type: prom.AwsAttrTypeNumber}},
+		[]prom.AwsDynamodbNameAndType{{Name: TopicFieldProductId, Type: prom.AwsKeyTypePartition}, {Name: TopicFieldPosition, Type: prom.AwsKeyTypeSort}})
+	if err != nil {
+		t.Fatalf("%s failed: error [%s]", name+"/dynamodbInitGsi", err)
 	}
 	dao := initTopicDaoDynamodb(adc)
 	if dao == nil {

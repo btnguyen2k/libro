@@ -1,6 +1,7 @@
 package doc
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/btnguyen2k/henge"
@@ -113,6 +114,13 @@ func TestPageDaoDynamodb_GetAll(t *testing.T) {
 	if err != nil {
 		t.Fatalf("%s failed: error [%s]", name+"/dynamodbInitTable", err)
 	}
+	gsiName := strings.ReplaceAll(awsDynamodbGSIPagePos, "{tableName}", testDynamodbTablePage)
+	err = dynamodbInitGsi(adc, testDynamodbTablePage, gsiName,
+		[]prom.AwsDynamodbNameAndType{{Name: PageFieldTopicId, Type: prom.AwsAttrTypeString}, {Name: PageFieldPosition, Type: prom.AwsAttrTypeNumber}},
+		[]prom.AwsDynamodbNameAndType{{Name: PageFieldTopicId, Type: prom.AwsKeyTypePartition}, {Name: PageFieldPosition, Type: prom.AwsKeyTypeSort}})
+	if err != nil {
+		t.Fatalf("%s failed: error [%s]", name+"/dynamodbInitGsi", err)
+	}
 	dao := initPageDaoDynamodb(adc)
 	if dao == nil {
 		t.Fatalf("%s failed: nil", name+"/initPageDaoDynamodb")
@@ -133,6 +141,13 @@ func TestPageDaoDynamodb_GetN(t *testing.T) {
 	err = dynamodbInitTable(adc, testDynamodbTablePage, spec)
 	if err != nil {
 		t.Fatalf("%s failed: error [%s]", name+"/dynamodbInitTable", err)
+	}
+	gsiName := strings.ReplaceAll(awsDynamodbGSIPagePos, "{tableName}", testDynamodbTablePage)
+	err = dynamodbInitGsi(adc, testDynamodbTablePage, gsiName,
+		[]prom.AwsDynamodbNameAndType{{Name: PageFieldTopicId, Type: prom.AwsAttrTypeString}, {Name: PageFieldPosition, Type: prom.AwsAttrTypeNumber}},
+		[]prom.AwsDynamodbNameAndType{{Name: PageFieldTopicId, Type: prom.AwsKeyTypePartition}, {Name: PageFieldPosition, Type: prom.AwsKeyTypeSort}})
+	if err != nil {
+		t.Fatalf("%s failed: error [%s]", name+"/dynamodbInitGsi", err)
 	}
 	dao := initPageDaoDynamodb(adc)
 	if dao == nil {

@@ -46,6 +46,11 @@ func NewPageFromUbo(ubo *henge.UniversalBo) *Page {
 	} else {
 		bo.topicId, _ = v.(string)
 	}
+	if v, err := ubo.GetExtraAttrAs(PageFieldPosition, reddo.TypeInt); err != nil {
+		return nil
+	} else if temp, ok := v.(int64); ok {
+		bo.position = int(temp)
+	}
 	if v, err := ubo.GetDataAttrAs(PageAttrTitle, reddo.TypeString); err != nil {
 		return nil
 	} else {
@@ -60,11 +65,6 @@ func NewPageFromUbo(ubo *henge.UniversalBo) *Page {
 		return nil
 	} else {
 		bo.summary, _ = v.(string)
-	}
-	if v, err := ubo.GetDataAttrAs(PageFieldPosition, reddo.TypeInt); err != nil {
-		return nil
-	} else if temp, ok := v.(int64); ok {
-		bo.position = int(temp)
 	}
 	if v, err := ubo.GetDataAttrAs(PageAttrContent, reddo.TypeString); err != nil {
 		return nil
@@ -151,7 +151,7 @@ func (p *Page) ToMap(postFunc henge.FuncPostUboToMap) map[string]interface{} {
 func (p *Page) MarshalJSON() ([]byte, error) {
 	p.sync()
 	m := map[string]interface{}{
-		topicAttrUbo: p.UniversalBo.Clone(),
+		pageAttrUbo: p.UniversalBo.Clone(),
 		bo.SerKeyFields: map[string]interface{}{
 			PageFieldProductId: p.productId,
 			PageFieldTopicId:   p.topicId,
@@ -175,8 +175,8 @@ func (p *Page) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	var err error
-	if m[topicAttrUbo] != nil {
-		js, _ := json.Marshal(m[topicAttrUbo])
+	if m[pageAttrUbo] != nil {
+		js, _ := json.Marshal(m[pageAttrUbo])
 		if err = json.Unmarshal(js, &p.UniversalBo); err != nil {
 			return err
 		}
