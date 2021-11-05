@@ -20,28 +20,16 @@ const (
 	testSqlTablePage = "test_page"
 )
 
-func sqlInitTablePage(sqlc *prom.SqlConnect, table string) error {
+func sqlInitTablePage(sqlc *prom.SqlConnect, tableName string) error {
 	rand.Seed(time.Now().UnixNano())
-	var err error
 	if sqlc.GetDbFlavor() == prom.FlavorCosmosDb {
-		_, err = sqlc.GetDB().Exec(fmt.Sprintf("CREATE DATABASE IF NOT EXISTS %s WITH MAXRU=10000", cosmosdbDbName))
+		_, err := sqlc.GetDB().Exec(fmt.Sprintf("CREATE DATABASE IF NOT EXISTS %s WITH MAXRU=10000", cosmosdbDbName))
 		if err != nil {
 			return err
 		}
 	}
-	sqlc.GetDB().Exec(fmt.Sprintf("DROP TABLE %s", table))
-	switch sqlc.GetDbFlavor() {
-	case prom.FlavorCosmosDb:
-		spec := &henge.CosmosdbCollectionSpec{Pk: henge.CosmosdbColId}
-		err = henge.InitCosmosdbCollection(sqlc, table, spec)
-	case prom.FlavorMySql:
-		err = henge.InitMysqlTable(sqlc, table, map[string]string{PageColProductId: "VARCHAR(32)", PageColTopicId: "VARCHAR(32)"})
-	case prom.FlavorPgSql:
-		err = henge.InitPgsqlTable(sqlc, table, map[string]string{PageColProductId: "VARCHAR(32)", PageColTopicId: "VARCHAR(32)"})
-	case prom.FlavorSqlite:
-		err = henge.InitSqliteTable(sqlc, table, map[string]string{PageColProductId: "VARCHAR(32)", PageColTopicId: "VARCHAR(32)"})
-	}
-	return err
+	sqlc.GetDB().Exec(fmt.Sprintf("DROP TABLE %s", tableName))
+	return CreateSqlTableForPages(sqlc, tableName)
 }
 
 func initPageDaoSql(sqlc *prom.SqlConnect) PageDao {

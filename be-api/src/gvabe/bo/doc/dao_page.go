@@ -9,11 +9,14 @@ const (
 	// TablePage is name of the database table to store document page records.
 	TablePage = "libro_page"
 
-	// PageColProductId is name of database column for document page's product-id.
+	// PageColProductId is name of table column for document page's product-id.
 	PageColProductId = "zpid"
 
-	// PageColTopicId is name of database column for document page's topic-id.
+	// PageColTopicId is name of table column for document page's topic-id.
 	PageColTopicId = "ztid"
+
+	// PageColPosition is name of table column for document page's relative position (for sorting).
+	PageColPosition = "zpos"
 )
 
 // PageDao defines API to access Page storage

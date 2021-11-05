@@ -18,3 +18,5 @@ func NewPageDaoCosmosdb(sqlc *prom.SqlConnect, tableName string, txModeOnWrite b
 	dao.UniversalDao = henge.NewUniversalDaoCosmosdbSql(sqlc, tableName, spec)
 	return dao
 }
+
+/* There is no function CreateCosmosdbTableForPages, use CreateSqlTableForPages instead. */

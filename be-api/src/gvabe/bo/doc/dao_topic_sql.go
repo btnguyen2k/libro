@@ -15,7 +15,7 @@ func NewTopicDaoSql(sqlc *prom.SqlConnect, tableName string, txModeOnWrite bool)
 	return dao
 }
 
-// CreateSqlTableForTopics creates SQL database table to store topics.
+// CreateSqlTableForTopics creates SQL database table to store document topics.
 //   - Necessary table and index are created.
 //   - Application may need to create database before calling this function.
 func CreateSqlTableForTopics(sqlc *prom.SqlConnect, tableName string) error {

@@ -13,7 +13,7 @@ func NewTopicDaoMongo(mc *prom.MongoConnect, collectionName string, txModeOnWrit
 	return dao
 }
 
-// CreateMongoCollectionForTopics creates MongoDB collection to store topics.
+// CreateMongoCollectionForTopics creates MongoDB collection to store document topics.
 //   - Necessary collection and index are created.
 //   - Application may need to create database before calling this function.
 func CreateMongoCollectionForTopics(mc *prom.MongoConnect, collectionName string) error {

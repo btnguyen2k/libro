@@ -10,10 +10,10 @@ const (
 	// TableTopic is name of the database table to store document topic records.
 	TableTopic = "libro_topic"
 
-	// TopicColProductId is name of database column storing document topic's product-id field.
+	// TopicColProductId is name of table column storing document topic's product-id field.
 	TopicColProductId = "zpid"
 
-	// TopicColPosition is name of database column storing document topic's position.
+	// TopicColPosition is name of table column storing document topic's relative position (for sorting).
 	TopicColPosition = "zpos"
 )
 
