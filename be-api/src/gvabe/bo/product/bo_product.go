@@ -71,6 +71,7 @@ const (
 
 // Product is the business object.
 //   - Product inherits unique id from bo.UniversalBo
+//   - Product must be unique
 type Product struct {
 	*henge.UniversalBo `json:"_ubo"`
 	name               string `json:"name"`

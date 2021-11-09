@@ -18,47 +18,31 @@
           <CCardBody>
             <p v-if="flashMsg" class="alert alert-success">{{ flashMsg }}</p>
             <CDataTable :items="topicList" :fields="[
-                {key:'id',label:$t('message.topic_id')},
-                {key:'icon',label:''},
-
-                {key:'is_published',label:''},
-                {key:'name',label:$t('message.product_name')},
-                {key:'domains',label:$t('message.product_domains')},
+                {key:'id',label:$t('message.topic_id'),_style:'text-align: left'},
+                {key:'title',label:$t('message.topic_title'),_style:'text-align: left'},
+                {key:'summary',label:$t('message.topic_summary')},
                 {key:'actions',label:$t('message.actions'),_style:'text-align: center'}
               ]">
-              <template #icon="{item}">
-                <td class="col-1">
-                  <CIcon :name="'cil-'+item.icon"/>
+              <template #id="{item}">
+                <td style="white-space: nowrap;" class="col-2">
+                  <CIcon :name="item.icon"/> {{ item.id }}
                 </td>
               </template>
-              <template #is_published="{item}">
-                <td class="col-1">
-                  <CIcon :name="`${item.is_published?'cil-check':'cil-check-alt'}`"
-                         :style="`color: ${item.is_published?'green':'grey'}`"/>
-                </td>
-              </template>
-              <template #name="{item}">
-                <td class="col-5">
-                  {{ item.name }}
-                  <br />
-                  <span style="font-size: smaller">{{ item.desc }}</span>
-                </td>
-              </template>
-              <template #domains="{item}">
-                <td class="col-4">
-                  {{ item.domains }}
+              <template #title="{item}">
+                <td class="col-3">
+                  {{ item.title }}
                 </td>
               </template>
               <template #actions="{item}">
-                <td style="white-space: nowrap; text-align: center">
-                  <CLink @click="clickProductTopic(item.id)" class="btn btn-sm btn-info m-1">
-                    <CIcon name="cil-list-rich" v-c-tooltip.hover="$t('message.topics')"/>
+                <td style="white-space: nowrap; text-align: center" class="col-2">
+                  <CLink @click="clickTopicPages(item.id)" class="btn btn-sm btn-success m-1">
+                    <CIcon name="cil-notes" v-c-tooltip.hover="$t('message.pages')"/>
                   </CLink>
-                  <CLink @click="clickEditProduct(item.id)" class="btn btn-sm btn-primary m-1">
+                  <CLink @click="clickEditTopic(item.id)" class="btn btn-sm btn-primary m-1">
                     <CIcon name="cil-pencil" v-c-tooltip.hover="$t('message.action_edit')"/>
                   </CLink>
 
-                  <CLink @click="clickDeleteProduct(item.id)" class="btn btn-sm btn-danger m-1">
+                  <CLink @click="clickDeleteTopic(item.id)" class="btn btn-sm btn-danger m-1">
                     <CIcon name="cil-trash" v-c-tooltip.hover="$t('message.action_delete')"/>
                   </CLink>
                 </td>

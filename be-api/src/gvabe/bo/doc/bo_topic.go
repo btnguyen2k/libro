@@ -93,6 +93,7 @@ const (
 
 // Topic is the business object.
 //   - Topic inherits unique id from bo.UniversalBo
+//   - Topic's id must be unique throughout the system
 type Topic struct {
 	*henge.UniversalBo `json:"_ubo"`
 	productId          string `json:"prod"`

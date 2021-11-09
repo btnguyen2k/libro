@@ -491,8 +491,8 @@ func _initSamples() {
 	longLorerm := "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi nec imperdiet turpis. Curabitur aliquet pulvinar ultrices. Etiam at posuere leo. Proin ultrices ex et dapibus feugiat link example aenean purus leo, faucibus at elit vel, aliquet scelerisque dui. Etiam quis elit euismod, imperdiet augue sit amet, imperdiet odio. Aenean sem erat, hendrerit eu gravida id, dignissim ut ante. Nam consequat porttitor libero euismod congue."
 
 	/*----------------------------------------------------------------------*/
-	topic := doc.NewTopic(goapi.AppVersionNumber, demoProd, "Quick Start", "paper-plane", "Demo example. "+shortLorem)
-	topic.SetPosition(1).SetId(re.ReplaceAllString(strings.ToLower(topic.GetTitle()), ""))
+	topic := doc.NewTopic(goapi.AppVersionNumber, demoProd, "Quick Start", "cil-paper-plane", "Demo example. "+shortLorem)
+	topic.SetPosition(1).SetId(demoProd.GetId() + "-" + re.ReplaceAllString(strings.ToLower(topic.GetTitle()), ""))
 	log.Printf("[INFO] Creating topic (%s -> %s)...", demoProdId, topic.GetTitle())
 	result, err = topicDao.Create(topic)
 	if err != nil && err != godal.ErrGdaoDuplicatedEntry {
@@ -515,7 +515,7 @@ func _initSamples() {
 		}
 	}
 
-	page := doc.NewPage(goapi.AppVersionNumber, topic, "Download", "download", "Download: "+shortLorem, longLorerm)
+	page := doc.NewPage(goapi.AppVersionNumber, topic, "Download", "cil-download", "Download: "+shortLorem, longLorerm)
 	page.SetPosition(1).SetId(topic.GetId() + "-" + re.ReplaceAllString(strings.ToLower(page.GetTitle()), ""))
 	log.Printf("[INFO] Creating page (%s:%s -> %s)...", demoProdId, topic.GetTitle(), page.GetTitle())
 	result, err = pageDao.Create(page)
@@ -526,7 +526,7 @@ func _initSamples() {
 		log.Printf("[ERROR] Cannot create page [%s]", page.GetTitle())
 	}
 
-	page = doc.NewPage(goapi.AppVersionNumber, topic, "Installation", "installation", "Installation: "+shortLorem, longLorerm)
+	page = doc.NewPage(goapi.AppVersionNumber, topic, "Installation", "cil-installation", "Installation: "+shortLorem, longLorerm)
 	page.SetPosition(2).SetId(topic.GetId() + "-" + re.ReplaceAllString(strings.ToLower(page.GetTitle()), ""))
 	log.Printf("[INFO] Creating page (%s:%s -> %s)...", demoProdId, topic.GetTitle(), page.GetTitle())
 	result, err = pageDao.Create(page)
@@ -551,8 +551,8 @@ func _initSamples() {
 		}
 	}
 	/*----------------------------------------------------------------------*/
-	topic = doc.NewTopic(goapi.AppVersionNumber, demoProd, "Components", "cog", shortLorem)
-	topic.SetPosition(2).SetId(re.ReplaceAllString(strings.ToLower(topic.GetTitle()), ""))
+	topic = doc.NewTopic(goapi.AppVersionNumber, demoProd, "Components", "cil-cog", shortLorem)
+	topic.SetPosition(2).SetId(demoProd.GetId() + "-" + re.ReplaceAllString(strings.ToLower(topic.GetTitle()), ""))
 	log.Printf("[INFO] Creating topic (%s -> %s)...", demoProdId, topic.GetTitle())
 	result, err = topicDao.Create(topic)
 	if err != nil && err != godal.ErrGdaoDuplicatedEntry {
@@ -575,7 +575,7 @@ func _initSamples() {
 		}
 	}
 
-	page = doc.NewPage(goapi.AppVersionNumber, topic, "Dashboards", "dashboards", "Dashboards: "+shortLorem, longLorerm)
+	page = doc.NewPage(goapi.AppVersionNumber, topic, "Dashboards", "cil-dashboards", "Dashboards: "+shortLorem, longLorerm)
 	page.SetPosition(1).SetId(topic.GetId() + "-" + re.ReplaceAllString(strings.ToLower(page.GetTitle()), ""))
 	log.Printf("[INFO] Creating page (%s:%s -> %s)...", demoProdId, topic.GetTitle(), page.GetTitle())
 	result, err = pageDao.Create(page)
@@ -586,7 +586,7 @@ func _initSamples() {
 		log.Printf("[ERROR] Cannot create page [%s]", page.GetTitle())
 	}
 
-	page = doc.NewPage(goapi.AppVersionNumber, topic, "Product", "product", "Product: "+shortLorem, longLorerm)
+	page = doc.NewPage(goapi.AppVersionNumber, topic, "Product", "cil-product", "Product: "+shortLorem, longLorerm)
 	page.SetPosition(2).SetId(topic.GetId() + "-" + re.ReplaceAllString(strings.ToLower(page.GetTitle()), ""))
 	log.Printf("[INFO] Creating page (%s:%s -> %s)...", demoProdId, topic.GetTitle(), page.GetTitle())
 	result, err = pageDao.Create(page)
@@ -597,7 +597,7 @@ func _initSamples() {
 		log.Printf("[ERROR] Cannot create page [%s]", page.GetTitle())
 	}
 
-	page = doc.NewPage(goapi.AppVersionNumber, topic, "UI", "ui", "UI: "+shortLorem, longLorerm)
+	page = doc.NewPage(goapi.AppVersionNumber, topic, "UI", "cil-ui", "UI: "+shortLorem, longLorerm)
 	page.SetPosition(3).SetId(topic.GetId() + "-" + re.ReplaceAllString(strings.ToLower(page.GetTitle()), ""))
 	log.Printf("[INFO] Creating page (%s:%s -> %s)...", demoProdId, topic.GetTitle(), page.GetTitle())
 	result, err = pageDao.Create(page)
@@ -622,8 +622,8 @@ func _initSamples() {
 		}
 	}
 	/*----------------------------------------------------------------------*/
-	topic = doc.NewTopic(goapi.AppVersionNumber, demoProd, "FAQs", "lightbulb", "Layout for FAQ page. "+shortLorem)
-	topic.SetPosition(3).SetId(re.ReplaceAllString(strings.ToLower(topic.GetTitle()), ""))
+	topic = doc.NewTopic(goapi.AppVersionNumber, demoProd, "FAQs", "cil-lightbulb", "Layout for FAQ page. "+shortLorem)
+	topic.SetPosition(3).SetId(demoProd.GetId() + "-" + re.ReplaceAllString(strings.ToLower(topic.GetTitle()), ""))
 	log.Printf("[INFO] Creating topic (%s -> %s)...", demoProdId, topic.GetTitle())
 	result, err = topicDao.Create(topic)
 	if err != nil && err != godal.ErrGdaoDuplicatedEntry {
@@ -646,7 +646,7 @@ func _initSamples() {
 		}
 	}
 
-	page = doc.NewPage(goapi.AppVersionNumber, topic, "General", "general", "General: "+shortLorem, longLorerm)
+	page = doc.NewPage(goapi.AppVersionNumber, topic, "General", "cil-general", "General: "+shortLorem, longLorerm)
 	page.SetPosition(1).SetId(topic.GetId() + "-" + re.ReplaceAllString(strings.ToLower(page.GetTitle()), ""))
 	log.Printf("[INFO] Creating page (%s:%s -> %s)...", demoProdId, topic.GetTitle(), page.GetTitle())
 	result, err = pageDao.Create(page)

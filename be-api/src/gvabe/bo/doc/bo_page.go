@@ -102,6 +102,7 @@ const (
 
 // Page is the business object.
 //   - Page inherits unique id from bo.UniversalBo
+//   - Page's id must be unique throughout the system
 type Page struct {
 	*henge.UniversalBo `json:"_ubo"`
 	productId          string `json:"prod"`
