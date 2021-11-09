@@ -32,6 +32,8 @@ const messages = {
             home: 'Home',
             dashboard: 'Dashboard',
 
+            icons: "Icons",
+
             products: "Products",
             topics: "Topics",
             pages: "Pages",
@@ -61,6 +63,18 @@ const messages = {
             product_map_domain: "Map",
             product_map_domain_msg: "Product documents are accessible via mapped domain names",
             product_domain_mapped_msg: 'Domain "{domain}" has been mapped successfully.',
+
+            add_topic: "Add new topic",
+            topic_added_msg: 'Topic "{name}" has been created successfully.',
+
+            topic_id: "Id",
+            topic_id_msg: "Must be unique, will be generated if empty",
+            topic_icon: "Icon",
+            topic_icon_msg: "Pick an icon from the list",
+            topic_title: "Title",
+            topic_title_msg: "Topic title",
+            topic_summary: "Summary",
+            topic_summary_msg: "Short summary of the topic",
         }
     },
     vi: {
@@ -92,6 +106,8 @@ const messages = {
             home: 'Trang nhà',
             dashboard: 'Tổng hợp',
 
+            icons: "Icon",
+
             products: "Sản phẩm",
             topics: "Chủ đề",
             pages: "Trang tài liệu",
@@ -121,6 +137,18 @@ const messages = {
             product_map_domain: "Kết nối",
             product_map_domain_msg: "Tài liệu của sản phẩm truy cập được từ các tên miền sau khi được kết nối",
             product_domain_mapped_msg: 'Tên miền "{domain}" đã được kết nối thành công.',
+
+            add_topic: "Thêm chủ đề",
+            topic_added_msg: 'Chủ đề "{name}" đã được tạo thành công.',
+
+            topic_id: "Id",
+            topic_id_msg: "Id phải là duy nhất, sẽ được tự động tạo nếu để rỗng",
+            topic_icon: "Biểu tượng",
+            topic_icon_msg: "Chọn 1 biểu tượng cho chủ đề trong danh sách",
+            topic_title: "Tên",
+            topic_title_msg: "Tên hiển thị của chủ đề",
+            topic_summary: "Mô tả",
+            topic_summary_msg: "Phần mô tả ngắn về chủ đề",
         }
     }
 }

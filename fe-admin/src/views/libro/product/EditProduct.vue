@@ -108,7 +108,6 @@
 </template>
 
 <script>
-import router from "@/router"
 import clientUtils from "@/utils/api_client"
 
 export default {
@@ -143,7 +142,7 @@ export default {
   },
   methods: {
     doCancel() {
-      router.push({name: "ProductList"})
+      this.$router.push({name: "ProductList"})
     },
     clickUnmapDomain(domain) {
       this.modalUnmapShow = true

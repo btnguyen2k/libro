@@ -7,10 +7,12 @@ const TheContainer = () => import('@/containers/TheContainer')
 
 // Views
 const Dashboard = () => import('@/views/libro/Dashboard')
+
 const ProductList = () => import('@/views/libro/product/ProductList')
 const AddProduct = () => import('@/views/libro/product/AddProduct')
 const EditProduct = () => import('@/views/libro/product/EditProduct')
 const DeleteProduct = () => import('@/views/libro/product/DeleteProduct')
+const ProductTopicList = () => import('@/views/libro/product/ProductTopicList')
 
 // Views - Pages
 const Login = () => import('@/views/gva/pages/Login')
@@ -117,6 +119,12 @@ function configRoutes() {
                             meta: {label: i18n.t('message.delete_product')},
                             name: 'DeleteProduct',
                             component: DeleteProduct,
+                        },
+                        {
+                            path: '_topics/:id',
+                            meta: {label: i18n.t('message.topics')},
+                            name: 'ProductTopicList',
+                            component: ProductTopicList,
                         },
                     ]
                 },

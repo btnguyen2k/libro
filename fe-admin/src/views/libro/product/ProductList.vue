@@ -6,7 +6,7 @@
           <strong>{{ $t('message.products') }}</strong>
           <div class="card-header-actions">
             <CButton class="btn-sm btn-primary" @click="clickAddProduct">
-              <CIcon name="cil-image-plus"/>
+              <CIcon name="cil-library-add" class="align-top"/>
               {{ $t('message.add_product') }}
             </CButton>
           </div>
@@ -87,11 +87,14 @@ export default {
     clickAddProduct() {
       this.$router.push({name: "AddProduct"})
     },
+    clickProductTopic(id) {
+      this.$router.push({name: "ProductTopicList", params: {id: id}})
+    },
     clickEditProduct(id) {
-      this.$router.push({name: "EditProduct", params: {id: id.toString()}})
+      this.$router.push({name: "EditProduct", params: {id: id}})
     },
     clickDeleteProduct(id) {
-      this.$router.push({name: "DeleteProduct", params: {id: id.toString()}})
+      this.$router.push({name: "DeleteProduct", params: {id: id}})
     },
   }
 }

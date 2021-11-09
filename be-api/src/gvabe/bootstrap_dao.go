@@ -551,7 +551,7 @@ func _initSamples() {
 		}
 	}
 	/*----------------------------------------------------------------------*/
-	topic = doc.NewTopic(goapi.AppVersionNumber, demoProd, "Components", "cogs", shortLorem)
+	topic = doc.NewTopic(goapi.AppVersionNumber, demoProd, "Components", "cog", shortLorem)
 	topic.SetPosition(2).SetId(re.ReplaceAllString(strings.ToLower(topic.GetTitle()), ""))
 	log.Printf("[INFO] Creating topic (%s -> %s)...", demoProdId, topic.GetTitle())
 	result, err = topicDao.Create(topic)

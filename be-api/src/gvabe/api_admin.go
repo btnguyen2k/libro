@@ -351,10 +351,10 @@ var funcTopicToMapTransform = func(m map[string]interface{}) map[string]interfac
 		"t_created": m[henge.FieldTimeCreated],
 	}
 	result["product_id"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyFields, doc.TopicFieldProductId), reddo.TypeString)
+	result["pos"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyFields, doc.TopicFieldPosition), reddo.TypeInt)
 	result["title"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, doc.TopicAttrTitle), reddo.TypeString)
 	result["icon"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, doc.TopicAttrIcon), reddo.TypeString)
 	result["summary"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, doc.TopicAttrSummary), reddo.TypeString)
-	result["pos"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, doc.TopicFieldPosition), reddo.TypeInt)
 	result["num_pages"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, doc.TopicAttrNumPages), reddo.TypeInt)
 
 	// convert "creation timestamp" to UTC
@@ -372,8 +372,8 @@ func apiAdminGetProductTopics(ctx *itineris.ApiContext, _ *itineris.ApiAuth, par
 		return authResult
 	}
 
-	id := _extractParam(params, "id", reddo.TypeString, "", nil)
-	product, err := productDao.Get(id.(string))
+	pid := _extractParam(params, "pid", reddo.TypeString, "", nil)
+	product, err := productDao.Get(pid.(string))
 	if err != nil {
 		return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage(err.Error())
 	}

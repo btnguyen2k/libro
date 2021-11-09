@@ -1,0 +1,220 @@
+<template>
+  <div>
+    <CRow>
+      <CCol sm="12">
+        <p v-if="foundStatus<0" class="alert alert-info">{{ $t('message.wait') }}</p>
+        <p v-if="foundStatus==0" class="alert alert-danger">
+          {{ $t('message.error_product_not_found', {id: $route.params.id}) }}</p>
+        <CCard accent-color="info">
+          <CCardHeader>
+            <strong>{{ $t('message.topics') }}</strong>
+            <div class="card-header-actions">
+              <CButton class="btn-sm btn-primary" @click="clickAddTopic">
+                <CIcon name="cil-playlist-add"/>
+                {{ $t('message.add_topic') }}
+              </CButton>
+            </div>
+          </CCardHeader>
+          <CCardBody>
+            <p v-if="flashMsg" class="alert alert-success">{{ flashMsg }}</p>
+            <CDataTable :items="topicList" :fields="[
+                {key:'id',label:$t('message.topic_id')},
+                {key:'icon',label:''},
+
+                {key:'is_published',label:''},
+                {key:'name',label:$t('message.product_name')},
+                {key:'domains',label:$t('message.product_domains')},
+                {key:'actions',label:$t('message.actions'),_style:'text-align: center'}
+              ]">
+              <template #icon="{item}">
+                <td class="col-1">
+                  <CIcon :name="'cil-'+item.icon"/>
+                </td>
+              </template>
+              <template #is_published="{item}">
+                <td class="col-1">
+                  <CIcon :name="`${item.is_published?'cil-check':'cil-check-alt'}`"
+                         :style="`color: ${item.is_published?'green':'grey'}`"/>
+                </td>
+              </template>
+              <template #name="{item}">
+                <td class="col-5">
+                  {{ item.name }}
+                  <br />
+                  <span style="font-size: smaller">{{ item.desc }}</span>
+                </td>
+              </template>
+              <template #domains="{item}">
+                <td class="col-4">
+                  {{ item.domains }}
+                </td>
+              </template>
+              <template #actions="{item}">
+                <td style="white-space: nowrap; text-align: center">
+                  <CLink @click="clickProductTopic(item.id)" class="btn btn-sm btn-info m-1">
+                    <CIcon name="cil-list-rich" v-c-tooltip.hover="$t('message.topics')"/>
+                  </CLink>
+                  <CLink @click="clickEditProduct(item.id)" class="btn btn-sm btn-primary m-1">
+                    <CIcon name="cil-pencil" v-c-tooltip.hover="$t('message.action_edit')"/>
+                  </CLink>
+
+                  <CLink @click="clickDeleteProduct(item.id)" class="btn btn-sm btn-danger m-1">
+                    <CIcon name="cil-trash" v-c-tooltip.hover="$t('message.action_delete')"/>
+                  </CLink>
+                </td>
+              </template>
+            </CDataTable>
+          </CCardBody>
+        </CCard>
+      </CCol>
+    </CRow>
+
+    <CForm @submit.prevent="doAddTopic" method="post">
+      <CModal :title="$t('message.add_topic')" :centered="true" :show.sync="modalAddShow" :close-on-backdrop="false">
+        <p v-if="modalAddErr!=''" class="alert alert-danger">{{ modalAddErr }}</p>
+        <CInput
+            type="text"
+            v-model="formAdd.id"
+            :label="$t('message.topic_id')"
+            :placeholder="$t('message.topic_id_msg')"
+            v-c-tooltip.hover="$t('message.topic_id_msg')"
+            horizontal
+        />
+        <CInput
+            type="text"
+            v-model="formAdd.icon"
+            :label="$t('message.topic_icon')"
+            :placeholder="$t('message.topic_icon_msg')"
+            v-c-tooltip.hover="$t('message.topic_icon_msg')"
+            horizontal
+            readonly="readonly"
+        >
+          <template #append>
+            <CButton color="primary" @click="modalIconsShow = true"><CIcon name="cil-magnifying-glass"/></CButton>
+          </template>
+        </CInput>
+        <CInput
+            type="text"
+            v-model="formAdd.title"
+            :label="$t('message.topic_title')"
+            :placeholder="$t('message.topic_title_msg')"
+            v-c-tooltip.hover="$t('message.topic_title_msg')"
+            horizontal
+            required
+            was-validated
+        />
+        <CTextarea
+            rows="4"
+            type="text"
+            v-model="formAdd.summary"
+            :label="$t('message.topic_summary')"
+            :placeholder="$t('message.topic_summary_msg')"
+            v-c-tooltip.hover="$t('message.topic_summary_msg')"
+            horizontal
+            required
+            was-validated
+        />
+        <template #footer>
+          <CButton type="submit" color="primary" style="width: 96px">
+            <CIcon name="cil-save" class="align-top"/>
+            {{ $t('message.action_save') }}
+          </CButton>
+          <CButton type="button" color="secondary" class="ml-2" style="width: 96px" @click="modalAddShow = false">
+            <CIcon name="cil-arrow-circle-left" class="align-top"/>
+            {{ $t('message.cancel') }}
+          </CButton>
+        </template>
+      </CModal>
+    </CForm>
+
+    <CModal :title="$t('message.icons')" :centered="true" :show.sync="modalIconsShow">
+      <CRow class="text-center">
+        <template v-for="(icon, iconName) in $options.freeSet">
+          <CCol
+              class="mb-5"
+              col="3"
+              sm="3"
+              :key="iconName"
+          >
+            <CButton size="lg" @click="clickSelectIcon(iconName)"><CIcon size="xl" :content="icon" :title="iconName"/></CButton>
+<!--            <CIcon type="button" @click="clickSelectIcon(iconName)" :height="42" :content="icon" :title="iconName"/>-->
+            <div style="font-size: small">{{toKebabCase(iconName)}}</div>
+          </CCol>
+        </template>
+      </CRow>
+
+      <template #footer>
+        <CButton @click="modalInfoShow = false" color="secondary" style="width: 96px">
+          <CIcon name="cil-x" class="align-top"/>
+          {{ $t('message.close') }}
+        </CButton>
+      </template>
+    </CModal>
+  </div>
+</template>
+
+<script>
+import clientUtils from "@/utils/api_client";
+import { freeSet } from '@coreui/icons'
+
+export default {
+  name: 'ProductTopicList',
+  freeSet,
+  mounted() {
+    this.loadProductTopicList(this.$route.params.id)
+  },
+  data() {
+    return {
+      modalAddShow: false,
+      modalAddErr: "",
+      formAdd: {id: "", icon: "", title: "", summary: ""},
+      modalIconsShow: false,
+      topicList: [],
+      errorMsg: "",
+      foundStatus: -1,
+    }
+  },
+  props: ["flashMsg"],
+  methods: {
+    loadProductTopicList(prodId) {
+      const vue = this
+      const apiUrl = clientUtils.apiAdminProductTopics.replace(':product/',prodId+'/')
+      clientUtils.apiDoGet(apiUrl,
+          (apiRes) => {
+            vue.foundStatus = apiRes.status == 200 ? 1 : 0
+            if (vue.foundStatus == 1) {
+              vue.topicList = apiRes.data
+              console.log(apiRes.data)
+            }
+          },
+          (err) => {
+            vue.errorMsg = err
+          })
+    },
+    toKebabCase (str) {
+      return str.replace(/([a-z])([A-Z0-9])/g, '$1-$2').toLowerCase().replace(/^[a-z]+-/, '')
+    },
+    clickSelectIcon(iconName) {
+      this.formAdd.icon = iconName
+      this.modalIconsShow = false
+    },
+    clickAddTopic() {
+      this.formAdd = {}
+      this.modalAddShow = true
+    },
+    doAddTopic(e) {
+      e.preventDefault()
+      console.log('hello')
+    },
+    clickProductTopic(id) {
+      console.log(id)
+    },
+    clickEditProduct(id) {
+      this.$router.push({name: "EditProduct", params: {id: id.toString()}})
+    },
+    clickDeleteProduct(id) {
+      this.$router.push({name: "DeleteProduct", params: {id: id.toString()}})
+    },
+  }
+}
+</script>
