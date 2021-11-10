@@ -16,7 +16,8 @@
             </div>
           </CCardHeader>
           <CCardBody>
-            <p v-if="flashMsg" class="alert alert-success">{{ flashMsg }}</p>
+<!--            <p v-if="myFlashMsg" class="alert alert-success">{{ myFlashMsg }}</p>-->
+            <CAlert v-if="myFlashMsg" color="success" closeButton>{{ myFlashMsg }}</CAlert>
             <CDataTable :items="topicList" :fields="[
                 {key:'id',label:$t('message.topic_id'),_style:'text-align: left'},
                 {key:'title',label:$t('message.topic_title'),_style:'text-align: left'},
@@ -154,6 +155,7 @@ export default {
       formAdd: {id: "", icon: "", title: "", summary: ""},
       modalIconsShow: false,
       topicList: [],
+      myFlashMsg: this.flashMsg,
       errorMsg: "",
       foundStatus: -1,
     }
@@ -175,20 +177,39 @@ export default {
             vue.errorMsg = err
           })
     },
-    toKebabCase (str) {
-      return str.replace(/([a-z])([A-Z0-9])/g, '$1-$2').toLowerCase().replace(/^[a-z]+-/, '')
+    toKebabCase(str, full = false) {
+      str = str.replace(/([a-z])([A-Z0-9])/g, '$1-$2').toLowerCase()
+      return full ? str : str.replace(/^[a-z]+-/, '')
     },
     clickSelectIcon(iconName) {
-      this.formAdd.icon = iconName
+      this.formAdd.icon = this.toKebabCase(iconName, true)
       this.modalIconsShow = false
     },
     clickAddTopic() {
       this.formAdd = {}
+      this.modalAddErr = ''
       this.modalAddShow = true
     },
     doAddTopic(e) {
       e.preventDefault()
-      console.log('hello')
+      let vue = this
+      let data = vue.formAdd
+      let prodId = vue.$route.params.id
+      const apiUrl = clientUtils.apiAdminProductTopics.replace(':product/',prodId+'/')
+      clientUtils.apiDoPost(apiUrl, data,
+          (apiRes) => {
+            if (apiRes.status == 200) {
+              vue.modalAddShow = false
+              vue.myFlashMsg = vue.$i18n.t('message.topic_added_msg', {name: data.title})
+              vue.loadProductTopicList(prodId)
+            } else {
+              vue.modalAddErr = apiRes.status + ": " + apiRes.message
+            }
+          },
+          (err) => {
+            vue.modalAddErr = err
+          }
+      )
     },
     clickProductTopic(id) {
       console.log(id)

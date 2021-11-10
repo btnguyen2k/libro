@@ -391,3 +391,53 @@ func apiAdminGetProductTopics(ctx *itineris.ApiContext, _ *itineris.ApiAuth, par
 	}
 	return itineris.NewApiResult(itineris.StatusOk).SetData(data)
 }
+
+// apiAdminAddProductTopic handles API call "adminAddProductTopic"
+func apiAdminAddProductTopic(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *itineris.ApiParams) *itineris.ApiResult {
+	_, authResult := authenticateApiCall(ctx)
+	if authResult != nil {
+		return authResult
+	}
+
+	pid := _extractParam(params, "pid", reddo.TypeString, "", nil)
+	product, err := productDao.Get(pid.(string))
+	if err != nil {
+		return itineris.NewApiResult(itineris.StatusErrorServer).
+			SetMessage(fmt.Sprintf("error getting product [%s] (error: %s)", pid, err))
+	}
+	if product == nil {
+		return itineris.NewApiResult(itineris.StatusNotFound).
+			SetMessage(fmt.Sprintf("product not found [%s]", pid))
+	}
+
+	id := _extractParam(params, "id", reddo.TypeString, utils.UniqueIdSmall(), nil)
+	topic, err := topicDao.Get(id.(string))
+	if err != nil {
+		return itineris.NewApiResult(itineris.StatusErrorServer).
+			SetMessage(fmt.Sprintf("error getting topic [%s] (error: %s)", id, err))
+	}
+	if topic != nil {
+		return itineris.NewApiResult(itineris.StatusErrorClient).
+			SetMessage(fmt.Sprintf("topic [%s] already existed", id))
+	}
+	id = strings.ToLower(id.(string))
+
+	icon := _extractParam(params, "icon", reddo.TypeString, utils.UniqueIdSmall(), nil)
+	icon = strings.ToLower(icon.(string))
+	title := _extractParam(params, "title", reddo.TypeString, utils.UniqueIdSmall(), nil)
+	summary := _extractParam(params, "summary", reddo.TypeString, utils.UniqueIdSmall(), nil)
+
+	if title == "" {
+		return itineris.NewApiResult(itineris.StatusErrorClient).SetMessage("title is empty")
+	}
+
+	topic = doc.NewTopic(goapi.AppVersionNumber, product, title.(string), icon.(string), summary.(string))
+	topic.SetId(id.(string))
+	result, err := topicDao.Create(topic)
+	if err != nil || !result {
+		return itineris.NewApiResult(itineris.StatusErrorServer).
+			SetMessage(fmt.Sprintf("cannot create topic [%s] (error: %s)", title, err))
+	}
+
+	return itineris.NewApiResult(itineris.StatusOk)
+}
