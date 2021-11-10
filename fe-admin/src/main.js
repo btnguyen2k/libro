@@ -6,7 +6,6 @@ import i18n from './i18n'
 import router from './router'
 import CoreuiVue from '@coreui/vue'
 import { iconsSet as icons } from './assets/icons/icons.js'
-// import { freeSet as icons } from '@coreui/icons'
 import store from './store'
 
 Vue.config.performance = true

@@ -2,6 +2,7 @@ package gvabe
 
 import (
 	"fmt"
+	"log"
 	"regexp"
 	"strings"
 	"time"
@@ -438,6 +439,95 @@ func apiAdminAddProductTopic(ctx *itineris.ApiContext, _ *itineris.ApiAuth, para
 		return itineris.NewApiResult(itineris.StatusErrorServer).
 			SetMessage(fmt.Sprintf("cannot create topic [%s] (error: %s)", title, err))
 	}
+
+	// TODO: update product's stats via event-driven manner
+	go func(topic *doc.Topic) {
+		prod, err := productDao.Get(topic.GetProductId())
+		if err != nil {
+			log.Printf("[WARN] Post-add topic [%s] - Error getting product [%s]: %e", topic.GetId(), topic.GetProductId(), err)
+			return
+		}
+
+		topics, err := topicDao.GetAll(prod, nil, nil)
+		if err != nil {
+			log.Printf("[WARN] Post-add topic [%s] - Error getting all topics for product [%s]: %e", topic.GetId(), topic.GetProductId(), err)
+			return
+		}
+		prod.SetNumTopics(len(topics))
+		ok, err := productDao.Update(prod)
+		if err != nil || !ok {
+			log.Printf("[WARN] Post-add topic [%s] - Cannot update product stats [%s]: %#v / %e", topic.GetId(), topic.GetProductId(), ok, err)
+		}
+	}(topic)
+
+	return itineris.NewApiResult(itineris.StatusOk)
+}
+
+// apiAdminDeleteProductTopic handles API call "adminDeleteProductTopic"
+func apiAdminDeleteProductTopic(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *itineris.ApiParams) *itineris.ApiResult {
+	_, authResult := authenticateApiCall(ctx)
+	if authResult != nil {
+		return authResult
+	}
+
+	pid := _extractParam(params, "pid", reddo.TypeString, "", nil)
+	prod, err := productDao.Get(pid.(string))
+	if err != nil {
+		return itineris.NewApiResult(itineris.StatusErrorServer).
+			SetMessage(fmt.Sprintf("error getting product [%s] (error: %s)", pid, err))
+	}
+	if prod == nil {
+		return itineris.NewApiResult(itineris.StatusNotFound).
+			SetMessage(fmt.Sprintf("product not found [%s]", pid))
+	}
+
+	id := _extractParam(params, "id", reddo.TypeString, utils.UniqueIdSmall(), nil)
+	topic, err := topicDao.Get(id.(string))
+	if err != nil {
+		return itineris.NewApiResult(itineris.StatusErrorServer).
+			SetMessage(fmt.Sprintf("error getting topic [%s] (error: %s)", id, err))
+	}
+	if topic == nil || topic.GetProductId() != prod.GetId() {
+		return itineris.NewApiResult(itineris.StatusNotFound).
+			SetMessage(fmt.Sprintf("topic not found [%s]", id))
+	}
+
+	_, err = topicDao.Delete(topic)
+	if err != nil {
+		return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage(err.Error())
+	}
+
+	// TODO: delete pages & update product's stats via event-driven manner
+	go func(topic *doc.Topic) {
+		prod, err := productDao.Get(topic.GetProductId())
+		if err != nil {
+			log.Printf("[WARN] Post-delete topic [%s] - Error getting product [%s]: %e", topic.GetId(), topic.GetProductId(), err)
+			return
+		}
+
+		topics, err := topicDao.GetAll(prod, nil, nil)
+		if err != nil {
+			log.Printf("[WARN] Post-delete topic [%s] - Error getting all topics for product [%s]: %e", topic.GetId(), topic.GetProductId(), err)
+			return
+		}
+		prod.SetNumTopics(len(topics))
+		ok, err := productDao.Update(prod)
+		if err != nil || !ok {
+			log.Printf("[WARN] Post-delete topic [%s] - Cannot update product stats [%s]: %#v / %e", topic.GetId(), topic.GetProductId(), ok, err)
+		}
+
+		pages, err := pageDao.GetAll(topic, nil, nil)
+		if err != nil {
+			log.Printf("[WARN] Post-delete topic [%s] - Error getting all page for topic [%s]: %e", topic.GetId(), topic.GetId(), err)
+			return
+		}
+		for _, page := range pages {
+			_, err := pageDao.Delete(page)
+			if err != nil {
+				log.Printf("[WARN] Post-delete topic [%s] - Error deleting page [%s]: %e", topic.GetId(), page.GetId(), err)
+			}
+		}
+	}(topic)
 
 	return itineris.NewApiResult(itineris.StatusOk)
 }

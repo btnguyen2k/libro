@@ -16,7 +16,6 @@
             </div>
           </CCardHeader>
           <CCardBody>
-<!--            <p v-if="myFlashMsg" class="alert alert-success">{{ myFlashMsg }}</p>-->
             <CAlert v-if="myFlashMsg" color="success" closeButton>{{ myFlashMsg }}</CAlert>
             <CDataTable :items="topicList" :fields="[
                 {key:'id',label:$t('message.topic_id'),_style:'text-align: left'},
@@ -54,6 +53,30 @@
       </CCol>
     </CRow>
 
+    <!-- pop-up dialog to confirm deleting a topic -->
+    <CModal color="warning" :title="$t('message.delete_topic')" :centered="true" :show.sync="modalDeleteShow" :close-on-backdrop="false">
+      <p class="alert alert-warning"><CIcon name="cil-warning" size="lg"/> {{ $t('message.delete_topic_msg', {numPages: topicToDelete['num_pages']}) }}</p>
+      <p v-if="modalDeleteErr!=''" class="alert alert-danger">{{ modalDeleteErr }}</p>
+      <CInput type="text" :label="$t('message.topic_icon')+' / '+$t('message.topic_id')" v-model="topicToDelete.id" horizontal plaintext>
+        <template #prepend>
+          <CButton disabled link><CIcon :name="topicToDelete.icon"/></CButton>
+        </template>
+      </CInput>
+      <CInput type="text" :label="$t('message.topic_title')" v-model="topicToDelete.title" horizontal plaintext/>
+      <CTextarea rows="4" type="text" :label="$t('message.topic_summary')" v-model="topicToDelete.summary" horizontal plaintext/>
+      <template #footer>
+        <CButton type="button" color="danger" style="width: 96px" @click="doDeleteTopic">
+          <CIcon name="cil-trash" class="align-top"/>
+          {{ $t('message.action_delete') }}
+        </CButton>
+        <CButton type="button" color="secondary" class="ml-2" style="width: 96px" @click="modalDeleteShow = false">
+          <CIcon name="cil-arrow-circle-left" class="align-top"/>
+          {{ $t('message.cancel') }}
+        </CButton>
+      </template>
+    </CModal>
+
+    <!-- pop-up form to add new topic -->
     <CForm @submit.prevent="doAddTopic" method="post">
       <CModal :title="$t('message.add_topic')" :centered="true" :show.sync="modalAddShow" :close-on-backdrop="false">
         <p v-if="modalAddErr!=''" class="alert alert-danger">{{ modalAddErr }}</p>
@@ -112,22 +135,17 @@
       </CModal>
     </CForm>
 
+    <!-- pop-up dialog to pick an icon -->
     <CModal :title="$t('message.icons')" :centered="true" :show.sync="modalIconsShow">
       <CRow class="text-center">
         <template v-for="(icon, iconName) in $options.freeSet">
-          <CCol
-              class="mb-5"
-              col="3"
-              sm="3"
-              :key="iconName"
-          >
+          <CCol class="mb-5" col="3" sm="3" :key="iconName">
             <CButton size="lg" @click="clickSelectIcon(iconName)"><CIcon size="xl" :content="icon" :title="iconName"/></CButton>
-<!--            <CIcon type="button" @click="clickSelectIcon(iconName)" :height="42" :content="icon" :title="iconName"/>-->
+            <!--<CIcon type="button" @click="clickSelectIcon(iconName)" :height="42" :content="icon" :title="iconName"/>-->
             <div style="font-size: small">{{toKebabCase(iconName)}}</div>
           </CCol>
         </template>
       </CRow>
-
       <template #footer>
         <CButton @click="modalInfoShow = false" color="secondary" style="width: 96px">
           <CIcon name="cil-x" class="align-top"/>
@@ -153,8 +171,16 @@ export default {
       modalAddShow: false,
       modalAddErr: "",
       formAdd: {id: "", icon: "", title: "", summary: ""},
+
       modalIconsShow: false,
+
+      modalDeleteShow: false,
+      modalDeleteErr: "",
+      topicToDelete: {},
+
       topicList: [],
+      topicMap: {},
+
       myFlashMsg: this.flashMsg,
       errorMsg: "",
       foundStatus: -1,
@@ -170,7 +196,11 @@ export default {
             vue.foundStatus = apiRes.status == 200 ? 1 : 0
             if (vue.foundStatus == 1) {
               vue.topicList = apiRes.data
-              console.log(apiRes.data)
+              vue.topicMap = {}
+              for (let i = vue.topicList.length - 1; i >= 0; i--) {
+                vue.topicMap[vue.topicList[i].id] = vue.topicList[i]
+              }
+              console.log(vue.topicMap)
             }
           },
           (err) => {
@@ -211,14 +241,39 @@ export default {
           }
       )
     },
-    clickProductTopic(id) {
+    clickTopicPages(id) {
       console.log(id)
     },
-    clickEditProduct(id) {
-      this.$router.push({name: "EditProduct", params: {id: id.toString()}})
+    clickEditTopic(id) {
+      console.log(id)
+      // this.$router.push({name: "EditProduct", params: {id: id.toString()}})
     },
-    clickDeleteProduct(id) {
-      this.$router.push({name: "DeleteProduct", params: {id: id.toString()}})
+    clickDeleteTopic(id) {
+      this.topicToDelete = this.topicMap[id]
+      this.modalDeleteShow = true
+    },
+    doDeleteTopic(e) {
+      e.preventDefault()
+      let vue = this
+      let prodId = vue.$route.params.id
+      let data = vue.topicToDelete
+      const apiUrl = clientUtils.apiAdminProductTopic.replace(':product/',prodId+'/')+'/'+data.id
+      console.log(vue.topicToDelete)
+      console.log(apiUrl)
+      clientUtils.apiDoDelete(apiUrl,
+          (apiRes) => {
+            if (apiRes.status == 200) {
+              vue.modalDeleteShow = false
+              vue.myFlashMsg = vue.$i18n.t('message.topic_deleted_msg', {name: data.title})
+              vue.loadProductTopicList(prodId)
+            } else {
+              vue.modalDeleteErr = apiRes.status + ": " + apiRes.message
+            }
+          },
+          (err) => {
+            vue.modalDeleteErr = err
+          }
+      )
     },
   }
 }

@@ -67,6 +67,10 @@ const messages = {
             add_topic: "Add new topic",
             topic_added_msg: 'Topic "{name}" has been created successfully.',
 
+            delete_topic: "Delete topic",
+            delete_topic_msg: 'All pages belong to the topic will also be deleted! This topic currently has {numPages} page(s). Are you sure you wish to delete the topic?',
+            topic_deleted_msg: 'Topic "{name}" has been deleted successfully.',
+
             topic_id: "Id",
             topic_id_msg: "Must be unique, will be generated if empty",
             topic_icon: "Icon",
@@ -140,6 +144,10 @@ const messages = {
 
             add_topic: "Thêm chủ đề",
             topic_added_msg: 'Chủ đề "{name}" đã được tạo thành công.',
+
+            delete_topic: "Xoá chủ đề",
+            delete_topic_msg: 'Xoá chủ đề sẽ xoá các trang tài liệu nằm trong chủ đề! Chủ đề này hiện có {numPages} tragn tài liệu. Bạn có chắc muốn xoá chủ đề này?',
+            topic_deleted_msg: 'Chủ đề "{name}" đã được xoá thành công.',
 
             topic_id: "Id",
             topic_id_msg: "Id phải là duy nhất, sẽ được tự động tạo nếu để rỗng",
