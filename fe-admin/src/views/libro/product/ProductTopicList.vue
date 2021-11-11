@@ -2,9 +2,9 @@
   <div>
     <CRow>
       <CCol sm="12">
-        <p v-if="foundStatus<0" class="alert alert-info">{{ $t('message.wait') }}</p>
-        <p v-if="foundStatus==0" class="alert alert-danger">
-          {{ $t('message.error_product_not_found', {id: $route.params.id}) }}</p>
+        <CAlert v-if="foundStatus<0" color="info">{{ $t('message.wait') }}</CAlert>
+        <CAlert v-if="foundStatus==0" color="danger">{{ $t('message.error_product_not_found', {id: $route.params.id}) }}</CAlert>
+        <CAlert v-if="errorMsg" color="danger" closeButton>{{ errorMsg }}</CAlert>
         <CCard accent-color="info">
           <CCardHeader>
             <strong>{{ $t('message.topics') }}</strong>
@@ -24,8 +24,9 @@
                 {key:'actions',label:$t('message.actions'),_style:'text-align: center'}
               ]">
               <template #id="{item}">
-                <td style="white-space: nowrap;" class="col-2">
-                  <CIcon :name="item.icon"/> {{ item.id }}
+                <td style="white-space: nowrap; font-size: small" class="col-2">
+                  <CIcon :name="item.icon"/>
+                  {{ item.id }}
                 </td>
               </template>
               <template #title="{item}">
@@ -34,17 +35,23 @@
                 </td>
               </template>
               <template #actions="{item}">
-                <td style="white-space: nowrap; text-align: center" class="col-2">
-                  <CLink @click="clickTopicPages(item.id)" class="btn btn-sm btn-success m-1">
+                <td style="white-space: nowrap; text-align: center">
+                  <CButton @click="clickTopicPages(item.id)" color="success" size="sm" class="mr-1">
                     <CIcon name="cil-notes" v-c-tooltip.hover="$t('message.pages')"/>
-                  </CLink>
-                  <CLink @click="clickEditTopic(item.id)" class="btn btn-sm btn-primary m-1">
+                  </CButton>
+                  <CButton @click="clickEditTopic(item.id)" color="primary" size="sm" class="mr-1">
                     <CIcon name="cil-pencil" v-c-tooltip.hover="$t('message.action_edit')"/>
-                  </CLink>
-
-                  <CLink @click="clickDeleteTopic(item.id)" class="btn btn-sm btn-danger m-1">
+                  </CButton>
+                  <CButton @click="clickDeleteTopic(item.id)" color="danger" size="sm" class="mr-3">
                     <CIcon name="cil-trash" v-c-tooltip.hover="$t('message.action_delete')"/>
-                  </CLink>
+                  </CButton>
+
+                  <CButton @click="doMoveTopicDown(item.id)" color="info" class="mr-1" size="sm" variant="outline">
+                    <CIcon name="cil-arrow-bottom" v-c-tooltip.hover="$t('message.action_move_down')"/>
+                  </CButton>
+                  <CButton @click="doMoveTopicUp(item.id)" color="info" size="sm" variant="outline">
+                    <CIcon name="cil-arrow-top" v-c-tooltip.hover="$t('message.action_move_up')"/>
+                  </CButton>
                 </td>
               </template>
             </CDataTable>
@@ -54,16 +61,24 @@
     </CRow>
 
     <!-- pop-up dialog to confirm deleting a topic -->
-    <CModal color="warning" :title="$t('message.delete_topic')" :centered="true" :show.sync="modalDeleteShow" :close-on-backdrop="false">
-      <p class="alert alert-warning"><CIcon name="cil-warning" size="lg"/> {{ $t('message.delete_topic_msg', {numPages: topicToDelete['num_pages']}) }}</p>
+    <CModal color="warning" :title="$t('message.delete_topic')" :centered="true" :show.sync="modalDeleteShow"
+            :close-on-backdrop="false">
+      <p class="alert alert-warning">
+        <CIcon name="cil-warning" size="lg"/>
+        {{ $t('message.delete_topic_msg', {numPages: topicToDelete['num_pages']}) }}
+      </p>
       <p v-if="modalDeleteErr!=''" class="alert alert-danger">{{ modalDeleteErr }}</p>
-      <CInput type="text" :label="$t('message.topic_icon')+' / '+$t('message.topic_id')" v-model="topicToDelete.id" horizontal plaintext>
+      <CInput type="text" :label="$t('message.topic_icon')+' / '+$t('message.topic_id')" v-model="topicToDelete.id"
+              horizontal plaintext>
         <template #prepend>
-          <CButton disabled link><CIcon :name="topicToDelete.icon"/></CButton>
+          <CButton disabled link>
+            <CIcon :name="topicToDelete.icon"/>
+          </CButton>
         </template>
       </CInput>
       <CInput type="text" :label="$t('message.topic_title')" v-model="topicToDelete.title" horizontal plaintext/>
-      <CTextarea rows="4" type="text" :label="$t('message.topic_summary')" v-model="topicToDelete.summary" horizontal plaintext/>
+      <CTextarea rows="4" type="text" :label="$t('message.topic_summary')" v-model="topicToDelete.summary" horizontal
+                 plaintext/>
       <template #footer>
         <CButton type="button" color="danger" style="width: 96px" @click="doDeleteTopic">
           <CIcon name="cil-trash" class="align-top"/>
@@ -98,7 +113,9 @@
             readonly="readonly"
         >
           <template #append>
-            <CButton color="primary" @click="modalIconsShow = true"><CIcon name="cil-magnifying-glass"/></CButton>
+            <CButton color="primary" @click="modalIconsShow = true">
+              <CIcon name="cil-magnifying-glass"/>
+            </CButton>
           </template>
         </CInput>
         <CInput
@@ -140,9 +157,11 @@
       <CRow class="text-center">
         <template v-for="(icon, iconName) in $options.freeSet">
           <CCol class="mb-5" col="3" sm="3" :key="iconName">
-            <CButton size="lg" @click="clickSelectIcon(iconName)"><CIcon size="xl" :content="icon" :title="iconName"/></CButton>
+            <CButton size="lg" @click="clickSelectIcon(iconName)">
+              <CIcon size="xl" :content="icon" :title="iconName"/>
+            </CButton>
             <!--<CIcon type="button" @click="clickSelectIcon(iconName)" :height="42" :content="icon" :title="iconName"/>-->
-            <div style="font-size: small">{{toKebabCase(iconName)}}</div>
+            <div style="font-size: small">{{ toKebabCase(iconName) }}</div>
           </CCol>
         </template>
       </CRow>
@@ -158,7 +177,7 @@
 
 <script>
 import clientUtils from "@/utils/api_client";
-import { freeSet } from '@coreui/icons'
+import {freeSet} from '@coreui/icons'
 
 export default {
   name: 'ProductTopicList',
@@ -190,7 +209,7 @@ export default {
   methods: {
     loadProductTopicList(prodId) {
       const vue = this
-      const apiUrl = clientUtils.apiAdminProductTopics.replace(':product/',prodId+'/')
+      const apiUrl = clientUtils.apiAdminProductTopics.replace(':product/', prodId + '/')
       clientUtils.apiDoGet(apiUrl,
           (apiRes) => {
             vue.foundStatus = apiRes.status == 200 ? 1 : 0
@@ -200,7 +219,6 @@ export default {
               for (let i = vue.topicList.length - 1; i >= 0; i--) {
                 vue.topicMap[vue.topicList[i].id] = vue.topicList[i]
               }
-              console.log(vue.topicMap)
             }
           },
           (err) => {
@@ -225,7 +243,7 @@ export default {
       let vue = this
       let data = vue.formAdd
       let prodId = vue.$route.params.id
-      const apiUrl = clientUtils.apiAdminProductTopics.replace(':product/',prodId+'/')
+      const apiUrl = clientUtils.apiAdminProductTopics.replace(':product/', prodId + '/')
       clientUtils.apiDoPost(apiUrl, data,
           (apiRes) => {
             if (apiRes.status == 200) {
@@ -257,9 +275,7 @@ export default {
       let vue = this
       let prodId = vue.$route.params.id
       let data = vue.topicToDelete
-      const apiUrl = clientUtils.apiAdminProductTopic.replace(':product/',prodId+'/')+'/'+data.id
-      console.log(vue.topicToDelete)
-      console.log(apiUrl)
+      const apiUrl = clientUtils.apiAdminProductTopic.replace(':product/', prodId + '/') + '/' + data.id
       clientUtils.apiDoDelete(apiUrl,
           (apiRes) => {
             if (apiRes.status == 200) {
@@ -274,6 +290,31 @@ export default {
             vue.modalDeleteErr = err
           }
       )
+    },
+    _doMoveTopicUpOrDown(id, data) {
+      let vue = this
+      let prodId = vue.$route.params.id
+      const apiUrl = clientUtils.apiAdminProductTopic.replace(':product/', prodId + '/') + '/' + id
+      console.log(id, data, apiUrl)
+      clientUtils.apiDoPatch(apiUrl, data,
+          (apiRes) => {
+            if (apiRes.status == 200) {
+              vue.myFlashMsg = vue.$i18n.t('message.topic_updated_msg', {name: this.topicMap[id].title})
+              vue.loadProductTopicList(prodId)
+            } else {
+              vue.errorMsg = apiRes.status + ": " + apiRes.message
+            }
+          },
+          (err) => {
+            vue.errorMsg = err
+          }
+      )
+    },
+    doMoveTopicUp(id) {
+      this._doMoveTopicUpOrDown(id, {action: "move_up"})
+    },
+    doMoveTopicDown(id) {
+      this._doMoveTopicUpOrDown(id, {action: "move_down"})
     },
   }
 }

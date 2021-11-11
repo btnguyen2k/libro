@@ -75,6 +75,16 @@ function apiDoGet(apiUri, callbackSuccessful, callbackError) {
     }).then(res => _apiOnSuccess('GET', res, apiUri, callbackSuccessful)).catch(err => _apiOnError(err, apiUri, callbackError))
 }
 
+function apiDoPatch(apiUri, data, callbackSuccessful, callbackError) {
+    const session = utils.loadLoginSession()
+    const headers = {}
+    headers[headerAppId] = appId
+    headers[headerAccessToken] = session != null ? session.token : ""
+    apiClient.patch(apiUri, data, {
+        headers: headers, cache: false
+    }).then(res => _apiOnSuccess('PATCH', res, apiUri, callbackSuccessful)).catch(err => _apiOnError(err, apiUri, callbackError))
+}
+
 function apiDoPost(apiUri, data, callbackSuccessful, callbackError) {
     const session = utils.loadLoginSession()
     const headers = {}
@@ -130,6 +140,7 @@ export default {
     apiUser,
 
     apiDoGet,
+    apiDoPatch,
     apiDoPost,
     apiDoPut,
     apiDoDelete,

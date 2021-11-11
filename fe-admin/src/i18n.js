@@ -11,6 +11,8 @@ const messages = {
             action_back: 'Back',
             action_edit: 'Edit',
             action_delete: 'Delete',
+            action_move_down: 'Move down',
+            action_move_up: 'Move up',
 
             error: 'Error',
             info: 'Information',
@@ -57,6 +59,7 @@ const messages = {
 
             edit_product: "Edit product",
             product_updated_msg: 'Product "{name}" has been updated successfully.',
+
             product_unmap_domain: "Unmap",
             product_unmap_domain_msg: 'Are you sure you wish to unmap domain name "{domain}"? Product documents are no longer accessible via domain name once unmapped.',
             product_domain_unmapped_msg: 'Domain "{domain}" has been unmapped successfully.',
@@ -70,6 +73,9 @@ const messages = {
             delete_topic: "Delete topic",
             delete_topic_msg: 'All pages belong to the topic will also be deleted! This topic currently has {numPages} page(s). Are you sure you wish to delete the topic?',
             topic_deleted_msg: 'Topic "{name}" has been deleted successfully.',
+
+            edit_topic: "Edit topic",
+            topic_updated_msg: 'Topic "{name}" has been updated successfully.',
 
             topic_id: "Id",
             topic_id_msg: "Must be unique, will be generated if empty",
@@ -89,6 +95,8 @@ const messages = {
             action_back: 'Quay lại',
             action_edit: 'Sửa',
             action_delete: 'Xoá',
+            action_move_down: 'Chuyển xuống',
+            action_move_up: 'Chuyển lên',
 
             error: 'Có lỗi',
             info: 'Thông tin',
@@ -135,6 +143,7 @@ const messages = {
 
             edit_product: "Chỉnh sửa sản phẩm",
             product_updated_msg: 'Sản phẩm "{name}" đã được cập nhật thành công.',
+
             product_unmap_domain: "Bỏ kết nối",
             product_unmap_domain_msg: 'Bạn có chắc bỏ kết nối tên miền "{domain}"? Tài liệu của sản phẩm sẽ không còn truy cập được qua tên miền sau khi bỏ kết nối.',
             product_domain_unmapped_msg: 'Kết nối với tên miền "{domain}" đã được bỏ thành công.',
@@ -148,6 +157,9 @@ const messages = {
             delete_topic: "Xoá chủ đề",
             delete_topic_msg: 'Xoá chủ đề sẽ xoá các trang tài liệu nằm trong chủ đề! Chủ đề này hiện có {numPages} tragn tài liệu. Bạn có chắc muốn xoá chủ đề này?',
             topic_deleted_msg: 'Chủ đề "{name}" đã được xoá thành công.',
+
+            edit_topic: "Chỉnh sửa chủ đề",
+            topic_updated_msg: 'Chủ đề "{name}" đã được cập nhật thành công.',
 
             topic_id: "Id",
             topic_id_msg: "Id phải là duy nhất, sẽ được tự động tạo nếu để rỗng",

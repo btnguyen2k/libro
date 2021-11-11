@@ -531,3 +531,117 @@ func apiAdminDeleteProductTopic(ctx *itineris.ApiContext, _ *itineris.ApiAuth, p
 
 	return itineris.NewApiResult(itineris.StatusOk)
 }
+
+// apiAdminModifyProductTopic handles API call "adminModifyProductTopic"
+func apiAdminModifyProductTopic(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *itineris.ApiParams) *itineris.ApiResult {
+	_, authResult := authenticateApiCall(ctx)
+	if authResult != nil {
+		return authResult
+	}
+
+	pid := _extractParam(params, "pid", reddo.TypeString, "", nil)
+	prod, err := productDao.Get(pid.(string))
+	if err != nil {
+		return itineris.NewApiResult(itineris.StatusErrorServer).
+			SetMessage(fmt.Sprintf("error getting product [%s] (error: %s)", pid, err))
+	}
+	if prod == nil {
+		return itineris.NewApiResult(itineris.StatusNotFound).
+			SetMessage(fmt.Sprintf("product not found [%s]", pid))
+	}
+
+	topicList, err := topicDao.GetAll(prod, nil, nil)
+	if err != nil {
+		return itineris.NewApiResult(itineris.StatusErrorServer).
+			SetMessage(fmt.Sprintf("error getting topics for product [%s] (error: %s)", pid, err))
+	}
+
+	id := _extractParam(params, "id", reddo.TypeString, utils.UniqueIdSmall(), nil)
+	id = strings.ToLower(id.(string))
+	found := -1
+	for i, topic := range topicList {
+		if topic.GetId() == id {
+			found = i
+			break
+		}
+	}
+
+	if found < 0 {
+		return itineris.NewApiResult(itineris.StatusNotFound).
+			SetMessage(fmt.Sprintf("topic not found [%s]", id))
+	}
+
+	modifyAction := _extractParam(params, "action", reddo.TypeString, "", nil)
+	switch modifyAction {
+	case "move_up":
+		if found == 0 {
+			// at top, can not be moved up
+			break
+		}
+		prev, curr := topicList[found-1], topicList[found]
+		pCurr := curr.GetPosition()
+		curr.SetPosition(pCurr - 1)
+		prev.SetPosition(pCurr)
+		_, eCurr := topicDao.Update(curr)
+		_, ePrev := topicDao.Update(prev)
+		if eCurr != nil || ePrev != nil {
+			return itineris.NewApiResult(itineris.StatusErrorServer).
+				SetMessage(fmt.Sprintf("error updating topics [%s/%s] (error: %s/%s)", prev.GetId(), curr.GetId(), ePrev, eCurr))
+		}
+	case "move_down":
+		if found == len(topicList)-1 {
+			// at bottom, can not be moved down
+			break
+		}
+		curr, next := topicList[found], topicList[found+1]
+		pCurr := curr.GetPosition()
+		curr.SetPosition(pCurr + 1)
+		next.SetPosition(pCurr)
+		_, eCurr := topicDao.Update(curr)
+		_, eNext := topicDao.Update(next)
+		if eCurr != nil || eNext != nil {
+			return itineris.NewApiResult(itineris.StatusErrorServer).
+				SetMessage(fmt.Sprintf("error updating topics [%s/%s] (error: %s/%s)", curr.GetId(), next.GetId(), eCurr, eNext))
+		}
+	default:
+		return itineris.NewApiResult(itineris.StatusErrorClient).
+			SetMessage(fmt.Sprintf("invalid action: %s", modifyAction))
+	}
+
+	return itineris.NewApiResult(itineris.StatusOk)
+}
+
+// apiAdminUpdateProductTopic handles API call "adminUpdateProductTopic"
+func apiAdminUpdateProductTopic(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *itineris.ApiParams) *itineris.ApiResult {
+	// 	_, authResult := authenticateApiCall(ctx)
+	// 	if authResult != nil {
+	// 		return authResult
+	// 	}
+	//
+	// 	id := _extractParam(params, "id", reddo.TypeString, "", nil)
+	// 	product, err := productDao.Get(id.(string))
+	// 	if err != nil {
+	// 		return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage(err.Error())
+	// 	}
+	// 	if product == nil {
+	// 		return itineris.NewApiResult(itineris.StatusNotFound).SetMessage("product not found")
+	// 	}
+	//
+	// 	// extract params
+	// 	isPublished := _extractParam(params, "is_published", reddo.TypeBool, false, nil)
+	// 	name := _extractParam(params, "name", reddo.TypeString, "", nil)
+	// 	if name == "" {
+	// 		return itineris.NewApiResult(itineris.StatusErrorClient).SetMessage("name is empty")
+	// 	}
+	// 	desc := _extractParam(params, "description", reddo.TypeString, "", nil)
+	//
+	// 	// update product
+	// 	product.SetPublished(isPublished.(bool)).SetName(name.(string)).SetDescription(desc.(string))
+	// 	result, err := productDao.Update(product)
+	// 	if err != nil || !result {
+	// 		return itineris.NewApiResult(itineris.StatusErrorServer).
+	// 			SetMessage(fmt.Sprintf("cannot update product %s (error: %s)", name, err))
+	// 	}
+
+	return itineris.NewApiResult(itineris.StatusOk)
+}
