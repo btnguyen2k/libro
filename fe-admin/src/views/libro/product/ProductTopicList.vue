@@ -3,7 +3,10 @@
     <CRow>
       <CCol sm="12">
         <CAlert v-if="foundStatus<0" color="info">{{ $t('message.wait') }}</CAlert>
-        <CAlert v-if="foundStatus==0" color="danger">{{ $t('message.error_product_not_found', {id: $route.params.id}) }}</CAlert>
+        <CAlert v-if="foundStatus==0" color="danger">{{
+            $t('message.error_product_not_found', {id: $route.params.id})
+          }}
+        </CAlert>
         <CAlert v-if="errorMsg" color="danger" closeButton>{{ errorMsg }}</CAlert>
         <CCard accent-color="info">
           <CCardHeader>
@@ -112,6 +115,11 @@
             horizontal
             readonly="readonly"
         >
+          <template #prepend>
+            <CButton disabled link>
+              <CIcon :name="formAdd.icon"/>
+            </CButton>
+          </template>
           <template #append>
             <CButton color="primary" @click="modalIconsShow = true">
               <CIcon name="cil-magnifying-glass"/>
@@ -145,6 +153,73 @@
             {{ $t('message.action_save') }}
           </CButton>
           <CButton type="button" color="secondary" class="ml-2" style="width: 96px" @click="modalAddShow = false">
+            <CIcon name="cil-arrow-circle-left" class="align-top"/>
+            {{ $t('message.cancel') }}
+          </CButton>
+        </template>
+      </CModal>
+    </CForm>
+
+    <!-- pop-up form to edit existing topic -->
+    <CForm @submit.prevent="doEditTopic" method="post">
+      <CModal :title="$t('message.edit_topic')" :centered="true" :show.sync="modalEditShow" :close-on-backdrop="false">
+        <p v-if="modalEditErr!=''" class="alert alert-danger">{{ modalEditErr }}</p>
+        <CInput
+            type="text"
+            v-model="formEdit.id"
+            :label="$t('message.topic_id')"
+            :placeholder="$t('message.topic_id_msg')"
+            v-c-tooltip.hover="$t('message.topic_id_msg')"
+            horizontal
+            readonly
+        />
+        <CInput
+            type="text"
+            v-model="formEdit.icon"
+            :label="$t('message.topic_icon')"
+            :placeholder="$t('message.topic_icon_msg')"
+            v-c-tooltip.hover="$t('message.topic_icon_msg')"
+            horizontal
+            readonly="readonly"
+        >
+          <template #prepend>
+            <CButton disabled link>
+              <CIcon :name="formEdit.icon"/>
+            </CButton>
+          </template>
+          <template #append>
+            <CButton color="primary" @click="modalIconsShow = true">
+              <CIcon name="cil-magnifying-glass"/>
+            </CButton>
+          </template>
+        </CInput>
+        <CInput
+            type="text"
+            v-model="formEdit.title"
+            :label="$t('message.topic_title')"
+            :placeholder="$t('message.topic_title_msg')"
+            v-c-tooltip.hover="$t('message.topic_title_msg')"
+            horizontal
+            required
+            was-validated
+        />
+        <CTextarea
+            rows="4"
+            type="text"
+            v-model="formEdit.summary"
+            :label="$t('message.topic_summary')"
+            :placeholder="$t('message.topic_summary_msg')"
+            v-c-tooltip.hover="$t('message.topic_summary_msg')"
+            horizontal
+            required
+            was-validated
+        />
+        <template #footer>
+          <CButton type="submit" color="primary" style="width: 96px">
+            <CIcon name="cil-save" class="align-top"/>
+            {{ $t('message.action_save') }}
+          </CButton>
+          <CButton type="button" color="secondary" class="ml-2" style="width: 96px" @click="modalEditShow = false">
             <CIcon name="cil-arrow-circle-left" class="align-top"/>
             {{ $t('message.cancel') }}
           </CButton>
@@ -187,9 +262,15 @@ export default {
   },
   data() {
     return {
+      addMode: Boolean,
+
       modalAddShow: false,
       modalAddErr: "",
       formAdd: {id: "", icon: "", title: "", summary: ""},
+
+      modalEditShow: false,
+      modalEditErr: "",
+      formEdit: {id: "", icon: "", title: "", summary: ""},
 
       modalIconsShow: false,
 
@@ -230,10 +311,15 @@ export default {
       return full ? str : str.replace(/^[a-z]+-/, '')
     },
     clickSelectIcon(iconName) {
-      this.formAdd.icon = this.toKebabCase(iconName, true)
+      if (this.addMode) {
+        this.formAdd.icon = this.toKebabCase(iconName, true)
+      } else {
+        this.formEdit.icon = this.toKebabCase(iconName, true)
+      }
       this.modalIconsShow = false
     },
     clickAddTopic() {
+      this.addMode = true
       this.formAdd = {}
       this.modalAddErr = ''
       this.modalAddShow = true
@@ -263,8 +349,31 @@ export default {
       console.log(id)
     },
     clickEditTopic(id) {
-      console.log(id)
-      // this.$router.push({name: "EditProduct", params: {id: id.toString()}})
+      this.addMode = false
+      this.formEdit = {...this.topicMap[id]} //shallow clone using spread syntax, alternative way: this.formEdit = Object.assign({}, this.topicMap[id])
+      this.modalEditErr = ''
+      this.modalEditShow = true
+    },
+    doEditTopic(e) {
+      e.preventDefault()
+      let vue = this
+      let data = vue.formEdit
+      let prodId = vue.$route.params.id
+      const apiUrl = clientUtils.apiAdminProductTopic.replace(':product/', prodId + '/')+'/'+data.id
+      clientUtils.apiDoPut(apiUrl, data,
+          (apiRes) => {
+            if (apiRes.status == 200) {
+              vue.modalEditShow = false
+              vue.myFlashMsg = vue.$i18n.t('message.topic_updated_msg', {name: data.title})
+              vue.loadProductTopicList(prodId)
+            } else {
+              vue.modalEditErr = apiRes.status + ": " + apiRes.message
+            }
+          },
+          (err) => {
+            vue.modalEditErr = err
+          }
+      )
     },
     clickDeleteTopic(id) {
       this.topicToDelete = this.topicMap[id]

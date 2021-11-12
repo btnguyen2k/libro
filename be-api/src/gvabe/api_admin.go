@@ -613,35 +613,48 @@ func apiAdminModifyProductTopic(ctx *itineris.ApiContext, _ *itineris.ApiAuth, p
 
 // apiAdminUpdateProductTopic handles API call "adminUpdateProductTopic"
 func apiAdminUpdateProductTopic(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *itineris.ApiParams) *itineris.ApiResult {
-	// 	_, authResult := authenticateApiCall(ctx)
-	// 	if authResult != nil {
-	// 		return authResult
-	// 	}
-	//
-	// 	id := _extractParam(params, "id", reddo.TypeString, "", nil)
-	// 	product, err := productDao.Get(id.(string))
-	// 	if err != nil {
-	// 		return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage(err.Error())
-	// 	}
-	// 	if product == nil {
-	// 		return itineris.NewApiResult(itineris.StatusNotFound).SetMessage("product not found")
-	// 	}
-	//
-	// 	// extract params
-	// 	isPublished := _extractParam(params, "is_published", reddo.TypeBool, false, nil)
-	// 	name := _extractParam(params, "name", reddo.TypeString, "", nil)
-	// 	if name == "" {
-	// 		return itineris.NewApiResult(itineris.StatusErrorClient).SetMessage("name is empty")
-	// 	}
-	// 	desc := _extractParam(params, "description", reddo.TypeString, "", nil)
-	//
-	// 	// update product
-	// 	product.SetPublished(isPublished.(bool)).SetName(name.(string)).SetDescription(desc.(string))
-	// 	result, err := productDao.Update(product)
-	// 	if err != nil || !result {
-	// 		return itineris.NewApiResult(itineris.StatusErrorServer).
-	// 			SetMessage(fmt.Sprintf("cannot update product %s (error: %s)", name, err))
-	// 	}
+	_, authResult := authenticateApiCall(ctx)
+	if authResult != nil {
+		return authResult
+	}
+
+	pid := _extractParam(params, "pid", reddo.TypeString, "", nil)
+	prod, err := productDao.Get(pid.(string))
+	if err != nil {
+		return itineris.NewApiResult(itineris.StatusErrorServer).
+			SetMessage(fmt.Sprintf("error getting product [%s] (error: %s)", pid, err))
+	}
+	if prod == nil {
+		return itineris.NewApiResult(itineris.StatusNotFound).
+			SetMessage(fmt.Sprintf("product not found [%s]", pid))
+	}
+
+	id := _extractParam(params, "id", reddo.TypeString, utils.UniqueIdSmall(), nil)
+	topic, err := topicDao.Get(id.(string))
+	if err != nil {
+		return itineris.NewApiResult(itineris.StatusErrorServer).
+			SetMessage(fmt.Sprintf("error getting topic [%s] (error: %s)", id, err))
+	}
+	if topic == nil || topic.GetProductId() != prod.GetId() {
+		return itineris.NewApiResult(itineris.StatusNotFound).
+			SetMessage(fmt.Sprintf("topic not found [%s]", id))
+	}
+
+	icon := _extractParam(params, "icon", reddo.TypeString, utils.UniqueIdSmall(), nil)
+	icon = strings.ToLower(icon.(string))
+	title := _extractParam(params, "title", reddo.TypeString, utils.UniqueIdSmall(), nil)
+	summary := _extractParam(params, "summary", reddo.TypeString, utils.UniqueIdSmall(), nil)
+
+	if title == "" {
+		return itineris.NewApiResult(itineris.StatusErrorClient).SetMessage("title is empty")
+	}
+
+	topic.SetIcon(icon.(string)).SetTitle(title.(string)).SetSummary(summary.(string))
+	result, err := topicDao.Update(topic)
+	if err != nil || !result {
+		return itineris.NewApiResult(itineris.StatusErrorServer).
+			SetMessage(fmt.Sprintf("cannot update topic %s (error: %s)", topic.GetId(), err))
+	}
 
 	return itineris.NewApiResult(itineris.StatusOk)
 }
