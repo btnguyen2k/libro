@@ -21,18 +21,27 @@ func initApiHandlers(router *itineris.ApiRouter) {
 	router.SetHandler("systemInfo", apiSystemInfo)
 
 	router.SetHandler("adminGetStats", apiAdminGetStats)
+
 	router.SetHandler("adminGetProductList", apiAdminGetProductList)
 	router.SetHandler("adminAddProduct", apiAdminAddProduct)
 	router.SetHandler("adminGetProduct", apiAdminGetProduct)
 	router.SetHandler("adminUpdateProduct", apiAdminUpdateProduct)
 	router.SetHandler("adminDeleteProduct", apiAdminDeleteProduct)
+
 	router.SetHandler("adminMapDomain", apiAdminMapDomain)
 	router.SetHandler("adminUnmapDomain", apiAdminUnmapDomain)
+
 	router.SetHandler("adminGetProductTopics", apiAdminGetProductTopics)
 	router.SetHandler("adminAddProductTopic", apiAdminAddProductTopic)
 	router.SetHandler("adminDeleteProductTopic", apiAdminDeleteProductTopic)
 	router.SetHandler("adminModifyProductTopic", apiAdminModifyProductTopic)
 	router.SetHandler("adminUpdateProductTopic", apiAdminUpdateProductTopic)
+
+	router.SetHandler("adminGetTopicPages", apiAdminGetTopicPages)
+	router.SetHandler("adminAddTopicPage", apiAdminAddTopicPage)
+	router.SetHandler("adminDeleteTopicPage", apiAdminDeleteTopicPage)
+	router.SetHandler("adminModifyTopicPage", apiAdminModifyTopicPage)
+	router.SetHandler("adminUpdateTopicPage", apiAdminUpdateTopicPage)
 }
 
 /*------------------------------ shared variables and functions ------------------------------*/

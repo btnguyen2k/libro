@@ -211,7 +211,7 @@ func apiAdminUpdateProduct(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params
 	result, err := productDao.Update(product)
 	if err != nil || !result {
 		return itineris.NewApiResult(itineris.StatusErrorServer).
-			SetMessage(fmt.Sprintf("cannot update product %s (error: %s)", name, err))
+			SetMessage(fmt.Sprintf("cannot update product [%s/%s] (error: %s)", product.GetId(), product.GetName(), err))
 	}
 
 	return itineris.NewApiResult(itineris.StatusOk)
@@ -423,10 +423,10 @@ func apiAdminAddProductTopic(ctx *itineris.ApiContext, _ *itineris.ApiAuth, para
 	}
 	id = strings.ToLower(id.(string))
 
-	icon := _extractParam(params, "icon", reddo.TypeString, utils.UniqueIdSmall(), nil)
+	icon := _extractParam(params, "icon", reddo.TypeString, "", nil)
 	icon = strings.ToLower(icon.(string))
-	title := _extractParam(params, "title", reddo.TypeString, utils.UniqueIdSmall(), nil)
-	summary := _extractParam(params, "summary", reddo.TypeString, utils.UniqueIdSmall(), nil)
+	title := _extractParam(params, "title", reddo.TypeString, "", nil)
+	summary := _extractParam(params, "summary", reddo.TypeString, "", nil)
 
 	if title == "" {
 		return itineris.NewApiResult(itineris.StatusErrorClient).SetMessage("title is empty")
@@ -437,7 +437,7 @@ func apiAdminAddProductTopic(ctx *itineris.ApiContext, _ *itineris.ApiAuth, para
 	result, err := topicDao.Create(topic)
 	if err != nil || !result {
 		return itineris.NewApiResult(itineris.StatusErrorServer).
-			SetMessage(fmt.Sprintf("cannot create topic [%s] (error: %s)", title, err))
+			SetMessage(fmt.Sprintf("cannot create topic [%s/%s] (error: %s)", id, title, err))
 	}
 
 	// TODO: update product's stats via event-driven manner
@@ -481,7 +481,7 @@ func apiAdminDeleteProductTopic(ctx *itineris.ApiContext, _ *itineris.ApiAuth, p
 			SetMessage(fmt.Sprintf("product not found [%s]", pid))
 	}
 
-	id := _extractParam(params, "id", reddo.TypeString, utils.UniqueIdSmall(), nil)
+	id := _extractParam(params, "id", reddo.TypeString, "", nil)
 	topic, err := topicDao.Get(id.(string))
 	if err != nil {
 		return itineris.NewApiResult(itineris.StatusErrorServer).
@@ -518,7 +518,7 @@ func apiAdminDeleteProductTopic(ctx *itineris.ApiContext, _ *itineris.ApiAuth, p
 
 		pages, err := pageDao.GetAll(topic, nil, nil)
 		if err != nil {
-			log.Printf("[WARN] Post-delete topic [%s] - Error getting all page for topic [%s]: %e", topic.GetId(), topic.GetId(), err)
+			log.Printf("[WARN] Post-delete topic [%s] - Error getting all pages for topic [%s]: %e", topic.GetId(), topic.GetId(), err)
 			return
 		}
 		for _, page := range pages {
@@ -553,10 +553,10 @@ func apiAdminModifyProductTopic(ctx *itineris.ApiContext, _ *itineris.ApiAuth, p
 	topicList, err := topicDao.GetAll(prod, nil, nil)
 	if err != nil {
 		return itineris.NewApiResult(itineris.StatusErrorServer).
-			SetMessage(fmt.Sprintf("error getting topics for product [%s] (error: %s)", pid, err))
+			SetMessage(fmt.Sprintf("error getting topics for product [%s/%s] (error: %s)", pid, prod.GetName(), err))
 	}
 
-	id := _extractParam(params, "id", reddo.TypeString, utils.UniqueIdSmall(), nil)
+	id := _extractParam(params, "id", reddo.TypeString, "", nil)
 	id = strings.ToLower(id.(string))
 	found := -1
 	for i, topic := range topicList {
@@ -629,7 +629,7 @@ func apiAdminUpdateProductTopic(ctx *itineris.ApiContext, _ *itineris.ApiAuth, p
 			SetMessage(fmt.Sprintf("product not found [%s]", pid))
 	}
 
-	id := _extractParam(params, "id", reddo.TypeString, utils.UniqueIdSmall(), nil)
+	id := _extractParam(params, "id", reddo.TypeString, "", nil)
 	topic, err := topicDao.Get(id.(string))
 	if err != nil {
 		return itineris.NewApiResult(itineris.StatusErrorServer).
@@ -640,10 +640,10 @@ func apiAdminUpdateProductTopic(ctx *itineris.ApiContext, _ *itineris.ApiAuth, p
 			SetMessage(fmt.Sprintf("topic not found [%s]", id))
 	}
 
-	icon := _extractParam(params, "icon", reddo.TypeString, utils.UniqueIdSmall(), nil)
+	icon := _extractParam(params, "icon", reddo.TypeString, "", nil)
 	icon = strings.ToLower(icon.(string))
-	title := _extractParam(params, "title", reddo.TypeString, utils.UniqueIdSmall(), nil)
-	summary := _extractParam(params, "summary", reddo.TypeString, utils.UniqueIdSmall(), nil)
+	title := _extractParam(params, "title", reddo.TypeString, "", nil)
+	summary := _extractParam(params, "summary", reddo.TypeString, "", nil)
 
 	if title == "" {
 		return itineris.NewApiResult(itineris.StatusErrorClient).SetMessage("title is empty")
@@ -653,7 +653,308 @@ func apiAdminUpdateProductTopic(ctx *itineris.ApiContext, _ *itineris.ApiAuth, p
 	result, err := topicDao.Update(topic)
 	if err != nil || !result {
 		return itineris.NewApiResult(itineris.StatusErrorServer).
-			SetMessage(fmt.Sprintf("cannot update topic %s (error: %s)", topic.GetId(), err))
+			SetMessage(fmt.Sprintf("cannot update topic [%s/%s] (error: %s)", topic.GetId(), topic.GetTitle(), err))
+	}
+
+	return itineris.NewApiResult(itineris.StatusOk)
+}
+
+/*----------------------------------------------------------------------*/
+
+var funcPageToMapTransform = func(m map[string]interface{}) map[string]interface{} {
+	s := semita.NewSemita(m)
+
+	// transform input map
+	result := map[string]interface{}{
+		"id":        m[henge.FieldId],
+		"t_created": m[henge.FieldTimeCreated],
+	}
+	result["product_id"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyFields, doc.PageFieldProductId), reddo.TypeString)
+	result["topic_id"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyFields, doc.PageFieldTopicId), reddo.TypeString)
+	result["pos"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyFields, doc.PageFieldPosition), reddo.TypeInt)
+	result["title"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, doc.PageAttrTitle), reddo.TypeString)
+	result["icon"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, doc.PageAttrIcon), reddo.TypeString)
+	result["summary"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, doc.PageAttrSummary), reddo.TypeString)
+	result["content"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, doc.PageAttrContent), reddo.TypeString)
+
+	// convert "creation timestamp" to UTC
+	if t, ok := result["t_created"].(time.Time); ok {
+		result["t_created"] = t.In(time.UTC)
+	}
+
+	return result
+}
+
+// apiAdminGetTopicPages handles API call "adminGetTopicPages"
+func apiAdminGetTopicPages(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *itineris.ApiParams) *itineris.ApiResult {
+	_, authResult := authenticateApiCall(ctx)
+	if authResult != nil {
+		return authResult
+	}
+
+	tid := _extractParam(params, "tid", reddo.TypeString, "", nil)
+	topic, err := topicDao.Get(tid.(string))
+	if err != nil {
+		return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage(err.Error())
+	}
+	if topic == nil {
+		return itineris.NewApiResult(itineris.StatusNotFound).SetMessage("topic not found")
+	}
+
+	pageList, err := pageDao.GetAll(topic, nil, nil)
+	if err != nil {
+		return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage(err.Error())
+	}
+	data := make([]map[string]interface{}, 0)
+	for _, page := range pageList {
+		data = append(data, page.ToMap(funcPageToMapTransform))
+	}
+	return itineris.NewApiResult(itineris.StatusOk).SetData(data)
+}
+
+// apiAdminAddTopicPage handles API call "adminAddTopicPage"
+func apiAdminAddTopicPage(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *itineris.ApiParams) *itineris.ApiResult {
+	_, authResult := authenticateApiCall(ctx)
+	if authResult != nil {
+		return authResult
+	}
+
+	tid := _extractParam(params, "tid", reddo.TypeString, "", nil)
+	topic, err := topicDao.Get(tid.(string))
+	if err != nil {
+		return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage(err.Error())
+	}
+	if topic == nil {
+		return itineris.NewApiResult(itineris.StatusNotFound).SetMessage("topic not found")
+	}
+
+	id := _extractParam(params, "id", reddo.TypeString, utils.UniqueIdSmall(), nil)
+	page, err := pageDao.Get(id.(string))
+	if err != nil {
+		return itineris.NewApiResult(itineris.StatusErrorServer).
+			SetMessage(fmt.Sprintf("error getting page [%s] (error: %s)", id, err))
+	}
+	if page != nil {
+		return itineris.NewApiResult(itineris.StatusErrorClient).
+			SetMessage(fmt.Sprintf("page [%s] already existed", id))
+	}
+	id = strings.ToLower(id.(string))
+
+	icon := _extractParam(params, "icon", reddo.TypeString, "", nil)
+	icon = strings.ToLower(icon.(string))
+	title := _extractParam(params, "title", reddo.TypeString, "", nil)
+	summary := _extractParam(params, "summary", reddo.TypeString, "", nil)
+	content := _extractParam(params, "content", reddo.TypeString, "", nil)
+
+	if title == "" {
+		return itineris.NewApiResult(itineris.StatusErrorClient).SetMessage("title is empty")
+	}
+
+	page = doc.NewPage(goapi.AppVersionNumber, topic, title.(string), icon.(string), summary.(string), content.(string))
+	page.SetId(id.(string))
+	result, err := pageDao.Create(page)
+	if err != nil || !result {
+		return itineris.NewApiResult(itineris.StatusErrorServer).
+			SetMessage(fmt.Sprintf("cannot create page [%s/%s] (error: %s)", id, title, err))
+	}
+
+	// TODO: update topic's stats via event-driven manner
+	go func(page *doc.Page) {
+		topic, err := topicDao.Get(page.GetTopicId())
+		if err != nil {
+			log.Printf("[WARN] Post-add page [%s] - Error getting topic [%s]: %e", page.GetId(), page.GetTopicId(), err)
+			return
+		}
+
+		pages, err := pageDao.GetAll(topic, nil, nil)
+		if err != nil {
+			log.Printf("[WARN] Post-add page [%s] - Error getting all pages for topic [%s]: %e", page.GetId(), page.GetTopicId(), err)
+			return
+		}
+		topic.SetNumPages(len(pages))
+		ok, err := topicDao.Update(topic)
+		if err != nil || !ok {
+			log.Printf("[WARN] Post-add page [%s] - Cannot update topic stats [%s]: %#v / %e", page.GetId(), page.GetTopicId(), ok, err)
+		}
+	}(page)
+
+	return itineris.NewApiResult(itineris.StatusOk)
+}
+
+// apiAdminDeleteTopicPage handles API call "adminDeleteTopicPage"
+func apiAdminDeleteTopicPage(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *itineris.ApiParams) *itineris.ApiResult {
+	_, authResult := authenticateApiCall(ctx)
+	if authResult != nil {
+		return authResult
+	}
+
+	tid := _extractParam(params, "tid", reddo.TypeString, "", nil)
+	topic, err := topicDao.Get(tid.(string))
+	if err != nil {
+		return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage(err.Error())
+	}
+	if topic == nil {
+		return itineris.NewApiResult(itineris.StatusNotFound).SetMessage("topic not found")
+	}
+
+	id := _extractParam(params, "id", reddo.TypeString, "", nil)
+	page, err := pageDao.Get(id.(string))
+	if err != nil {
+		return itineris.NewApiResult(itineris.StatusErrorServer).
+			SetMessage(fmt.Sprintf("error getting page [%s] (error: %s)", id, err))
+	}
+	if page == nil || page.GetTopicId() != topic.GetId() {
+		return itineris.NewApiResult(itineris.StatusNotFound).
+			SetMessage(fmt.Sprintf("page not found [%s]", id))
+	}
+
+	_, err = pageDao.Delete(page)
+	if err != nil {
+		return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage(err.Error())
+	}
+
+	// TODO: update topic's stats via event-driven manner
+	go func(page *doc.Page) {
+		topic, err := topicDao.Get(page.GetTopicId())
+		if err != nil {
+			log.Printf("[WARN] Post-delete page [%s] - Error getting topic [%s]: %e", page.GetId(), page.GetTopicId(), err)
+			return
+		}
+
+		pages, err := pageDao.GetAll(topic, nil, nil)
+		if err != nil {
+			log.Printf("[WARN] Post-delete page [%s] - Error getting all pages for topic [%s]: %e", page.GetId(), page.GetTopicId(), err)
+			return
+		}
+		topic.SetNumPages(len(pages))
+		ok, err := topicDao.Update(topic)
+		if err != nil || !ok {
+			log.Printf("[WARN] Post-delete page [%s] - Cannot update topic stats [%s]: %#v / %e", page.GetId(), page.GetTopicId(), ok, err)
+		}
+	}(page)
+
+	return itineris.NewApiResult(itineris.StatusOk)
+}
+
+// apiAdminModifyTopicPage handles API call "adminModifyTopicPage"
+func apiAdminModifyTopicPage(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *itineris.ApiParams) *itineris.ApiResult {
+	_, authResult := authenticateApiCall(ctx)
+	if authResult != nil {
+		return authResult
+	}
+
+	tid := _extractParam(params, "tid", reddo.TypeString, "", nil)
+	topic, err := topicDao.Get(tid.(string))
+	if err != nil {
+		return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage(err.Error())
+	}
+	if topic == nil {
+		return itineris.NewApiResult(itineris.StatusNotFound).SetMessage("topic not found")
+	}
+
+	pageList, err := pageDao.GetAll(topic, nil, nil)
+	if err != nil {
+		return itineris.NewApiResult(itineris.StatusErrorServer).
+			SetMessage(fmt.Sprintf("error getting pages for topic [%s/%s] (error: %s)", tid, topic.GetTitle(), err))
+	}
+
+	id := _extractParam(params, "id", reddo.TypeString, "", nil)
+	id = strings.ToLower(id.(string))
+	found := -1
+	for i, page := range pageList {
+		if page.GetId() == id {
+			found = i
+			break
+		}
+	}
+
+	if found < 0 {
+		return itineris.NewApiResult(itineris.StatusNotFound).
+			SetMessage(fmt.Sprintf("page not found [%s]", id))
+	}
+
+	modifyAction := _extractParam(params, "action", reddo.TypeString, "", nil)
+	switch modifyAction {
+	case "move_up":
+		if found == 0 {
+			// at top, can not be moved up
+			break
+		}
+		prev, curr := pageList[found-1], pageList[found]
+		pCurr := curr.GetPosition()
+		curr.SetPosition(pCurr - 1)
+		prev.SetPosition(pCurr)
+		_, eCurr := pageDao.Update(curr)
+		_, ePrev := pageDao.Update(prev)
+		if eCurr != nil || ePrev != nil {
+			return itineris.NewApiResult(itineris.StatusErrorServer).
+				SetMessage(fmt.Sprintf("error updating pages [%s/%s] (error: %s/%s)", prev.GetId(), curr.GetId(), ePrev, eCurr))
+		}
+	case "move_down":
+		if found == len(pageList)-1 {
+			// at bottom, can not be moved down
+			break
+		}
+		curr, next := pageList[found], pageList[found+1]
+		pCurr := curr.GetPosition()
+		curr.SetPosition(pCurr + 1)
+		next.SetPosition(pCurr)
+		_, eCurr := pageDao.Update(curr)
+		_, eNext := pageDao.Update(next)
+		if eCurr != nil || eNext != nil {
+			return itineris.NewApiResult(itineris.StatusErrorServer).
+				SetMessage(fmt.Sprintf("error updating pages [%s/%s] (error: %s/%s)", curr.GetId(), next.GetId(), eCurr, eNext))
+		}
+	default:
+		return itineris.NewApiResult(itineris.StatusErrorClient).
+			SetMessage(fmt.Sprintf("invalid action: %s", modifyAction))
+	}
+
+	return itineris.NewApiResult(itineris.StatusOk)
+}
+
+// apiAdminUpdateTopicPage handles API call "adminUpdateTopicPage"
+func apiAdminUpdateTopicPage(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *itineris.ApiParams) *itineris.ApiResult {
+	_, authResult := authenticateApiCall(ctx)
+	if authResult != nil {
+		return authResult
+	}
+
+	tid := _extractParam(params, "tid", reddo.TypeString, "", nil)
+	topic, err := topicDao.Get(tid.(string))
+	if err != nil {
+		return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage(err.Error())
+	}
+	if topic == nil {
+		return itineris.NewApiResult(itineris.StatusNotFound).SetMessage("topic not found")
+	}
+
+	id := _extractParam(params, "id", reddo.TypeString, "", nil)
+	page, err := pageDao.Get(id.(string))
+	if err != nil {
+		return itineris.NewApiResult(itineris.StatusErrorServer).
+			SetMessage(fmt.Sprintf("error getting page [%s] (error: %s)", id, err))
+	}
+	if page == nil || page.GetTopicId() != topic.GetId() {
+		return itineris.NewApiResult(itineris.StatusNotFound).
+			SetMessage(fmt.Sprintf("page not found [%s]", id))
+	}
+
+	icon := _extractParam(params, "icon", reddo.TypeString, "", nil)
+	icon = strings.ToLower(icon.(string))
+	title := _extractParam(params, "title", reddo.TypeString, "", nil)
+	summary := _extractParam(params, "summary", reddo.TypeString, "", nil)
+	content := _extractParam(params, "content", reddo.TypeString, "", nil)
+
+	if title == "" {
+		return itineris.NewApiResult(itineris.StatusErrorClient).SetMessage("title is empty")
+	}
+
+	page.SetIcon(icon.(string)).SetTitle(title.(string)).SetSummary(summary.(string)).SetContent(content.(string))
+	result, err := pageDao.Update(page)
+	if err != nil || !result {
+		return itineris.NewApiResult(itineris.StatusErrorServer).
+			SetMessage(fmt.Sprintf("cannot update page [%s/%s] (error: %s)", page.GetId(), page.GetTitle(), err))
 	}
 
 	return itineris.NewApiResult(itineris.StatusOk)

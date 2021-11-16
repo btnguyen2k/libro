@@ -29,7 +29,9 @@ let apiAdminProduct = "/api/admin/product"
 let apiAdminDomains = "/api/admin/domains"
 let apiAdminDomain = "/api/admin/domain"
 let apiAdminProductTopics = "/api/admin/product/:product/topics"
-let apiAdminProductTopic = "/api/admin/product/:product/topic"
+let apiAdminProductTopic = "/api/admin/product/:product/topic/:topic"
+let apiAdminTopicPages = "/api/admin/topic/:topic/pages"
+let apiAdminTopicPage = "/api/admin/topic/:topic/page/:page"
 
 let apiMyBlog = '/api/myblog'
 let apiMyFeed = '/api/myfeed'
@@ -127,6 +129,8 @@ export default {
     apiAdminDomain,
     apiAdminProductTopics,
     apiAdminProductTopic,
+    apiAdminTopicPages,
+    apiAdminTopicPage,
 
     apiMyBlog,
     apiMyFeed,

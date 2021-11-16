@@ -88,7 +88,7 @@ export default {
       this.$router.push({name: "AddProduct"})
     },
     clickProductTopic(id) {
-      this.$router.push({name: "ProductTopicList", params: {id: id}})
+      this.$router.push({name: "ProductTopicList", params: {pid: id}})
     },
     clickEditProduct(id) {
       this.$router.push({name: "EditProduct", params: {id: id}})

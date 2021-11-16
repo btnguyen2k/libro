@@ -67,6 +67,8 @@ const messages = {
             product_map_domain_msg: "Product documents are accessible via mapped domain names",
             product_domain_mapped_msg: 'Domain "{domain}" has been mapped successfully.',
 
+            error_topic_not_found: 'Topic "{id}" not found.',
+
             add_topic: "Add new topic",
             topic_added_msg: 'Topic "{name}" has been created successfully.',
 
@@ -85,6 +87,26 @@ const messages = {
             topic_title_msg: "Topic title",
             topic_summary: "Summary",
             topic_summary_msg: "Short summary of the topic",
+
+            add_page: "Add new page",
+            page_added_msg: 'Page "{name}" has been created successfully.',
+
+            delete_page: "Delete page",
+            page_deleted_msg: 'Page "{name}" has been deleted successfully.',
+
+            edit_page: "Edit page",
+            page_updated_msg: 'Page "{name}" has been updated successfully.',
+
+            page_id: "Id",
+            page_id_msg: "Must be unique, will be generated if empty",
+            page_icon: "Icon",
+            page_icon_msg: "Pick an icon from the list",
+            page_title: "Title",
+            page_title_msg: "Topic title",
+            page_summary: "Summary",
+            page_summary_msg: "Short summary of the page",
+            page_content: "Content",
+            page_content_msg: "Page content (Markdown supported)",
         }
     },
     vi: {
@@ -151,6 +173,8 @@ const messages = {
             product_map_domain_msg: "Tài liệu của sản phẩm truy cập được từ các tên miền sau khi được kết nối",
             product_domain_mapped_msg: 'Tên miền "{domain}" đã được kết nối thành công.',
 
+            error_topic_not_found: 'Không tìm thấy chủ để "{id}".',
+
             add_topic: "Thêm chủ đề",
             topic_added_msg: 'Chủ đề "{name}" đã được tạo thành công.',
 
@@ -167,8 +191,28 @@ const messages = {
             topic_icon_msg: "Chọn 1 biểu tượng cho chủ đề trong danh sách",
             topic_title: "Tên",
             topic_title_msg: "Tên hiển thị của chủ đề",
-            topic_summary: "Mô tả",
-            topic_summary_msg: "Phần mô tả ngắn về chủ đề",
+            topic_summary: "Tóm tắt",
+            topic_summary_msg: "Phần tóm tắt ngắn về chủ đề",
+
+            add_page: "Thêm trang tài liệu",
+            page_added_msg: 'Trang tài liệu "{name}" đã được tạo thành công.',
+
+            delete_page: "Xoá trang tài liệu",
+            page_deleted_msg: 'Trang tài liệu "{name}" đã được xoá thành công.',
+
+            edit_page: "Chỉnh sửa trang tài liệu",
+            page_updated_msg: 'Trang tài liệu "{name}" đã được cập nhật thành công.',
+
+            page_id: "Id",
+            page_id_msg: "Id phải là duy nhất, sẽ được tự động tạo nếu để rỗng",
+            page_icon: "Biểu tượng",
+            page_icon_msg: "Chọn 1 biểu tượng cho trang tài liệu trong danh sách",
+            page_title: "Tên",
+            page_title_msg: "Tên hiển thị của trang tài liệu",
+            page_summary: "Tóm tắt",
+            page_summary_msg: "Phần tóm tắt ngắn về nội dung của trang tài liệu",
+            page_content: "Nội dung",
+            page_content_msg: "Nội dung của trang tài liệu (hỗ trợ Markdown)",
         }
     }
 }

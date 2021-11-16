@@ -8,11 +8,12 @@ const TheContainer = () => import('@/containers/TheContainer')
 // Views
 const Dashboard = () => import('@/views/libro/Dashboard')
 
-const ProductList = () => import('@/views/libro/product/ProductList')
-const AddProduct = () => import('@/views/libro/product/AddProduct')
-const EditProduct = () => import('@/views/libro/product/EditProduct')
-const DeleteProduct = () => import('@/views/libro/product/DeleteProduct')
-const ProductTopicList = () => import('@/views/libro/product/ProductTopicList')
+const ProductList = () => import('@/views/libro/ProductList')
+const AddProduct = () => import('@/views/libro/AddProduct')
+const EditProduct = () => import('@/views/libro/EditProduct')
+const DeleteProduct = () => import('@/views/libro/DeleteProduct')
+const ProductTopicList = () => import('@/views/libro/ProductTopicList')
+const TopicPageList = () => import('@/views/libro/TopicPageList')
 
 // Views - Pages
 const Login = () => import('@/views/gva/pages/Login')
@@ -121,10 +122,16 @@ function configRoutes() {
                             component: DeleteProduct,
                         },
                         {
-                            path: '_topics/:id',
+                            path: '_topics/:pid',
                             meta: {label: i18n.t('message.topics')},
                             name: 'ProductTopicList',
                             component: ProductTopicList,
+                        },
+                        {
+                            path: '_pages/:pid/:tid',
+                            meta: {label: i18n.t('message.pages')},
+                            name: 'TopicPageList',
+                            component: TopicPageList,
                         },
                     ]
                 },

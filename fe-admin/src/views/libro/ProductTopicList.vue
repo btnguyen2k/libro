@@ -3,16 +3,26 @@
     <CRow>
       <CCol sm="12">
         <CAlert v-if="foundStatus<0" color="info">{{ $t('message.wait') }}</CAlert>
-        <CAlert v-if="foundStatus==0" color="danger">{{
-            $t('message.error_product_not_found', {id: $route.params.id})
-          }}
-        </CAlert>
+        <CCard v-if="foundStatus==0" color="danger" text-color="white">
+          <CCardHeader>
+            {{ $t('message.error_product_not_found', {id: $route.params.pid}) }}
+            <div class="card-header-actions">
+              <CButton color="light" size="sm" @click="clickGoback">
+                <CIcon name="cil-arrow-circle-left"/> {{ $t('message.action_back') }}
+              </CButton>
+            </div>
+          </CCardHeader>
+        </CCard>
         <CAlert v-if="errorMsg" color="danger" closeButton>{{ errorMsg }}</CAlert>
-        <CCard accent-color="info">
+        <CCard accent-color="info" v-if="foundStatus>0">
           <CCardHeader>
             <strong>{{ $t('message.topics') }}</strong>
             <div class="card-header-actions">
-              <CButton class="btn-sm btn-primary" @click="clickAddTopic">
+              <CButton color="secondary" size="sm" class="m-2" @click="clickGoback">
+                <CIcon name="cil-arrow-circle-left"/>
+                {{ $t('message.action_back') }}
+              </CButton>
+              <CButton color="primary" size="sm"  @click="clickAddTopic">
                 <CIcon name="cil-playlist-add"/>
                 {{ $t('message.add_topic') }}
               </CButton>
@@ -59,6 +69,16 @@
               </template>
             </CDataTable>
           </CCardBody>
+          <CCardFooter>
+            <CButton color="secondary" size="sm" class="m-2" @click="clickGoback">
+              <CIcon name="cil-arrow-circle-left"/>
+              {{ $t('message.action_back') }}
+            </CButton>
+            <CButton color="primary" size="sm"  @click="clickAddTopic">
+              <CIcon name="cil-playlist-add"/>
+              {{ $t('message.add_topic') }}
+            </CButton>
+          </CCardFooter>
         </CCard>
       </CCol>
     </CRow>
@@ -83,11 +103,11 @@
       <CTextarea rows="4" type="text" :label="$t('message.topic_summary')" v-model="topicToDelete.summary" horizontal
                  plaintext/>
       <template #footer>
-        <CButton type="button" color="danger" style="width: 96px" @click="doDeleteTopic">
+        <CButton type="button" color="danger" class="m-2" style="width: 96px" @click="doDeleteTopic">
           <CIcon name="cil-trash" class="align-top"/>
           {{ $t('message.action_delete') }}
         </CButton>
-        <CButton type="button" color="secondary" class="ml-2" style="width: 96px" @click="modalDeleteShow = false">
+        <CButton type="button" color="secondary" style="width: 96px" @click="modalDeleteShow = false">
           <CIcon name="cil-arrow-circle-left" class="align-top"/>
           {{ $t('message.cancel') }}
         </CButton>
@@ -148,11 +168,11 @@
             was-validated
         />
         <template #footer>
-          <CButton type="submit" color="primary" style="width: 96px">
+          <CButton type="submit" color="primary" class="m-2" style="width: 96px">
             <CIcon name="cil-save" class="align-top"/>
             {{ $t('message.action_save') }}
           </CButton>
-          <CButton type="button" color="secondary" class="ml-2" style="width: 96px" @click="modalAddShow = false">
+          <CButton type="button" color="secondary" style="width: 96px" @click="modalAddShow = false">
             <CIcon name="cil-arrow-circle-left" class="align-top"/>
             {{ $t('message.cancel') }}
           </CButton>
@@ -215,11 +235,11 @@
             was-validated
         />
         <template #footer>
-          <CButton type="submit" color="primary" style="width: 96px">
+          <CButton type="submit" color="primary" class="m-2" style="width: 96px">
             <CIcon name="cil-save" class="align-top"/>
             {{ $t('message.action_save') }}
           </CButton>
-          <CButton type="button" color="secondary" class="ml-2" style="width: 96px" @click="modalEditShow = false">
+          <CButton type="button" color="secondary" style="width: 96px" @click="modalEditShow = false">
             <CIcon name="cil-arrow-circle-left" class="align-top"/>
             {{ $t('message.cancel') }}
           </CButton>
@@ -258,7 +278,7 @@ export default {
   name: 'ProductTopicList',
   freeSet,
   mounted() {
-    this.loadProductTopicList(this.$route.params.id)
+    this.loadProductTopicList(this.$route.params.pid)
   },
   data() {
     return {
@@ -289,8 +309,9 @@ export default {
   props: ["flashMsg"],
   methods: {
     loadProductTopicList(prodId) {
+      this.foundStatus = -1
       const vue = this
-      const apiUrl = clientUtils.apiAdminProductTopics.replace(':product/', prodId + '/')
+      const apiUrl = clientUtils.apiAdminProductTopics.replaceAll(':product', prodId)
       clientUtils.apiDoGet(apiUrl,
           (apiRes) => {
             vue.foundStatus = apiRes.status == 200 ? 1 : 0
@@ -310,6 +331,9 @@ export default {
       str = str.replace(/([a-z])([A-Z0-9])/g, '$1-$2').toLowerCase()
       return full ? str : str.replace(/^[a-z]+-/, '')
     },
+    clickGoback() {
+      this.$router.push({name: "ProductList"})
+    },
     clickSelectIcon(iconName) {
       if (this.addMode) {
         this.formAdd.icon = this.toKebabCase(iconName, true)
@@ -326,10 +350,12 @@ export default {
     },
     doAddTopic(e) {
       e.preventDefault()
+      const saveStatus = this.foundStatus
+      this.foundStatus = -1
       let vue = this
       let data = vue.formAdd
-      let prodId = vue.$route.params.id
-      const apiUrl = clientUtils.apiAdminProductTopics.replace(':product/', prodId + '/')
+      let prodId = vue.$route.params.pid
+      const apiUrl = clientUtils.apiAdminProductTopics.replaceAll(':product', prodId)
       clientUtils.apiDoPost(apiUrl, data,
           (apiRes) => {
             if (apiRes.status == 200) {
@@ -338,15 +364,18 @@ export default {
               vue.loadProductTopicList(prodId)
             } else {
               vue.modalAddErr = apiRes.status + ": " + apiRes.message
+              vue.foundStatus = saveStatus
             }
           },
           (err) => {
             vue.modalAddErr = err
+            vue.foundStatus = saveStatus
           }
       )
     },
-    clickTopicPages(id) {
-      console.log(id)
+    clickTopicPages(topicId) {
+      let prodId = this.$route.params.pid
+      this.$router.push({name: "TopicPageList", params: {pid: prodId, tid: topicId}})
     },
     clickEditTopic(id) {
       this.addMode = false
@@ -356,10 +385,12 @@ export default {
     },
     doEditTopic(e) {
       e.preventDefault()
+      const saveStatus = this.foundStatus
+      this.foundStatus = -1
       let vue = this
       let data = vue.formEdit
-      let prodId = vue.$route.params.id
-      const apiUrl = clientUtils.apiAdminProductTopic.replace(':product/', prodId + '/')+'/'+data.id
+      let prodId = vue.$route.params.pid
+      const apiUrl = clientUtils.apiAdminProductTopic.replaceAll(':product', prodId).replaceAll(':topic', data.id)
       clientUtils.apiDoPut(apiUrl, data,
           (apiRes) => {
             if (apiRes.status == 200) {
@@ -368,10 +399,12 @@ export default {
               vue.loadProductTopicList(prodId)
             } else {
               vue.modalEditErr = apiRes.status + ": " + apiRes.message
+              vue.foundStatus = saveStatus
             }
           },
           (err) => {
             vue.modalEditErr = err
+            vue.foundStatus = saveStatus
           }
       )
     },
@@ -381,10 +414,12 @@ export default {
     },
     doDeleteTopic(e) {
       e.preventDefault()
+      const saveStatus = this.foundStatus
+      this.foundStatus = -1
       let vue = this
-      let prodId = vue.$route.params.id
+      let prodId = vue.$route.params.pid
       let data = vue.topicToDelete
-      const apiUrl = clientUtils.apiAdminProductTopic.replace(':product/', prodId + '/') + '/' + data.id
+      const apiUrl = clientUtils.apiAdminProductTopic.replaceAll(':product', prodId).replaceAll(':topic', data.id)
       clientUtils.apiDoDelete(apiUrl,
           (apiRes) => {
             if (apiRes.status == 200) {
@@ -393,18 +428,21 @@ export default {
               vue.loadProductTopicList(prodId)
             } else {
               vue.modalDeleteErr = apiRes.status + ": " + apiRes.message
+              vue.foundStatus = saveStatus
             }
           },
           (err) => {
             vue.modalDeleteErr = err
+            vue.foundStatus = saveStatus
           }
       )
     },
     _doMoveTopicUpOrDown(id, data) {
+      const saveStatus = this.foundStatus
+      this.foundStatus = -1
       let vue = this
-      let prodId = vue.$route.params.id
-      const apiUrl = clientUtils.apiAdminProductTopic.replace(':product/', prodId + '/') + '/' + id
-      console.log(id, data, apiUrl)
+      let prodId = vue.$route.params.pid
+      const apiUrl = clientUtils.apiAdminProductTopic.replaceAll(':product', prodId).replaceAll(':topic', id)
       clientUtils.apiDoPatch(apiUrl, data,
           (apiRes) => {
             if (apiRes.status == 200) {
@@ -412,10 +450,12 @@ export default {
               vue.loadProductTopicList(prodId)
             } else {
               vue.errorMsg = apiRes.status + ": " + apiRes.message
+              vue.foundStatus = saveStatus
             }
           },
           (err) => {
             vue.errorMsg = err
+            vue.foundStatus = saveStatus
           }
       )
     },
