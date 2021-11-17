@@ -71,36 +71,38 @@
       </CCol>
     </CRow>
 
-    <!--    &lt;!&ndash; pop-up dialog to confirm deleting a topic &ndash;&gt;-->
-    <!--    <CModal color="warning" :title="$t('message.delete_topic')" :centered="true" :show.sync="modalDeleteShow"-->
-    <!--            :close-on-backdrop="false">-->
-    <!--      <p class="alert alert-warning">-->
-    <!--        <CIcon name="cil-warning" size="lg"/>-->
-    <!--        {{ $t('message.delete_topic_msg', {numPages: topicToDelete['num_pages']}) }}-->
-    <!--      </p>-->
-    <!--      <p v-if="modalDeleteErr!=''" class="alert alert-danger">{{ modalDeleteErr }}</p>-->
-    <!--      <CInput type="text" :label="$t('message.topic_icon')+' / '+$t('message.topic_id')" v-model="topicToDelete.id"-->
-    <!--              horizontal plaintext>-->
-    <!--        <template #prepend>-->
-    <!--          <CButton disabled link>-->
-    <!--            <CIcon :name="topicToDelete.icon"/>-->
-    <!--          </CButton>-->
-    <!--        </template>-->
-    <!--      </CInput>-->
-    <!--      <CInput type="text" :label="$t('message.topic_title')" v-model="topicToDelete.title" horizontal plaintext/>-->
-    <!--      <CTextarea rows="4" type="text" :label="$t('message.topic_summary')" v-model="topicToDelete.summary" horizontal-->
-    <!--                 plaintext/>-->
-    <!--      <template #footer>-->
-    <!--        <CButton type="button" color="danger" class="m-2" style="width: 96px" @click="doDeleteTopic">-->
-    <!--          <CIcon name="cil-trash" class="align-top"/>-->
-    <!--          {{ $t('message.action_delete') }}-->
-    <!--        </CButton>-->
-    <!--        <CButton type="button" color="secondary" style="width: 96px" @click="modalDeleteShow = false">-->
-    <!--          <CIcon name="cil-arrow-circle-left" class="align-top"/>-->
-    <!--          {{ $t('message.cancel') }}-->
-    <!--        </CButton>-->
-    <!--      </template>-->
-    <!--    </CModal>-->
+    <!-- pop-up dialog to confirm deleting a page -->
+    <CModal color="warning" size="lg" :title="$t('message.delete_page')" :centered="true" :show.sync="modalDeleteShow"
+            :close-on-backdrop="false">
+      <p class="alert alert-warning">
+        <CIcon name="cil-warning" size="lg"/>
+        {{ $t('message.delete_page_msg') }}
+      </p>
+      <p v-if="modalDeleteErr!=''" class="alert alert-danger">{{ modalDeleteErr }}</p>
+      <CInput type="text" :label="$t('message.page_icon')+' / '+$t('message.page_id')" v-model="pageToDelete.id"
+              horizontal plaintext>
+        <template #prepend>
+          <CButton disabled link>
+            <CIcon :name="pageToDelete.icon"/>
+          </CButton>
+        </template>
+      </CInput>
+      <CInput type="text" :label="$t('message.page_title')" v-model="pageToDelete.title" horizontal plaintext/>
+      <CTextarea rows="2" type="text" :label="$t('message.page_summary')" v-model="pageToDelete.summary" horizontal
+                 plaintext/>
+      <CTextarea rows="8" type="text" :label="$t('message.page_content')" v-model="pageToDelete.content" horizontal
+                 plaintext/>
+      <template #footer>
+        <CButton type="button" color="danger" class="m-2" style="width: 96px" @click="doDeletePage">
+          <CIcon name="cil-trash" class="align-top"/>
+          {{ $t('message.action_delete') }}
+        </CButton>
+        <CButton type="button" color="secondary" style="width: 96px" @click="modalDeleteShow = false">
+          <CIcon name="cil-arrow-circle-left" class="align-top"/>
+          {{ $t('message.cancel') }}
+        </CButton>
+      </template>
+    </CModal>
 
     <!-- pop-up form to add new page -->
     <CForm @submit.prevent="doAddPage" method="post">

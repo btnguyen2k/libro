@@ -92,6 +92,7 @@ const messages = {
             page_added_msg: 'Page "{name}" has been created successfully.',
 
             delete_page: "Delete page",
+            delete_page_msg: 'Are you sure you wish to delete this page?',
             page_deleted_msg: 'Page "{name}" has been deleted successfully.',
 
             edit_page: "Edit page",
@@ -201,6 +202,7 @@ const messages = {
             page_added_msg: 'Trang tài liệu "{name}" đã được tạo thành công.',
 
             delete_page: "Xoá trang tài liệu",
+            delete_page_msg: 'Bạn có chắc muốn xoá trang tài liệu này?',
             page_deleted_msg: 'Trang tài liệu "{name}" đã được xoá thành công.',
 
             edit_page: "Chỉnh sửa trang tài liệu",
