@@ -311,30 +311,16 @@
 </template>
 
 <script>
-import clientUtils from "@/utils/api_client";
+import clientUtils from "@/utils/api_client"
 import {freeSet} from '@coreui/icons'
-import {marked} from 'marked';
-import DOMPurify from "dompurify"
-// import hljs from 'highlight.js'          // all languages
-import hljs from 'highlight.js/lib/common'  // only common languages
-// import hljs from 'highlight.js/lib/core' // no language
-import 'highlight.js/styles/default.css'
+import {markdownRender} from './utils'
 
 export default {
   name: 'TopicPageList',
   freeSet,
   computed: {
     previewPageContent() {
-      marked.setOptions({
-        highlight: function (code, lang) {
-          const language = hljs.getLanguage(lang) ? lang : 'plaintext'
-          return hljs.highlight(code, { language }).value;
-        },
-        langPrefix: 'hljs language-', // highlight.js css expects a top-level 'hljs' class
-        gfm: true,
-      });
-      const html = marked.parse(this.addMode ? this.formAdd.content : this.formEdit.content)
-      return DOMPurify.sanitize(html, {ADD_ATTR: ['target']})
+      return markdownRender(this.addMode ? this.formAdd.content : this.formEdit.content, true)
     }
   },
   mounted() {
