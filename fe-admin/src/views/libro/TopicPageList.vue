@@ -8,7 +8,8 @@
             {{ $t('message.error_topic_not_found', {id: $route.params.tid}) }}
             <div class="card-header-actions">
               <CButton color="light" size="sm" @click="clickGoback">
-                <CIcon name="cil-arrow-circle-left"/> {{ $t('message.action_back') }}
+                <CIcon name="cil-arrow-circle-left"/>
+                {{ $t('message.action_back') }}
               </CButton>
             </div>
           </CCardHeader>
@@ -70,40 +71,41 @@
       </CCol>
     </CRow>
 
-<!--    &lt;!&ndash; pop-up dialog to confirm deleting a topic &ndash;&gt;-->
-<!--    <CModal color="warning" :title="$t('message.delete_topic')" :centered="true" :show.sync="modalDeleteShow"-->
-<!--            :close-on-backdrop="false">-->
-<!--      <p class="alert alert-warning">-->
-<!--        <CIcon name="cil-warning" size="lg"/>-->
-<!--        {{ $t('message.delete_topic_msg', {numPages: topicToDelete['num_pages']}) }}-->
-<!--      </p>-->
-<!--      <p v-if="modalDeleteErr!=''" class="alert alert-danger">{{ modalDeleteErr }}</p>-->
-<!--      <CInput type="text" :label="$t('message.topic_icon')+' / '+$t('message.topic_id')" v-model="topicToDelete.id"-->
-<!--              horizontal plaintext>-->
-<!--        <template #prepend>-->
-<!--          <CButton disabled link>-->
-<!--            <CIcon :name="topicToDelete.icon"/>-->
-<!--          </CButton>-->
-<!--        </template>-->
-<!--      </CInput>-->
-<!--      <CInput type="text" :label="$t('message.topic_title')" v-model="topicToDelete.title" horizontal plaintext/>-->
-<!--      <CTextarea rows="4" type="text" :label="$t('message.topic_summary')" v-model="topicToDelete.summary" horizontal-->
-<!--                 plaintext/>-->
-<!--      <template #footer>-->
-<!--        <CButton type="button" color="danger" class="m-2" style="width: 96px" @click="doDeleteTopic">-->
-<!--          <CIcon name="cil-trash" class="align-top"/>-->
-<!--          {{ $t('message.action_delete') }}-->
-<!--        </CButton>-->
-<!--        <CButton type="button" color="secondary" style="width: 96px" @click="modalDeleteShow = false">-->
-<!--          <CIcon name="cil-arrow-circle-left" class="align-top"/>-->
-<!--          {{ $t('message.cancel') }}-->
-<!--        </CButton>-->
-<!--      </template>-->
-<!--    </CModal>-->
+    <!--    &lt;!&ndash; pop-up dialog to confirm deleting a topic &ndash;&gt;-->
+    <!--    <CModal color="warning" :title="$t('message.delete_topic')" :centered="true" :show.sync="modalDeleteShow"-->
+    <!--            :close-on-backdrop="false">-->
+    <!--      <p class="alert alert-warning">-->
+    <!--        <CIcon name="cil-warning" size="lg"/>-->
+    <!--        {{ $t('message.delete_topic_msg', {numPages: topicToDelete['num_pages']}) }}-->
+    <!--      </p>-->
+    <!--      <p v-if="modalDeleteErr!=''" class="alert alert-danger">{{ modalDeleteErr }}</p>-->
+    <!--      <CInput type="text" :label="$t('message.topic_icon')+' / '+$t('message.topic_id')" v-model="topicToDelete.id"-->
+    <!--              horizontal plaintext>-->
+    <!--        <template #prepend>-->
+    <!--          <CButton disabled link>-->
+    <!--            <CIcon :name="topicToDelete.icon"/>-->
+    <!--          </CButton>-->
+    <!--        </template>-->
+    <!--      </CInput>-->
+    <!--      <CInput type="text" :label="$t('message.topic_title')" v-model="topicToDelete.title" horizontal plaintext/>-->
+    <!--      <CTextarea rows="4" type="text" :label="$t('message.topic_summary')" v-model="topicToDelete.summary" horizontal-->
+    <!--                 plaintext/>-->
+    <!--      <template #footer>-->
+    <!--        <CButton type="button" color="danger" class="m-2" style="width: 96px" @click="doDeleteTopic">-->
+    <!--          <CIcon name="cil-trash" class="align-top"/>-->
+    <!--          {{ $t('message.action_delete') }}-->
+    <!--        </CButton>-->
+    <!--        <CButton type="button" color="secondary" style="width: 96px" @click="modalDeleteShow = false">-->
+    <!--          <CIcon name="cil-arrow-circle-left" class="align-top"/>-->
+    <!--          {{ $t('message.cancel') }}-->
+    <!--        </CButton>-->
+    <!--      </template>-->
+    <!--    </CModal>-->
 
     <!-- pop-up form to add new page -->
     <CForm @submit.prevent="doAddPage" method="post">
-      <CModal size="lg" :title="$t('message.add_page')" :centered="true" :show.sync="modalAddShow" :close-on-backdrop="false">
+      <CModal size="lg" :title="$t('message.add_page')" :centered="true" :show.sync="modalAddShow"
+              :close-on-backdrop="false">
         <p v-if="modalAddErr!=''" class="alert alert-danger">{{ modalAddErr }}</p>
         <CInput
             type="text"
@@ -194,7 +196,8 @@
 
     <!-- pop-up form to edit existing page -->
     <CForm @submit.prevent="doEditPage" method="post">
-      <CModal size="lg" :title="$t('message.edit_page')" :centered="true" :show.sync="modalEditShow" :close-on-backdrop="false">
+      <CModal size="lg" :title="$t('message.edit_page')" :centered="true" :show.sync="modalEditShow"
+              :close-on-backdrop="false">
         <p v-if="modalEditErr!=''" class="alert alert-danger">{{ modalEditErr }}</p>
         <CInput
             type="text"
@@ -310,15 +313,27 @@
 <script>
 import clientUtils from "@/utils/api_client";
 import {freeSet} from '@coreui/icons'
-import marked from "marked"
+import {marked} from 'marked';
 import DOMPurify from "dompurify"
+// import hljs from 'highlight.js'          // all languages
+import hljs from 'highlight.js/lib/common'  // only common languages
+// import hljs from 'highlight.js/lib/core' // no language
+import 'highlight.js/styles/default.css'
 
 export default {
   name: 'TopicPageList',
   freeSet,
   computed: {
     previewPageContent() {
-      const html = marked(this.addMode ? this.formAdd.content : this.formEdit.content)
+      marked.setOptions({
+        highlight: function (code, lang) {
+          const language = hljs.getLanguage(lang) ? lang : 'plaintext'
+          return hljs.highlight(code, { language }).value;
+        },
+        langPrefix: 'hljs language-', // highlight.js css expects a top-level 'hljs' class
+        gfm: true,
+      });
+      const html = marked.parse(this.addMode ? this.formAdd.content : this.formEdit.content)
       return DOMPurify.sanitize(html, {ADD_ATTR: ['target']})
     }
   },
