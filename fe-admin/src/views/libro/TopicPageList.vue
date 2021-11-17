@@ -103,7 +103,7 @@
 
     <!-- pop-up form to add new page -->
     <CForm @submit.prevent="doAddPage" method="post">
-      <CModal size="xl" :title="$t('message.add_page')" :centered="true" :show.sync="modalAddShow" :close-on-backdrop="false">
+      <CModal size="lg" :title="$t('message.add_page')" :centered="true" :show.sync="modalAddShow" :close-on-backdrop="false">
         <p v-if="modalAddErr!=''" class="alert alert-danger">{{ modalAddErr }}</p>
         <CInput
             type="text"
@@ -120,7 +120,7 @@
             :placeholder="$t('message.page_icon_msg')"
             v-c-tooltip.hover="$t('message.page_icon_msg')"
             horizontal
-            readonly="readonly"
+            readonly
         >
           <template #prepend>
             <CButton disabled link>
@@ -161,7 +161,7 @@
               {{ $t('message.content_editor') }}
             </template>
             <CTextarea
-                rows="10"
+                rows="8"
                 type="text"
                 v-model="formAdd.content"
                 :label="$t('message.page_content')"
@@ -192,72 +192,97 @@
       </CModal>
     </CForm>
 
-<!--    &lt;!&ndash; pop-up form to edit existing topic &ndash;&gt;-->
-<!--    <CForm @submit.prevent="doEditTopic" method="post">-->
-<!--      <CModal :title="$t('message.edit_topic')" :centered="true" :show.sync="modalEditShow" :close-on-backdrop="false">-->
-<!--        <p v-if="modalEditErr!=''" class="alert alert-danger">{{ modalEditErr }}</p>-->
-<!--        <CInput-->
-<!--            type="text"-->
-<!--            v-model="formEdit.id"-->
-<!--            :label="$t('message.topic_id')"-->
-<!--            :placeholder="$t('message.topic_id_msg')"-->
-<!--            v-c-tooltip.hover="$t('message.topic_id_msg')"-->
-<!--            horizontal-->
-<!--            readonly-->
-<!--        />-->
-<!--        <CInput-->
-<!--            type="text"-->
-<!--            v-model="formEdit.icon"-->
-<!--            :label="$t('message.topic_icon')"-->
-<!--            :placeholder="$t('message.topic_icon_msg')"-->
-<!--            v-c-tooltip.hover="$t('message.topic_icon_msg')"-->
-<!--            horizontal-->
-<!--            readonly="readonly"-->
-<!--        >-->
-<!--          <template #prepend>-->
-<!--            <CButton disabled link>-->
-<!--              <CIcon :name="formEdit.icon"/>-->
-<!--            </CButton>-->
-<!--          </template>-->
-<!--          <template #append>-->
-<!--            <CButton color="primary" @click="modalIconsShow = true">-->
-<!--              <CIcon name="cil-magnifying-glass"/>-->
-<!--            </CButton>-->
-<!--          </template>-->
-<!--        </CInput>-->
-<!--        <CInput-->
-<!--            type="text"-->
-<!--            v-model="formEdit.title"-->
-<!--            :label="$t('message.topic_title')"-->
-<!--            :placeholder="$t('message.topic_title_msg')"-->
-<!--            v-c-tooltip.hover="$t('message.topic_title_msg')"-->
-<!--            horizontal-->
-<!--            required-->
-<!--            was-validated-->
-<!--        />-->
-<!--        <CTextarea-->
-<!--            rows="4"-->
-<!--            type="text"-->
-<!--            v-model="formEdit.summary"-->
-<!--            :label="$t('message.topic_summary')"-->
-<!--            :placeholder="$t('message.topic_summary_msg')"-->
-<!--            v-c-tooltip.hover="$t('message.topic_summary_msg')"-->
-<!--            horizontal-->
-<!--            required-->
-<!--            was-validated-->
-<!--        />-->
-<!--        <template #footer>-->
-<!--          <CButton type="submit" color="primary" class="m-2" style="width: 96px">-->
-<!--            <CIcon name="cil-save" class="align-top"/>-->
-<!--            {{ $t('message.action_save') }}-->
-<!--          </CButton>-->
-<!--          <CButton type="button" color="secondary" style="width: 96px" @click="modalEditShow = false">-->
-<!--            <CIcon name="cil-arrow-circle-left" class="align-top"/>-->
-<!--            {{ $t('message.cancel') }}-->
-<!--          </CButton>-->
-<!--        </template>-->
-<!--      </CModal>-->
-<!--    </CForm>-->
+    <!-- pop-up form to edit existing page -->
+    <CForm @submit.prevent="doEditPage" method="post">
+      <CModal size="lg" :title="$t('message.edit_page')" :centered="true" :show.sync="modalEditShow" :close-on-backdrop="false">
+        <p v-if="modalEditErr!=''" class="alert alert-danger">{{ modalEditErr }}</p>
+        <CInput
+            type="text"
+            v-model="formEdit.id"
+            :label="$t('message.page_id')"
+            :placeholder="$t('message.page_id_msg')"
+            v-c-tooltip.hover="$t('message.page_id_msg')"
+            horizontal
+            readonly
+        />
+        <CInput
+            type="text"
+            v-model="formEdit.icon"
+            :label="$t('message.page_icon')"
+            :placeholder="$t('message.page_icon_msg')"
+            v-c-tooltip.hover="$t('message.page_icon_msg')"
+            horizontal
+            readonly
+        >
+          <template #prepend>
+            <CButton disabled link>
+              <CIcon :name="formEdit.icon"/>
+            </CButton>
+          </template>
+          <template #append>
+            <CButton color="primary" @click="modalIconsShow = true">
+              <CIcon name="cil-magnifying-glass"/>
+            </CButton>
+          </template>
+        </CInput>
+        <CInput
+            type="text"
+            v-model="formEdit.title"
+            :label="$t('message.page_title')"
+            :placeholder="$t('message.page_title_msg')"
+            v-c-tooltip.hover="$t('message.page_title_msg')"
+            horizontal
+            required
+            was-validated
+        />
+        <CTextarea
+            rows="2"
+            type="text"
+            v-model="formEdit.summary"
+            :label="$t('message.page_summary')"
+            :placeholder="$t('message.page_summary_msg')"
+            v-c-tooltip.hover="$t('message.page_summary_msg')"
+            horizontal
+            required
+            was-validated
+        />
+        <CTabs>
+          <CTab active>
+            <template slot="title">
+              <CIcon name="cib-markdown"/>
+              {{ $t('message.content_editor') }}
+            </template>
+            <CTextarea
+                rows="8"
+                type="text"
+                v-model="formEdit.content"
+                :label="$t('message.page_content')"
+                :placeholder="$t('message.page_content_msg')"
+                horizontal
+                required
+                was-validated
+            />
+          </CTab>
+          <CTab>
+            <template slot="title">
+              <CIcon name="cil-calculator"/>
+              {{ $t('message.content_preview') }}
+            </template>
+            <div v-html="previewPageContent"></div>
+          </CTab>
+        </CTabs>
+        <template #footer>
+          <CButton type="submit" color="primary" class="m-2" style="width: 96px">
+            <CIcon name="cil-save" class="align-top"/>
+            {{ $t('message.action_save') }}
+          </CButton>
+          <CButton type="button" color="secondary" style="width: 96px" @click="modalEditShow = false">
+            <CIcon name="cil-arrow-circle-left" class="align-top"/>
+            {{ $t('message.cancel') }}
+          </CButton>
+        </template>
+      </CModal>
+    </CForm>
 
     <!-- pop-up dialog to pick an icon -->
     <CModal :title="$t('message.icons')" :centered="true" :show.sync="modalIconsShow">

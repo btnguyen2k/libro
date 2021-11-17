@@ -133,7 +133,7 @@
             :placeholder="$t('message.topic_icon_msg')"
             v-c-tooltip.hover="$t('message.topic_icon_msg')"
             horizontal
-            readonly="readonly"
+            readonly
         >
           <template #prepend>
             <CButton disabled link>
@@ -200,7 +200,7 @@
             :placeholder="$t('message.topic_icon_msg')"
             v-c-tooltip.hover="$t('message.topic_icon_msg')"
             horizontal
-            readonly="readonly"
+            readonly
         >
           <template #prepend>
             <CButton disabled link>
