@@ -107,6 +107,9 @@ const messages = {
             page_summary_msg: "Short summary of the page",
             page_content: "Content",
             page_content_msg: "Page content (Markdown supported)",
+
+            content_editor: "Editor",
+            content_preview: "Preview",
         }
     },
     vi: {
@@ -213,6 +216,9 @@ const messages = {
             page_summary_msg: "Phần tóm tắt ngắn về nội dung của trang tài liệu",
             page_content: "Nội dung",
             page_content_msg: "Nội dung của trang tài liệu (hỗ trợ Markdown)",
+
+            content_editor: "Soạn thảo",
+            content_preview: "Xem trước",
         }
     }
 }

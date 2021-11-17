@@ -515,7 +515,7 @@ func _initSamples() {
 		}
 	}
 
-	page := doc.NewPage(goapi.AppVersionNumber, topic, "Download", "cil-download", "Download: "+shortLorem, longLorerm)
+	page := doc.NewPage(goapi.AppVersionNumber, topic, "Download", "cil-cloud-download", "Download: "+shortLorem, longLorerm)
 	page.SetPosition(1).SetId(topic.GetId() + "-" + re.ReplaceAllString(strings.ToLower(page.GetTitle()), ""))
 	log.Printf("[INFO] Creating page (%s:%s -> %s)...", demoProdId, topic.GetTitle(), page.GetTitle())
 	result, err = pageDao.Create(page)
@@ -526,7 +526,7 @@ func _initSamples() {
 		log.Printf("[ERROR] Cannot create page [%s]", page.GetTitle())
 	}
 
-	page = doc.NewPage(goapi.AppVersionNumber, topic, "Installation", "cil-installation", "Installation: "+shortLorem, longLorerm)
+	page = doc.NewPage(goapi.AppVersionNumber, topic, "Installation", "cil-code", "Installation: "+shortLorem, longLorerm)
 	page.SetPosition(2).SetId(topic.GetId() + "-" + re.ReplaceAllString(strings.ToLower(page.GetTitle()), ""))
 	log.Printf("[INFO] Creating page (%s:%s -> %s)...", demoProdId, topic.GetTitle(), page.GetTitle())
 	result, err = pageDao.Create(page)
@@ -575,7 +575,7 @@ func _initSamples() {
 		}
 	}
 
-	page = doc.NewPage(goapi.AppVersionNumber, topic, "Dashboards", "cil-dashboards", "Dashboards: "+shortLorem, longLorerm)
+	page = doc.NewPage(goapi.AppVersionNumber, topic, "Dashboards", "cil-home", "Dashboards: "+shortLorem, longLorerm)
 	page.SetPosition(1).SetId(topic.GetId() + "-" + re.ReplaceAllString(strings.ToLower(page.GetTitle()), ""))
 	log.Printf("[INFO] Creating page (%s:%s -> %s)...", demoProdId, topic.GetTitle(), page.GetTitle())
 	result, err = pageDao.Create(page)
@@ -586,7 +586,7 @@ func _initSamples() {
 		log.Printf("[ERROR] Cannot create page [%s]", page.GetTitle())
 	}
 
-	page = doc.NewPage(goapi.AppVersionNumber, topic, "Product", "cil-product", "Product: "+shortLorem, longLorerm)
+	page = doc.NewPage(goapi.AppVersionNumber, topic, "Product", "cil-applications", "Product: "+shortLorem, longLorerm)
 	page.SetPosition(2).SetId(topic.GetId() + "-" + re.ReplaceAllString(strings.ToLower(page.GetTitle()), ""))
 	log.Printf("[INFO] Creating page (%s:%s -> %s)...", demoProdId, topic.GetTitle(), page.GetTitle())
 	result, err = pageDao.Create(page)
@@ -597,7 +597,7 @@ func _initSamples() {
 		log.Printf("[ERROR] Cannot create page [%s]", page.GetTitle())
 	}
 
-	page = doc.NewPage(goapi.AppVersionNumber, topic, "UI", "cil-ui", "UI: "+shortLorem, longLorerm)
+	page = doc.NewPage(goapi.AppVersionNumber, topic, "UI", "cil-image", "UI: "+shortLorem, longLorerm)
 	page.SetPosition(3).SetId(topic.GetId() + "-" + re.ReplaceAllString(strings.ToLower(page.GetTitle()), ""))
 	log.Printf("[INFO] Creating page (%s:%s -> %s)...", demoProdId, topic.GetTitle(), page.GetTitle())
 	result, err = pageDao.Create(page)
@@ -646,7 +646,7 @@ func _initSamples() {
 		}
 	}
 
-	page = doc.NewPage(goapi.AppVersionNumber, topic, "General", "cil-general", "General: "+shortLorem, longLorerm)
+	page = doc.NewPage(goapi.AppVersionNumber, topic, "General", "cil-blur-circular", "General: "+shortLorem, longLorerm)
 	page.SetPosition(1).SetId(topic.GetId() + "-" + re.ReplaceAllString(strings.ToLower(page.GetTitle()), ""))
 	log.Printf("[INFO] Creating page (%s:%s -> %s)...", demoProdId, topic.GetTitle(), page.GetTitle())
 	result, err = pageDao.Create(page)

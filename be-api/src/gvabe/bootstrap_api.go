@@ -78,6 +78,9 @@ func _extractParam(params *itineris.ApiParams, paramName string, typ reflect.Typ
 	if v != nil {
 		if _, ok := v.(string); ok {
 			v = strings.TrimSpace(v.(string))
+			if v.(string) == "" {
+				v = defValue
+			}
 			if regexp != nil && !regexp.Match([]byte(v.(string))) {
 				return nil
 			}

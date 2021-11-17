@@ -101,71 +101,96 @@
 <!--      </template>-->
 <!--    </CModal>-->
 
-<!--    &lt;!&ndash; pop-up form to add new topic &ndash;&gt;-->
-<!--    <CForm @submit.prevent="doAddTopic" method="post">-->
-<!--      <CModal :title="$t('message.add_topic')" :centered="true" :show.sync="modalAddShow" :close-on-backdrop="false">-->
-<!--        <p v-if="modalAddErr!=''" class="alert alert-danger">{{ modalAddErr }}</p>-->
-<!--        <CInput-->
-<!--            type="text"-->
-<!--            v-model="formAdd.id"-->
-<!--            :label="$t('message.topic_id')"-->
-<!--            :placeholder="$t('message.topic_id_msg')"-->
-<!--            v-c-tooltip.hover="$t('message.topic_id_msg')"-->
-<!--            horizontal-->
-<!--        />-->
-<!--        <CInput-->
-<!--            type="text"-->
-<!--            v-model="formAdd.icon"-->
-<!--            :label="$t('message.topic_icon')"-->
-<!--            :placeholder="$t('message.topic_icon_msg')"-->
-<!--            v-c-tooltip.hover="$t('message.topic_icon_msg')"-->
-<!--            horizontal-->
-<!--            readonly="readonly"-->
-<!--        >-->
-<!--          <template #prepend>-->
-<!--            <CButton disabled link>-->
-<!--              <CIcon :name="formAdd.icon"/>-->
-<!--            </CButton>-->
-<!--          </template>-->
-<!--          <template #append>-->
-<!--            <CButton color="primary" @click="modalIconsShow = true">-->
-<!--              <CIcon name="cil-magnifying-glass"/>-->
-<!--            </CButton>-->
-<!--          </template>-->
-<!--        </CInput>-->
-<!--        <CInput-->
-<!--            type="text"-->
-<!--            v-model="formAdd.title"-->
-<!--            :label="$t('message.topic_title')"-->
-<!--            :placeholder="$t('message.topic_title_msg')"-->
-<!--            v-c-tooltip.hover="$t('message.topic_title_msg')"-->
-<!--            horizontal-->
-<!--            required-->
-<!--            was-validated-->
-<!--        />-->
-<!--        <CTextarea-->
-<!--            rows="4"-->
-<!--            type="text"-->
-<!--            v-model="formAdd.summary"-->
-<!--            :label="$t('message.topic_summary')"-->
-<!--            :placeholder="$t('message.topic_summary_msg')"-->
-<!--            v-c-tooltip.hover="$t('message.topic_summary_msg')"-->
-<!--            horizontal-->
-<!--            required-->
-<!--            was-validated-->
-<!--        />-->
-<!--        <template #footer>-->
-<!--          <CButton type="submit" color="primary" class="m-2" style="width: 96px">-->
-<!--            <CIcon name="cil-save" class="align-top"/>-->
-<!--            {{ $t('message.action_save') }}-->
-<!--          </CButton>-->
-<!--          <CButton type="button" color="secondary" style="width: 96px" @click="modalAddShow = false">-->
-<!--            <CIcon name="cil-arrow-circle-left" class="align-top"/>-->
-<!--            {{ $t('message.cancel') }}-->
-<!--          </CButton>-->
-<!--        </template>-->
-<!--      </CModal>-->
-<!--    </CForm>-->
+    <!-- pop-up form to add new page -->
+    <CForm @submit.prevent="doAddPage" method="post">
+      <CModal size="xl" :title="$t('message.add_page')" :centered="true" :show.sync="modalAddShow" :close-on-backdrop="false">
+        <p v-if="modalAddErr!=''" class="alert alert-danger">{{ modalAddErr }}</p>
+        <CInput
+            type="text"
+            v-model="formAdd.id"
+            :label="$t('message.page_id')"
+            :placeholder="$t('message.page_id_msg')"
+            v-c-tooltip.hover="$t('message.page_id_msg')"
+            horizontal
+        />
+        <CInput
+            type="text"
+            v-model="formAdd.icon"
+            :label="$t('message.page_icon')"
+            :placeholder="$t('message.page_icon_msg')"
+            v-c-tooltip.hover="$t('message.page_icon_msg')"
+            horizontal
+            readonly="readonly"
+        >
+          <template #prepend>
+            <CButton disabled link>
+              <CIcon :name="formAdd.icon"/>
+            </CButton>
+          </template>
+          <template #append>
+            <CButton color="primary" @click="modalIconsShow = true">
+              <CIcon name="cil-magnifying-glass"/>
+            </CButton>
+          </template>
+        </CInput>
+        <CInput
+            type="text"
+            v-model="formAdd.title"
+            :label="$t('message.page_title')"
+            :placeholder="$t('message.page_title_msg')"
+            v-c-tooltip.hover="$t('message.page_title_msg')"
+            horizontal
+            required
+            was-validated
+        />
+        <CTextarea
+            rows="2"
+            type="text"
+            v-model="formAdd.summary"
+            :label="$t('message.page_summary')"
+            :placeholder="$t('message.page_summary_msg')"
+            v-c-tooltip.hover="$t('message.page_summary_msg')"
+            horizontal
+            required
+            was-validated
+        />
+        <CTabs>
+          <CTab active>
+            <template slot="title">
+              <CIcon name="cib-markdown"/>
+              {{ $t('message.content_editor') }}
+            </template>
+            <CTextarea
+                rows="10"
+                type="text"
+                v-model="formAdd.content"
+                :label="$t('message.page_content')"
+                :placeholder="$t('message.page_content_msg')"
+                horizontal
+                required
+                was-validated
+            />
+          </CTab>
+          <CTab>
+            <template slot="title">
+              <CIcon name="cil-calculator"/>
+              {{ $t('message.content_preview') }}
+            </template>
+            <div v-html="previewPageContent"></div>
+          </CTab>
+        </CTabs>
+        <template #footer>
+          <CButton type="submit" color="primary" class="m-2" style="width: 96px">
+            <CIcon name="cil-save" class="align-top"/>
+            {{ $t('message.action_save') }}
+          </CButton>
+          <CButton type="button" color="secondary" style="width: 96px" @click="modalAddShow = false">
+            <CIcon name="cil-arrow-circle-left" class="align-top"/>
+            {{ $t('message.cancel') }}
+          </CButton>
+        </template>
+      </CModal>
+    </CForm>
 
 <!--    &lt;!&ndash; pop-up form to edit existing topic &ndash;&gt;-->
 <!--    <CForm @submit.prevent="doEditTopic" method="post">-->
@@ -234,36 +259,44 @@
 <!--      </CModal>-->
 <!--    </CForm>-->
 
-<!--    &lt;!&ndash; pop-up dialog to pick an icon &ndash;&gt;-->
-<!--    <CModal :title="$t('message.icons')" :centered="true" :show.sync="modalIconsShow">-->
-<!--      <CRow class="text-center">-->
-<!--        <template v-for="(icon, iconName) in $options.freeSet">-->
-<!--          <CCol class="mb-5" col="3" sm="3" :key="iconName">-->
-<!--            <CButton size="lg" @click="clickSelectIcon(iconName)">-->
-<!--              <CIcon size="xl" :content="icon" :title="iconName"/>-->
-<!--            </CButton>-->
-<!--            &lt;!&ndash;<CIcon type="button" @click="clickSelectIcon(iconName)" :height="42" :content="icon" :title="iconName"/>&ndash;&gt;-->
-<!--            <div style="font-size: small">{{ toKebabCase(iconName) }}</div>-->
-<!--          </CCol>-->
-<!--        </template>-->
-<!--      </CRow>-->
-<!--      <template #footer>-->
-<!--        <CButton @click="modalInfoShow = false" color="secondary" style="width: 96px">-->
-<!--          <CIcon name="cil-x" class="align-top"/>-->
-<!--          {{ $t('message.close') }}-->
-<!--        </CButton>-->
-<!--      </template>-->
-<!--    </CModal>-->
+    <!-- pop-up dialog to pick an icon -->
+    <CModal :title="$t('message.icons')" :centered="true" :show.sync="modalIconsShow">
+      <CRow class="text-center">
+        <template v-for="(icon, iconName) in $options.freeSet">
+          <CCol class="mb-5" col="3" sm="3" :key="iconName">
+            <CButton size="lg" @click="clickSelectIcon(iconName)">
+              <CIcon size="xl" :content="icon" :title="iconName"/>
+            </CButton>
+            <!--<CIcon type="button" @click="clickSelectIcon(iconName)" :height="42" :content="icon" :title="iconName"/>-->
+            <div style="font-size: small">{{ toKebabCase(iconName) }}</div>
+          </CCol>
+        </template>
+      </CRow>
+      <template #footer>
+        <CButton @click="modalInfoShow = false" color="secondary" style="width: 96px">
+          <CIcon name="cil-x" class="align-top"/>
+          {{ $t('message.close') }}
+        </CButton>
+      </template>
+    </CModal>
   </div>
 </template>
 
 <script>
 import clientUtils from "@/utils/api_client";
 import {freeSet} from '@coreui/icons'
+import marked from "marked"
+import DOMPurify from "dompurify"
 
 export default {
   name: 'TopicPageList',
   freeSet,
+  computed: {
+    previewPageContent() {
+      const html = marked(this.addMode ? this.formAdd.content : this.formEdit.content)
+      return DOMPurify.sanitize(html, {ADD_ATTR: ['target']})
+    }
+  },
   mounted() {
     this.loadTopicPageList(this.$route.params.tid)
   },
@@ -332,7 +365,7 @@ export default {
     },
     clickAddPage() {
       this.addMode = true
-      this.formAdd = {}
+      this.formAdd = {id: "", icon: "", title: "", summary: "", content: ""}
       this.modalAddErr = ''
       this.modalAddShow = true
     },
