@@ -3,20 +3,21 @@ package goapi
 import (
 	"encoding/json"
 	"fmt"
-	hocon "github.com/go-akka/configuration"
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
-	"google.golang.org/grpc"
 	"io/ioutil"
 	"log"
-	pb "main/grpc"
-	"main/src/itineris"
-	"main/src/utils"
 	"net"
 	"net/http"
 	"os"
 	"regexp"
 	"time"
+
+	hocon "github.com/go-akka/configuration"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
+	"google.golang.org/grpc"
+	pb "main/grpc"
+	"main/src/itineris"
+	"main/src/utils"
 )
 
 const (
@@ -124,16 +125,16 @@ func initEchoServer() {
 		}))
 	}
 
-	const fePath = "/app"
 	const feDir = "./frontend"
-	e.Static(fePath, feDir)
+	const feAdminPath = "/admin"
+	e.Static(feAdminPath, feDir)
 	e.GET("/", func(c echo.Context) error {
-		return c.Redirect(http.StatusFound, fePath+"/")
+		return c.Redirect(http.StatusFound, feAdminPath+"/")
 	})
-	e.GET(fePath+"/", func(c echo.Context) error {
+	e.GET(feAdminPath+"/", func(c echo.Context) error {
 		if fcontent, err := ioutil.ReadFile(feDir + "/index.html"); err != nil {
 			if os.IsNotExist(err) {
-				return c.HTML(http.StatusNotFound, "Not found: "+fePath+"/index.html")
+				return c.HTML(http.StatusNotFound, "Not found: "+feAdminPath+"/index.html")
 			} else {
 				return err
 			}

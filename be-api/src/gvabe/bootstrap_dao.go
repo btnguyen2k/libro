@@ -377,10 +377,10 @@ func initDaos() {
 	mc := _createMongoConnect(dbtype)
 	// adc := _createDynamodbConnect(dbtype)
 	// if sqlc == nil && mc == nil && adc == nil {
-	// 	panic(fmt.Sprintf("unknown databbase type: %s", dbtype))
+	// 	panic(fmt.Sprintf("unknown database type: %s", dbtype))
 	// }
 	if mc == nil {
-		panic(fmt.Sprintf("unknown databbase type: %s", dbtype))
+		panic(fmt.Sprintf("unknown database type: %s", dbtype))
 	}
 
 	// if sqlc != nil {
