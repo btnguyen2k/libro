@@ -40,7 +40,7 @@ build-fe:
   stage: build
   script:
     - whoami && pwd && date
-    - cd $APP_ROOT/fe-gui && npm install && npm run build
+    - cd $APP_ROOT/fe-admin && npm install && npm run build
   tags:
   ## Define tags if needed
   #- gitlabci-build
@@ -50,7 +50,7 @@ test-fe:
   stage: test
   script:
     - whoami && pwd && date
-    #- cd $APP_ROOT/fe-gui && npm install && npm run test
+    #- cd $APP_ROOT/fe-admin && npm install && npm run test
   tags:
   ## Define tags if needed
   #- gitlabci-build
@@ -86,7 +86,7 @@ build docker image frontend:
   script:
     - whoami && pwd && date
     ## Remove --squash if docker's experimental features are not enabled
-    - cd $APP_ROOT/fe-gui && docker build --force-rm --squash -t $DOCKER_REGISTRY_SERVER/$CI_PROJECT_NAME-fe:$CI_PROJECT_VERSION .
+    - cd $APP_ROOT/fe-admin && docker build --force-rm --squash -t $DOCKER_REGISTRY_SERVER/$CI_PROJECT_NAME-fe:$CI_PROJECT_VERSION .
     - docker rmi $(docker images -f "dangling=true" -q)
   tags:
   ## Define tags if needed

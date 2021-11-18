@@ -12,7 +12,7 @@ RUN cd /build \
     && export APP_INITIAL=`jq -r '.initial' appinfo.json` \
     && export APP_VERSION=`jq -r '.version' appinfo.json` \
     && export APP_DESC=`jq -r '.description' appinfo.json` \
-    && cd /build/fe-gui \
+    && cd /build/fe-admin \
     && rm -rf .env \
     && rm -rf dist node_modules \
     && sed -i s/#{pageTitle}/"$APP_NAME v$APP_VERSION"/g public/index.html \
@@ -51,7 +51,7 @@ LABEL maintainer="Thanh Nguyen <btnguyen2k@gmail.com>"
 RUN mkdir -p /app/frontend
 COPY --from=builder_be /build/be-api/main /app/main
 COPY --from=builder_be /build/be-api/config /app/config
-COPY --from=builder_fe /build/fe-gui/dist /app/frontend
+COPY --from=builder_fe /build/fe-admin/dist /app/frontend
 RUN apk add --no-cache -U tzdata bash ca-certificates \
     && update-ca-certificates \
     && cp /usr/share/zoneinfo/Asia/Ho_Chi_Minh /etc/localtime \
