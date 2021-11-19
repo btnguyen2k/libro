@@ -407,6 +407,7 @@ func initDaos() {
 		if DEVMODE {
 			log.Printf("[DEVMODE] MongoDB database: %s", mc.GetDb())
 			log.Printf("[DEVMODE] MongoDB url: %s", mc.GetUrl())
+			mc.CreateCollection("__libro") // HACK to force database creation
 		}
 
 		// create MongoDB collections
