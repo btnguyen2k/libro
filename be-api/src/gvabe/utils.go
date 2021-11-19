@@ -19,6 +19,7 @@ import (
 )
 
 var DEBUG = false
+var DEVMODE = false
 
 var (
 	rsaPrivKey *rsa.PrivateKey

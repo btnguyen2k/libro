@@ -53,6 +53,8 @@ securityContext:
 service:
   type: ClusterIP
   port: 8000
+  annotations:
+    dev.okteto.com/auto-ingress: "true"
 
 ingress:
   enabled: false

@@ -17,8 +17,8 @@ import (
 	"strings"
 
 	"main/src/goapi"
-	"main/src/gvabe/bo/product"
 	"main/src/gvabe/bo/doc"
+	"main/src/gvabe/bo/product"
 	"main/src/gvabe/bo/user"
 	"main/src/respicite"
 )
@@ -48,6 +48,9 @@ Bootstrapper usually does the following:
 func (b *MyBootstrapper) Bootstrap() error {
 	if os.Getenv("DEBUG") != "" {
 		DEBUG = true
+	}
+	if os.Getenv("DEVMODE") != "" {
+		DEVMODE = true
 	}
 	go startUpdateSystemInfo()
 
