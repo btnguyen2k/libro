@@ -1,0 +1,89 @@
+# Default values for libro.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+name: libro
+httpPort: 8000
+replicaCount: 1
+
+librocfg:
+  debug: false
+  # secret_name_keys: "name-of-k8s-secret-that-store-Libro-keys"
+  # secret_mountpath_keys: "path-to-mount-secrets-as-files"
+  # rsa_privkey_file: "location-to-RSA-private-key"
+
+secret:
+  LIBRO_TIMEZONE: "enter-value"
+  LIBRO_INIT_ADMIN_USER_ID: "enter-value"
+  LIBRO_DB_TYPE: "enter-value"
+  LIBRO_DB_PGSQL_URL: "enter-value"
+  LIBRO_DB_MONGODB_DB: "enter-value"
+  LIBRO_DB_MONGODB_URL: "enter-value"
+  LIBRO_EXTER_APP_ID: "enter-value"
+  LIBRO_EXTER_BASE_URL: "enter-value"
+
+image:
+  repository: libro
+  pullPolicy: Always
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: latest
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext:
+  fsGroup: 2000
+
+securityContext:
+  runAsNonRoot: false
+  runAsUser: 1000
+
+service:
+  type: ClusterIP
+  port: 8000
+
+ingress:
+  enabled: false
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: "enter.your.domainname"
+      paths: []
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+resources:
+  requests:
+    cpu: 10m
+    memory: 4Mi
+  limits:
+    cpu: 100m
+    memory: 64Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 4
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
