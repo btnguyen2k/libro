@@ -35,10 +35,10 @@ func apiInfo(_ *itineris.ApiContext, _ *itineris.ApiAuth, _ *itineris.ApiParams)
 			"version":     goapi.AppConfig.GetString("app.version"),
 			"description": goapi.AppConfig.GetString("app.desc"),
 		},
-		// "exter": map[string]interface{}{
-		// 	"app_id":   exterAppId,
-		// 	"base_url": exterBaseUrl,
-		// },
+		"exter": map[string]interface{}{
+			"app_id":   exterAppId,
+			"base_url": exterBaseUrl,
+		},
 		// "rsa_public_key": string(publicPEM),
 		"memory": map[string]interface{}{
 			"alloc":     m.Alloc,
