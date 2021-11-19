@@ -1,6 +1,6 @@
 {
     "name"       : "Libro - Application Document Management System",
-    "shortname"  : "Libro",
+    "shortname"  : "libro",
     "initial"    : "LIB",
     "version"    : "0.1.0",
     "description": "An application document management system"
