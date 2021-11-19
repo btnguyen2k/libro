@@ -6,6 +6,7 @@ import (
 	"log"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -83,14 +84,14 @@ func _createMongoConnect(dbtype string) *prom.MongoConnect {
 	case "mongo", "mongodb":
 		db := goapi.AppConfig.GetString("gvabe.db.mongodb.db")
 		url := goapi.AppConfig.GetString("gvabe.db.mongodb.url")
-		// poolOpts := &prom.MongoPoolOpts{
-		// 	ConnectTimeout:         15 * time.Second,
-		// 	SocketTimeout:          5 * time.Second,
-		// 	ServerSelectionTimeout: 10 * time.Second,
-		// 	MaxPoolSize:            4,
-		// 	MinPoolSize:            1,
-		// }
-		poolOpts := prom.MongoPoolOptsLongDistance
+		poolOpts := &prom.MongoPoolOpts{
+			ConnectTimeout:         15 * time.Second,
+			SocketTimeout:          5 * time.Second,
+			ServerSelectionTimeout: 10 * time.Second,
+			MaxPoolSize:            4,
+			MinPoolSize:            1,
+		}
+		poolOpts = prom.MongoPoolOptsLongDistance
 		mc, err = prom.NewMongoConnectWithPoolOptions(url, db, 10000, poolOpts)
 	}
 	if err != nil {
