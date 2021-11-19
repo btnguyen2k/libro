@@ -84,8 +84,8 @@ func _createMongoConnect(dbtype string) *prom.MongoConnect {
 		db := goapi.AppConfig.GetString("gvabe.db.mongodb.db")
 		url := goapi.AppConfig.GetString("gvabe.db.mongodb.url")
 		poolOpts := &prom.MongoPoolOpts{
-			ConnectTimeout:         5000,
-			SocketTimeout:          3000,
+			ConnectTimeout:         15000,
+			SocketTimeout:          5000,
 			ServerSelectionTimeout: 10000,
 			MaxPoolSize:            4,
 			MinPoolSize:            1,
@@ -419,11 +419,11 @@ func initDaos() {
 			// HACK to force database creation
 			colName := "__libro"
 			_, err := mc.CreateCollection(colName)
-			log.Printf("[DEVMODE] Create collection %s: %e", colName, err)
+			log.Printf("[DEVMODE] Create collection %s: %s", colName, err)
 			_, err = mc.GetCollection("__libro").InsertOne(context.Background(), bson.D{
 				{"version", goapi.AppVersion},
 			})
-			log.Printf("[DEVMODE] Insert document: %e", err)
+			log.Printf("[DEVMODE] Insert document: %s", err)
 		}
 
 		// create MongoDB collections
