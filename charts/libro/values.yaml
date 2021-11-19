@@ -8,6 +8,7 @@ replicaCount: 1
 
 librocfg:
   debug: false
+  devmode: false
   # secret_name_keys: "name-of-k8s-secret-that-store-Libro-keys"
   # secret_mountpath_keys: "path-to-mount-secrets-as-files"
   # rsa_privkey_file: "location-to-RSA-private-key"

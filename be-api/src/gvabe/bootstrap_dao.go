@@ -404,6 +404,11 @@ func initDaos() {
 	// 	blogVoteDaov2 = _createBlogVoteDaoDynamodb(adc)
 	// }
 	if mc != nil {
+		if DEVMODE {
+			log.Printf("[DEVMODE] MongoDB database: %s", mc.GetDb())
+			log.Printf("[DEVMODE] MongoDB url: %s", mc.GetUrl())
+		}
+
 		// create MongoDB collections
 		_createMongoCollections(mc)
 
