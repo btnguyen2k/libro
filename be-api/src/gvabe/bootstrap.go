@@ -54,7 +54,7 @@ func (b *MyBootstrapper) Bootstrap() error {
 	}
 	go startUpdateSystemInfo()
 
-	initRsaKeys()
+	// initRsaKeys()
 	initExter()
 	initDaos()
 	initApiHandlers(goapi.ApiRouter)
