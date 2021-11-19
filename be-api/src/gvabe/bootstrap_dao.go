@@ -1,6 +1,7 @@
 package gvabe
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"regexp"
@@ -407,7 +408,15 @@ func initDaos() {
 		if DEVMODE {
 			log.Printf("[DEVMODE] MongoDB database: %s", mc.GetDb())
 			log.Printf("[DEVMODE] MongoDB url: %s", mc.GetUrl())
-			mc.CreateCollection("__libro") // HACK to force database creation
+
+			// HACK to force database creation
+			colName := "__libro"
+			createResult, err := mc.CreateCollection(colName)
+			log.Printf("[DEVMODE] Create collection %s: %#v / %e", colName, createResult, err)
+			insertResult, err := mc.GetCollection("__libro").InsertOne(context.Background(), bson.D{
+				{"version", goapi.AppVersion},
+			})
+			log.Printf("[DEVMODE] Insert document: %#v / %e", insertResult, err)
 		}
 
 		// create MongoDB collections
