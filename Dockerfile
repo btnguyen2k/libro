@@ -1,6 +1,6 @@
 ## Sample Dockerfile to package the whole application (backend + frontend) as a docker image.
 # Sample build command:
-# docker build --rm -t lib:0.1.0 .
+# docker build --rm -t libro:0.1.0 .
 
 FROM node:12-alpine AS builder_fe
 RUN mkdir /build
@@ -28,7 +28,7 @@ RUN cd /build \
     && sed -i s/#{appVersion}/"$APP_VERSION"/g src/config.json \
     && npm install && npm run build
 
-FROM golang:1.14-alpine AS builder_be
+FROM golang:1.13-alpine AS builder_be
 RUN apk add git build-base jq sed
 RUN mkdir /build
 COPY . /build
@@ -48,10 +48,10 @@ RUN cd /build \
 
 FROM alpine:3.12
 LABEL maintainer="Thanh Nguyen <btnguyen2k@gmail.com>"
-RUN mkdir -p /app/frontend
+RUN mkdir -p /app/frontend/admin
 COPY --from=builder_be /build/be-api/main /app/main
 COPY --from=builder_be /build/be-api/config /app/config
-COPY --from=builder_fe /build/fe-admin/dist /app/frontend
+COPY --from=builder_fe /build/fe-admin/dist /app/frontend/admin
 RUN apk add --no-cache -U tzdata bash ca-certificates \
     && update-ca-certificates \
     && cp /usr/share/zoneinfo/Asia/Ho_Chi_Minh /etc/localtime \

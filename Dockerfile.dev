@@ -1,6 +1,6 @@
 ## Sample Dockerfile to package the whole application (backend + frontend) as a docker image.
 # Sample build command:
-# docker build --rm -t govueadmin -f Dockerfile.dev .
+# docker build --rm -t libro:dev -f Dockerfile.dev .
 
 FROM node:12-alpine AS builder_fe
 RUN mkdir /build
@@ -50,10 +50,10 @@ RUN cd /build \
 
 FROM alpine:3.12
 LABEL maintainer="Thanh Nguyen"
-RUN mkdir -p /app/frontend
+RUN mkdir -p /app/frontend/admin
 COPY --from=builder_be /build/be-api/main /app/main
 COPY --from=builder_be /build/be-api/config /app/config
-COPY --from=builder_fe /build/fe-admin/dist /app/frontend
+COPY --from=builder_fe /build/fe-admin/dist /app/frontend/admin
 RUN apk add --no-cache -U tzdata bash ca-certificates \
     && update-ca-certificates \
     && cp /usr/share/zoneinfo/Asia/Ho_Chi_Minh /etc/localtime \
