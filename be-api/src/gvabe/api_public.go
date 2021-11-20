@@ -1,10 +1,10 @@
 package gvabe
 
 import (
+	"crypto/x509"
+	"encoding/pem"
 	"fmt"
 	"log"
-	"runtime"
-	"strconv"
 	"strings"
 	"time"
 
@@ -15,19 +15,19 @@ import (
 
 // API handler "info"
 func apiInfo(_ *itineris.ApiContext, _ *itineris.ApiAuth, _ *itineris.ApiParams) *itineris.ApiResult {
-	// var publicPEM []byte
-	// if pubDER, err := x509.MarshalPKIXPublicKey(rsaPubKey); err == nil {
-	// 	pubBlock := pem.Block{
-	// 		Type:    "PUBLIC KEY",
-	// 		Headers: nil,
-	// 		Bytes:   pubDER,
-	// 	}
-	// 	publicPEM = pem.EncodeToMemory(&pubBlock)
-	// } else {
-	// 	publicPEM = []byte(err.Error())
-	// }
+	var publicPEM []byte
+	if pubDER, err := x509.MarshalPKIXPublicKey(rsaPubKey); err == nil {
+		pubBlock := pem.Block{
+			Type:    "PUBLIC KEY",
+			Headers: nil,
+			Bytes:   pubDER,
+		}
+		publicPEM = pem.EncodeToMemory(&pubBlock)
+	} else {
+		publicPEM = []byte(err.Error())
+	}
 
-	var m runtime.MemStats
+	// var m runtime.MemStats
 	result := map[string]interface{}{
 		"app": map[string]interface{}{
 			"name":        goapi.AppConfig.GetString("app.name"),
@@ -39,14 +39,14 @@ func apiInfo(_ *itineris.ApiContext, _ *itineris.ApiAuth, _ *itineris.ApiParams)
 			"app_id":   exterAppId,
 			"base_url": exterBaseUrl,
 		},
-		// "rsa_public_key": string(publicPEM),
-		"memory": map[string]interface{}{
-			"alloc":     m.Alloc,
-			"alloc_str": strconv.FormatFloat(float64(m.Alloc)/1024.0/1024.0, 'f', 1, 64) + " MiB",
-			"sys":       m.Sys,
-			"sys_str":   strconv.FormatFloat(float64(m.Sys)/1024.0/1024.0, 'f', 1, 64) + " MiB",
-			"gc":        m.NumGC,
-		},
+		"rsa_public_key": string(publicPEM),
+		// "memory": map[string]interface{}{
+		// 	"alloc":     m.Alloc,
+		// 	"alloc_str": strconv.FormatFloat(float64(m.Alloc)/1024.0/1024.0, 'f', 1, 64) + " MiB",
+		// 	"sys":       m.Sys,
+		// 	"sys_str":   strconv.FormatFloat(float64(m.Sys)/1024.0/1024.0, 'f', 1, 64) + " MiB",
+		// 	"gc":        m.NumGC,
+		// },
 	}
 	return itineris.NewApiResult(itineris.StatusOk).SetData(result)
 }

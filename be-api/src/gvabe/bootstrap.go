@@ -24,9 +24,9 @@ import (
 )
 
 var (
-	userDao    user.UserDao
-	productDao product.ProductDao
-	topicDao   doc.TopicDao
+	userDao                 user.UserDao
+	productDao              product.ProductDao
+	topicDao                doc.TopicDao
 	pageDao                 doc.PageDao
 	domainProductMappingDao respicite.M2oDao
 )
@@ -54,7 +54,7 @@ func (b *MyBootstrapper) Bootstrap() error {
 	}
 	go startUpdateSystemInfo()
 
-	// initRsaKeys()
+	initRsaKeys()
 	initExter()
 	initDaos()
 	initApiHandlers(goapi.ApiRouter)
