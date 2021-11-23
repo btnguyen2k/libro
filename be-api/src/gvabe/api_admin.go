@@ -20,7 +20,7 @@ import (
 	"main/src/utils"
 )
 
-func authenticateApiCall(ctx *itineris.ApiContext) (*user.User, *itineris.ApiResult) {
+func authenticateAdminApiCall(ctx *itineris.ApiContext) (*user.User, *itineris.ApiResult) {
 	_, user, err := _currentUserFromContext(ctx)
 	if err != nil {
 		return nil, itineris.NewApiResult(itineris.StatusErrorServer).SetMessage(err.Error())
@@ -35,7 +35,7 @@ func authenticateApiCall(ctx *itineris.ApiContext) (*user.User, *itineris.ApiRes
 
 // apiAdminGetStats handles API call "adminGetStats"
 func apiAdminGetStats(ctx *itineris.ApiContext, _ *itineris.ApiAuth, _ *itineris.ApiParams) *itineris.ApiResult {
-	_, authResult := authenticateApiCall(ctx)
+	_, authResult := authenticateAdminApiCall(ctx)
 	if authResult != nil {
 		return authResult
 	}
@@ -100,7 +100,7 @@ var funcProductToMapTransform = func(m map[string]interface{}) map[string]interf
 
 // apiAdminGetProductList handles API call "adminGetProductList"
 func apiAdminGetProductList(ctx *itineris.ApiContext, _ *itineris.ApiAuth, _ *itineris.ApiParams) *itineris.ApiResult {
-	_, authResult := authenticateApiCall(ctx)
+	_, authResult := authenticateAdminApiCall(ctx)
 	if authResult != nil {
 		return authResult
 	}
@@ -118,7 +118,7 @@ func apiAdminGetProductList(ctx *itineris.ApiContext, _ *itineris.ApiAuth, _ *it
 
 // apiAdminAddProduct handles API call "adminAddProduct"
 func apiAdminAddProduct(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *itineris.ApiParams) *itineris.ApiResult {
-	_, authResult := authenticateApiCall(ctx)
+	_, authResult := authenticateAdminApiCall(ctx)
 	if authResult != nil {
 		return authResult
 	}
@@ -166,7 +166,7 @@ func apiAdminAddProduct(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *i
 
 // apiAdminGetProduct handles API call "adminGetProduct"
 func apiAdminGetProduct(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *itineris.ApiParams) *itineris.ApiResult {
-	_, authResult := authenticateApiCall(ctx)
+	_, authResult := authenticateAdminApiCall(ctx)
 	if authResult != nil {
 		return authResult
 	}
@@ -184,7 +184,7 @@ func apiAdminGetProduct(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *i
 
 // apiAdminUpdateProduct handles API call "adminUpdateProduct"
 func apiAdminUpdateProduct(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *itineris.ApiParams) *itineris.ApiResult {
-	_, authResult := authenticateApiCall(ctx)
+	_, authResult := authenticateAdminApiCall(ctx)
 	if authResult != nil {
 		return authResult
 	}
@@ -219,7 +219,7 @@ func apiAdminUpdateProduct(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params
 
 // apiAdminDeleteProduct handles API call "adminDeleteProduct"
 func apiAdminDeleteProduct(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *itineris.ApiParams) *itineris.ApiResult {
-	_, authResult := authenticateApiCall(ctx)
+	_, authResult := authenticateAdminApiCall(ctx)
 	if authResult != nil {
 		return authResult
 	}
@@ -259,7 +259,7 @@ func apiAdminDeleteProduct(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params
 
 // apiAdminMapDomain handles API call "adminMapDomain"
 func apiAdminMapDomain(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *itineris.ApiParams) *itineris.ApiResult {
-	_, authResult := authenticateApiCall(ctx)
+	_, authResult := authenticateAdminApiCall(ctx)
 	if authResult != nil {
 		return authResult
 	}
@@ -304,7 +304,7 @@ func apiAdminMapDomain(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *it
 
 // apiAdminUnmapDomain handles API call "adminUnmapDomain"
 func apiAdminUnmapDomain(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *itineris.ApiParams) *itineris.ApiResult {
-	_, authResult := authenticateApiCall(ctx)
+	_, authResult := authenticateAdminApiCall(ctx)
 	if authResult != nil {
 		return authResult
 	}
@@ -368,7 +368,7 @@ var funcTopicToMapTransform = func(m map[string]interface{}) map[string]interfac
 
 // apiAdminGetProductTopics handles API call "adminGetProductTopics"
 func apiAdminGetProductTopics(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *itineris.ApiParams) *itineris.ApiResult {
-	_, authResult := authenticateApiCall(ctx)
+	_, authResult := authenticateAdminApiCall(ctx)
 	if authResult != nil {
 		return authResult
 	}
@@ -395,7 +395,7 @@ func apiAdminGetProductTopics(ctx *itineris.ApiContext, _ *itineris.ApiAuth, par
 
 // apiAdminAddProductTopic handles API call "adminAddProductTopic"
 func apiAdminAddProductTopic(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *itineris.ApiParams) *itineris.ApiResult {
-	_, authResult := authenticateApiCall(ctx)
+	_, authResult := authenticateAdminApiCall(ctx)
 	if authResult != nil {
 		return authResult
 	}
@@ -465,7 +465,7 @@ func apiAdminAddProductTopic(ctx *itineris.ApiContext, _ *itineris.ApiAuth, para
 
 // apiAdminDeleteProductTopic handles API call "adminDeleteProductTopic"
 func apiAdminDeleteProductTopic(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *itineris.ApiParams) *itineris.ApiResult {
-	_, authResult := authenticateApiCall(ctx)
+	_, authResult := authenticateAdminApiCall(ctx)
 	if authResult != nil {
 		return authResult
 	}
@@ -534,7 +534,7 @@ func apiAdminDeleteProductTopic(ctx *itineris.ApiContext, _ *itineris.ApiAuth, p
 
 // apiAdminModifyProductTopic handles API call "adminModifyProductTopic"
 func apiAdminModifyProductTopic(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *itineris.ApiParams) *itineris.ApiResult {
-	_, authResult := authenticateApiCall(ctx)
+	_, authResult := authenticateAdminApiCall(ctx)
 	if authResult != nil {
 		return authResult
 	}
@@ -613,7 +613,7 @@ func apiAdminModifyProductTopic(ctx *itineris.ApiContext, _ *itineris.ApiAuth, p
 
 // apiAdminUpdateProductTopic handles API call "adminUpdateProductTopic"
 func apiAdminUpdateProductTopic(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *itineris.ApiParams) *itineris.ApiResult {
-	_, authResult := authenticateApiCall(ctx)
+	_, authResult := authenticateAdminApiCall(ctx)
 	if authResult != nil {
 		return authResult
 	}
@@ -687,7 +687,7 @@ var funcPageToMapTransform = func(m map[string]interface{}) map[string]interface
 
 // apiAdminGetTopicPages handles API call "adminGetTopicPages"
 func apiAdminGetTopicPages(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *itineris.ApiParams) *itineris.ApiResult {
-	_, authResult := authenticateApiCall(ctx)
+	_, authResult := authenticateAdminApiCall(ctx)
 	if authResult != nil {
 		return authResult
 	}
@@ -714,7 +714,7 @@ func apiAdminGetTopicPages(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params
 
 // apiAdminAddTopicPage handles API call "adminAddTopicPage"
 func apiAdminAddTopicPage(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *itineris.ApiParams) *itineris.ApiResult {
-	_, authResult := authenticateApiCall(ctx)
+	_, authResult := authenticateAdminApiCall(ctx)
 	if authResult != nil {
 		return authResult
 	}
@@ -783,7 +783,7 @@ func apiAdminAddTopicPage(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params 
 
 // apiAdminDeleteTopicPage handles API call "adminDeleteTopicPage"
 func apiAdminDeleteTopicPage(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *itineris.ApiParams) *itineris.ApiResult {
-	_, authResult := authenticateApiCall(ctx)
+	_, authResult := authenticateAdminApiCall(ctx)
 	if authResult != nil {
 		return authResult
 	}
@@ -838,7 +838,7 @@ func apiAdminDeleteTopicPage(ctx *itineris.ApiContext, _ *itineris.ApiAuth, para
 
 // apiAdminModifyTopicPage handles API call "adminModifyTopicPage"
 func apiAdminModifyTopicPage(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *itineris.ApiParams) *itineris.ApiResult {
-	_, authResult := authenticateApiCall(ctx)
+	_, authResult := authenticateAdminApiCall(ctx)
 	if authResult != nil {
 		return authResult
 	}
@@ -915,7 +915,7 @@ func apiAdminModifyTopicPage(ctx *itineris.ApiContext, _ *itineris.ApiAuth, para
 
 // apiAdminUpdateTopicPage handles API call "adminUpdateTopicPage"
 func apiAdminUpdateTopicPage(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *itineris.ApiParams) *itineris.ApiResult {
-	_, authResult := authenticateApiCall(ctx)
+	_, authResult := authenticateAdminApiCall(ctx)
 	if authResult != nil {
 		return authResult
 	}

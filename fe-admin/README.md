@@ -33,7 +33,7 @@ npm run lint
 ##Application Configurations
 
 `src/config.json`: application's main configuration file. Important config keys:
-- `api_client.bo_api_base_url`: point to backend's base URL
+- `api_client.be_api_base_url`: point to backend's base URL
 - `api_client.app_id`: application id in order to authenticate with backend. _Must match between frontend and backend._
 - `api_client.header_app_id` and `api_client.header_access_token`: name of HTTP headers passed along every API call for authentication. _Must match between frontend and backend._
 

@@ -15,11 +15,16 @@ Setup API handlers: application register its api-handlers by calling router.SetH
 */
 // TODO change this function to implement application's business logic
 func initApiHandlers(router *itineris.ApiRouter) {
+	// pubic APIs
 	router.SetHandler("info", apiInfo)
 	router.SetHandler("login", apiLogin)
 	router.SetHandler("verifyLoginToken", apiVerifyLoginToken)
 	router.SetHandler("systemInfo", apiSystemInfo)
 
+	// frontend APIs
+	router.SetHandler("feGetProduct", apiFeGetProduct)
+
+	// admin APIs
 	router.SetHandler("adminGetStats", apiAdminGetStats)
 
 	router.SetHandler("adminGetProductList", apiAdminGetProductList)
@@ -56,6 +61,7 @@ var (
 		"getApp":           false,
 		"verifyLoginToken": true,
 		"loginChannelList": true,
+		"feGetProduct":     false,
 	}
 )
 

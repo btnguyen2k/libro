@@ -11,7 +11,7 @@ import utils from "@/utils/app_utils"
 import router from "@/router"
 
 const apiClient = Axios.create({
-    baseURL: appConfig.APP_CONFIG.api_client.bo_api_base_url,
+    baseURL: appConfig.APP_CONFIG.api_client.be_api_base_url,
     timeout: 10000,
 });
 

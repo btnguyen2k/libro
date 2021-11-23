@@ -128,20 +128,6 @@ func initEchoServer() {
 	const feDir = "./frontend"
 	const feAdminPath = "/admin"
 	e.Static(feAdminPath, feDir+feAdminPath)
-	// e.GET("/", func(c echo.Context) error {
-	// 	return c.Redirect(http.StatusFound, feAdminPath+"/")
-	// })
-	// e.GET(feAdminPath+"/", func(c echo.Context) error {
-	// 	if fcontent, err := ioutil.ReadFile(feDir + "/index.html"); err != nil {
-	// 		if os.IsNotExist(err) {
-	// 			return c.HTML(http.StatusNotFound, "Not found: "+feAdminPath+"/index.html")
-	// 		} else {
-	// 			return err
-	// 		}
-	// 	} else {
-	// 		return c.HTMLBlob(http.StatusOK, fcontent)
-	// 	}
-	// })
 	e.GET("/manifest.json", func(c echo.Context) error {
 		if fcontent, err := ioutil.ReadFile(feDir + feAdminPath + "/manifest.json"); err != nil {
 			if os.IsNotExist(err) {
@@ -163,6 +149,9 @@ func initEchoServer() {
 		} else {
 			return c.Blob(http.StatusOK, "image/x-icon", fcontent)
 		}
+	})
+	e.GET("/", func(c echo.Context) error {
+		return nil
 	})
 
 	// register API http endpoints
