@@ -480,18 +480,60 @@ func _initUsers() {
 	}
 }
 
+func _initSamplesUpdateStats(prod *product.Product, topic *doc.Topic) {
+	if prod != nil {
+		topicList, err := topicDao.GetAll(prod, nil, nil)
+		if err != nil {
+			panic(fmt.Sprintf("error while getting topic list for product %s: %s", prod.GetId(), err))
+		} else {
+			prod.SetNumTopics(len(topicList))
+			result, err := productDao.Update(prod)
+			if err != nil {
+				panic(fmt.Sprintf("error while updating product %s: %s", prod.GetId(), err))
+			}
+			if !result {
+				log.Printf("[ERROR] Cannot update product [%s]", prod.GetId())
+			}
+		}
+	}
+
+	if topic != nil {
+		pageList, err := pageDao.GetAll(topic, nil, nil)
+		if err != nil {
+			panic(fmt.Sprintf("error while getting page list for topic %s: %s", topic.GetId(), err))
+		} else {
+			topic.SetNumPages(len(pageList))
+			result, err := topicDao.Update(topic)
+			if err != nil {
+				panic(fmt.Sprintf("error while updating topic %s: %s", topic.GetId(), err))
+			}
+			if !result {
+				log.Printf("[ERROR] Cannot update topic [%s]", topic.GetId())
+			}
+		}
+	}
+}
+
 func _initSamples() {
+	if !DEVMODE {
+		// only populate sample data on dev mode
+		return
+	}
+
 	demoProdId := "demo"
+	demoProdName := "Demo"
+	demoProdDesc := "Sample product to demonstrate Libro"
 	demoProd, err := productDao.Get(demoProdId)
 	if err != nil {
 		panic(fmt.Sprintf("error while getting product [%s]: %s", demoProdId, err))
 	}
 	if demoProd != nil {
+		log.Printf("[INFO] Sample product [%s] already existed.", demoProdId)
 		return
 	}
 
 	log.Printf("[INFO] Sample product [%s] not found, creating one...", demoProdId)
-	demoProd = product.NewProduct(goapi.AppVersionNumber, demoProdId, "Demo", "Demo product", true)
+	demoProd = product.NewProduct(goapi.AppVersionNumber, demoProdId, demoProdName, demoProdDesc, true)
 	result, err := productDao.Create(demoProd)
 	if err != nil && err != godal.ErrGdaoDuplicatedEntry {
 		panic(fmt.Sprintf("error while creating sample product [%s]: %s", demoProdId, err))
@@ -500,14 +542,17 @@ func _initSamples() {
 		log.Printf("[ERROR] Cannot create sample product [%s]", demoProdId)
 	}
 
-	domain := "localhost"
-	log.Printf("[INFO] Creating mapping {domain:%s -> product:%s}...", domain, demoProdId)
-	result, err = domainProductMappingDao.Set("localhost", demoProdId)
-	if err != nil && err != respicite.ErrDuplicated {
-		panic(fmt.Sprintf("error while creating mapping {domain:%s -> product:%s}: %s", domain, demoProdId, err))
-	}
-	if !result {
-		log.Printf("[ERROR] Cannot create mapping {domain:%s -> product:%s}...", domain, demoProdId)
+	domainCsv := goapi.AppConfig.GetString("libro.samples.samples", "localhost")
+	domainList := regexp.MustCompile(`[,\s]+`).Split(domainCsv, -1)
+	for _, domain := range domainList {
+		log.Printf("[INFO] Creating mapping {domain:%s -> product:%s}...", domain, demoProdId)
+		result, err = domainProductMappingDao.Set("localhost", demoProdId)
+		if err != nil && err != respicite.ErrDuplicated {
+			panic(fmt.Sprintf("error while creating mapping {domain:%s -> product:%s}: %s", domain, demoProdId, err))
+		}
+		if !result {
+			log.Printf("[ERROR] Cannot create mapping {domain:%s -> product:%s}...", domain, demoProdId)
+		}
 	}
 
 	re := regexp.MustCompile(`\W+`)
@@ -515,7 +560,8 @@ func _initSamples() {
 	longLorerm := "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi nec imperdiet turpis. Curabitur aliquet pulvinar ultrices. Etiam at posuere leo. Proin ultrices ex et dapibus feugiat link example aenean purus leo, faucibus at elit vel, aliquet scelerisque dui. Etiam quis elit euismod, imperdiet augue sit amet, imperdiet odio. Aenean sem erat, hendrerit eu gravida id, dignissim ut ante. Nam consequat porttitor libero euismod congue."
 
 	/*----------------------------------------------------------------------*/
-	topic := doc.NewTopic(goapi.AppVersionNumber, demoProd, "Quick Start", "cil-paper-plane", "Demo example. "+shortLorem)
+	topic := doc.NewTopic(goapi.AppVersionNumber, demoProd, "Quick Start", "fa-fighter-jet",
+		"Libro's quick start guide. "+shortLorem)
 	topic.SetPosition(1).SetId(demoProd.GetId() + "-" + re.ReplaceAllString(strings.ToLower(topic.GetTitle()), ""))
 	log.Printf("[INFO] Creating topic (%s -> %s)...", demoProdId, topic.GetTitle())
 	result, err = topicDao.Create(topic)
@@ -525,21 +571,10 @@ func _initSamples() {
 	if !result {
 		log.Printf("[ERROR] Cannot create topic [%s]", topic.GetTitle())
 	}
-	topicList, err := topicDao.GetAll(demoProd, nil, nil)
-	if err != nil {
-		panic(fmt.Sprintf("error while getting topic list for product %s: %s", demoProdId, err))
-	} else {
-		demoProd.SetNumTopics(len(topicList))
-		result, err = productDao.Update(demoProd)
-		if err != nil {
-			panic(fmt.Sprintf("error while updating product %s: %s", demoProdId, err))
-		}
-		if !result {
-			log.Printf("[ERROR] Cannot update product [%s]", demoProdId)
-		}
-	}
+	_initSamplesUpdateStats(demoProd, nil)
 
-	page := doc.NewPage(goapi.AppVersionNumber, topic, "Download", "cil-cloud-download", "Download: "+shortLorem, longLorerm)
+	page := doc.NewPage(goapi.AppVersionNumber, topic, "Download", "fa-cloud-download",
+		"Download Libro and install on your infrastructure. "+shortLorem, longLorerm)
 	page.SetPosition(1).SetId(topic.GetId() + "-" + re.ReplaceAllString(strings.ToLower(page.GetTitle()), ""))
 	log.Printf("[INFO] Creating page (%s:%s -> %s)...", demoProdId, topic.GetTitle(), page.GetTitle())
 	result, err = pageDao.Create(page)
@@ -550,7 +585,8 @@ func _initSamples() {
 		log.Printf("[ERROR] Cannot create page [%s]", page.GetTitle())
 	}
 
-	page = doc.NewPage(goapi.AppVersionNumber, topic, "Installation", "cil-code", "Installation: "+shortLorem, longLorerm)
+	page = doc.NewPage(goapi.AppVersionNumber, topic, "Installation", "fa-code",
+		"Installation guide: how to install Libro on local environment. "+shortLorem, longLorerm)
 	page.SetPosition(2).SetId(topic.GetId() + "-" + re.ReplaceAllString(strings.ToLower(page.GetTitle()), ""))
 	log.Printf("[INFO] Creating page (%s:%s -> %s)...", demoProdId, topic.GetTitle(), page.GetTitle())
 	result, err = pageDao.Create(page)
@@ -561,21 +597,10 @@ func _initSamples() {
 		log.Printf("[ERROR] Cannot create page [%s]", page.GetTitle())
 	}
 
-	pageList, err := pageDao.GetAll(topic, nil, nil)
-	if err != nil {
-		panic(fmt.Sprintf("error while getting page list for topic %s: %s", topic.GetId(), err))
-	} else {
-		topic.SetNumPages(len(pageList))
-		result, err = topicDao.Update(topic)
-		if err != nil {
-			panic(fmt.Sprintf("error while updating topic %s: %s", topic.GetId(), err))
-		}
-		if !result {
-			log.Printf("[ERROR] Cannot update topic [%s]", topic.GetId())
-		}
-	}
+	_initSamplesUpdateStats(nil, topic)
 	/*----------------------------------------------------------------------*/
-	topic = doc.NewTopic(goapi.AppVersionNumber, demoProd, "Components", "cil-cog", shortLorem)
+	topic = doc.NewTopic(goapi.AppVersionNumber, demoProd, "Components", "fa-cogs",
+		"Libro has 3 components: API backend, Admin frontend, and Public frontend. "+shortLorem)
 	topic.SetPosition(2).SetId(demoProd.GetId() + "-" + re.ReplaceAllString(strings.ToLower(topic.GetTitle()), ""))
 	log.Printf("[INFO] Creating topic (%s -> %s)...", demoProdId, topic.GetTitle())
 	result, err = topicDao.Create(topic)
@@ -585,21 +610,10 @@ func _initSamples() {
 	if !result {
 		log.Printf("[ERROR] Cannot create topic [%s]", topic.GetTitle())
 	}
-	topicList, err = topicDao.GetAll(demoProd, nil, nil)
-	if err != nil {
-		panic(fmt.Sprintf("error while getting topic list for product %s: %s", demoProdId, err))
-	} else {
-		demoProd.SetNumTopics(len(topicList))
-		result, err = productDao.Update(demoProd)
-		if err != nil {
-			panic(fmt.Sprintf("error while updating product %s: %s", demoProdId, err))
-		}
-		if !result {
-			log.Printf("[ERROR] Cannot update product [%s]", demoProdId)
-		}
-	}
+	_initSamplesUpdateStats(demoProd, nil)
 
-	page = doc.NewPage(goapi.AppVersionNumber, topic, "Dashboards", "cil-home", "Dashboards: "+shortLorem, longLorerm)
+	page = doc.NewPage(goapi.AppVersionNumber, topic, "API Backend", "fa-microchip",
+		"APIs for both Admin frontend and Public frontend. "+shortLorem, longLorerm)
 	page.SetPosition(1).SetId(topic.GetId() + "-" + re.ReplaceAllString(strings.ToLower(page.GetTitle()), ""))
 	log.Printf("[INFO] Creating page (%s:%s -> %s)...", demoProdId, topic.GetTitle(), page.GetTitle())
 	result, err = pageDao.Create(page)
@@ -610,7 +624,8 @@ func _initSamples() {
 		log.Printf("[ERROR] Cannot create page [%s]", page.GetTitle())
 	}
 
-	page = doc.NewPage(goapi.AppVersionNumber, topic, "Product", "cil-applications", "Product: "+shortLorem, longLorerm)
+	page = doc.NewPage(goapi.AppVersionNumber, topic, "Admin Frontend", "fa-dashboard",
+		"GUI for administrators to manage products, document topics and pages. "+shortLorem, longLorerm)
 	page.SetPosition(2).SetId(topic.GetId() + "-" + re.ReplaceAllString(strings.ToLower(page.GetTitle()), ""))
 	log.Printf("[INFO] Creating page (%s:%s -> %s)...", demoProdId, topic.GetTitle(), page.GetTitle())
 	result, err = pageDao.Create(page)
@@ -621,7 +636,8 @@ func _initSamples() {
 		log.Printf("[ERROR] Cannot create page [%s]", page.GetTitle())
 	}
 
-	page = doc.NewPage(goapi.AppVersionNumber, topic, "UI", "cil-image", "UI: "+shortLorem, longLorerm)
+	page = doc.NewPage(goapi.AppVersionNumber, topic, "Public Frontend", "fa-book",
+		"End users are able to view documentation from here. "+shortLorem, longLorerm)
 	page.SetPosition(3).SetId(topic.GetId() + "-" + re.ReplaceAllString(strings.ToLower(page.GetTitle()), ""))
 	log.Printf("[INFO] Creating page (%s:%s -> %s)...", demoProdId, topic.GetTitle(), page.GetTitle())
 	result, err = pageDao.Create(page)
@@ -632,21 +648,10 @@ func _initSamples() {
 		log.Printf("[ERROR] Cannot create page [%s]", page.GetTitle())
 	}
 
-	pageList, err = pageDao.GetAll(topic, nil, nil)
-	if err != nil {
-		panic(fmt.Sprintf("error while getting page list for topic %s: %s", topic.GetId(), err))
-	} else {
-		topic.SetNumPages(len(pageList))
-		result, err = topicDao.Update(topic)
-		if err != nil {
-			panic(fmt.Sprintf("error while updating topic %s: %s", topic.GetId(), err))
-		}
-		if !result {
-			log.Printf("[ERROR] Cannot update topic [%s]", topic.GetId())
-		}
-	}
+	_initSamplesUpdateStats(nil, topic)
 	/*----------------------------------------------------------------------*/
-	topic = doc.NewTopic(goapi.AppVersionNumber, demoProd, "FAQs", "cil-lightbulb", "Layout for FAQ page. "+shortLorem)
+	topic = doc.NewTopic(goapi.AppVersionNumber, demoProd, "FAQs", "fa-question",
+		"List of frequently asked questions. "+shortLorem)
 	topic.SetPosition(3).SetId(demoProd.GetId() + "-" + re.ReplaceAllString(strings.ToLower(topic.GetTitle()), ""))
 	log.Printf("[INFO] Creating topic (%s -> %s)...", demoProdId, topic.GetTitle())
 	result, err = topicDao.Create(topic)
@@ -656,21 +661,10 @@ func _initSamples() {
 	if !result {
 		log.Printf("[ERROR] Cannot create topic [%s]", topic.GetTitle())
 	}
-	topicList, err = topicDao.GetAll(demoProd, nil, nil)
-	if err != nil {
-		panic(fmt.Sprintf("error while getting topic list for product %s: %s", demoProdId, err))
-	} else {
-		demoProd.SetNumTopics(len(topicList))
-		result, err = productDao.Update(demoProd)
-		if err != nil {
-			panic(fmt.Sprintf("error while updating product %s: %s", demoProdId, err))
-		}
-		if !result {
-			log.Printf("[ERROR] Cannot update product [%s]", demoProdId)
-		}
-	}
 
-	page = doc.NewPage(goapi.AppVersionNumber, topic, "General", "cil-blur-circular", "General: "+shortLorem, longLorerm)
+	_initSamplesUpdateStats(demoProd, nil)
+
+	page = doc.NewPage(goapi.AppVersionNumber, topic, "General", "fa-circle-o-notch", "General questions: "+shortLorem, longLorerm)
 	page.SetPosition(1).SetId(topic.GetId() + "-" + re.ReplaceAllString(strings.ToLower(page.GetTitle()), ""))
 	log.Printf("[INFO] Creating page (%s:%s -> %s)...", demoProdId, topic.GetTitle(), page.GetTitle())
 	result, err = pageDao.Create(page)
@@ -681,17 +675,5 @@ func _initSamples() {
 		log.Printf("[ERROR] Cannot create page [%s]", page.GetTitle())
 	}
 
-	pageList, err = pageDao.GetAll(topic, nil, nil)
-	if err != nil {
-		panic(fmt.Sprintf("error while getting page list for topic %s: %s", topic.GetId(), err))
-	} else {
-		topic.SetNumPages(len(pageList))
-		result, err = topicDao.Update(topic)
-		if err != nil {
-			panic(fmt.Sprintf("error while updating topic %s: %s", topic.GetId(), err))
-		}
-		if !result {
-			log.Printf("[ERROR] Cannot update topic [%s]", topic.GetId())
-		}
-	}
+	_initSamplesUpdateStats(nil, topic)
 }

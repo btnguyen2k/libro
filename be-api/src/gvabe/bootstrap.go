@@ -13,7 +13,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"os"
 	"strings"
 
 	"main/src/goapi"
@@ -46,12 +45,9 @@ Bootstrapper usually does the following:
   - other initializing work (e.g. creating DAO, initializing database, etc)
 */
 func (b *MyBootstrapper) Bootstrap() error {
-	if os.Getenv("DEBUG") != "" {
-		DEBUG = true
-	}
-	if os.Getenv("DEVMODE") != "" {
-		DEVMODE = true
-	}
+	DEBUG = goapi.AppConfig.GetBoolean("libro.debug", false)
+	DEVMODE = goapi.AppConfig.GetBoolean("libro.devmode", false)
+
 	go startUpdateSystemInfo()
 
 	initRsaKeys()
