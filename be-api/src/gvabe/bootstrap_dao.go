@@ -1,7 +1,6 @@
 package gvabe
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"regexp"
@@ -398,20 +397,12 @@ func initDaos() {
 	// 	_createSqlTables(sqlc, dbtype)
 	//
 	// 	// create DAO instances
-	// 	userDaov2 = _createUserDaoSql(sqlc)
-	// 	blogPostDaov2 = _createBlogPostDaoSql(sqlc)
-	// 	blogCommentDaov2 = _createBlogCommentDaoSql(sqlc)
-	// 	blogVoteDaov2 = _createBlogVoteDaoSql(sqlc)
 	// }
 	// if adc != nil {
 	// 	// create AWS DynamoDB tables
 	// 	_createDynamodbTables(adc)
 	//
 	// 	// create DAO instances
-	// 	userDaov2 = _createUserDaoDynamodb(adc)
-	// 	blogPostDaov2 = _createBlogPostDaoDynamodb(adc)
-	// 	blogCommentDaov2 = _createBlogCommentDaoDynamodb(adc)
-	// 	blogVoteDaov2 = _createBlogVoteDaoDynamodb(adc)
 	// }
 	if mc != nil {
 		if DEVMODE {
@@ -422,10 +413,10 @@ func initDaos() {
 			colName := "__libro"
 			_, err := mc.CreateCollection(colName)
 			log.Printf("[DEVMODE] Create collection %s: %s", colName, err)
-			_, err = mc.GetCollection("__libro").InsertOne(context.Background(), bson.D{
-				{"version", goapi.AppVersion},
-			})
-			log.Printf("[DEVMODE] Insert document: %s", err)
+			// _, err = mc.GetCollection("__libro").InsertOne(context.Background(), bson.D{
+			// 	{"version", goapi.AppVersion},
+			// })
+			// log.Printf("[DEVMODE] Insert document: %s", err)
 		}
 
 		// create MongoDB collections
@@ -542,7 +533,7 @@ func _initSamples() {
 		log.Printf("[ERROR] Cannot create sample product [%s]", demoProdId)
 	}
 
-	domainCsv := goapi.AppConfig.GetString("libro.samples.samples", "localhost")
+	domainCsv := goapi.AppConfig.GetString("libro.samples.domains", "localhost")
 	domainList := regexp.MustCompile(`[,\s]+`).Split(domainCsv, -1)
 	for _, domain := range domainList {
 		log.Printf("[INFO] Creating mapping {domain:%s -> product:%s}...", domain, demoProdId)

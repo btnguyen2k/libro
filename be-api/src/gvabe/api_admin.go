@@ -123,13 +123,25 @@ func apiAdminAddProduct(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *i
 		return authResult
 	}
 
+	id := _extractParam(params, "id", reddo.TypeString, utils.UniqueIdSmall(), nil)
+	prod, err := productDao.Get(id.(string))
+	if err != nil {
+		return itineris.NewApiResult(itineris.StatusErrorServer).
+			SetMessage(fmt.Sprintf("error getting product [%s] (error: %s)", id, err))
+	}
+	if prod != nil {
+		return itineris.NewApiResult(itineris.StatusErrorClient).
+			SetMessage(fmt.Sprintf("product [%s] already existed", id))
+	}
+	id = strings.ToLower(id.(string))
+
 	// extract params
 	isPublished := _extractParam(params, "is_published", reddo.TypeBool, false, nil)
 	name := _extractParam(params, "name", reddo.TypeString, "", nil)
 	if name == "" {
 		return itineris.NewApiResult(itineris.StatusErrorClient).SetMessage("name is empty")
 	}
-	desc := _extractParam(params, "description", reddo.TypeString, "", nil)
+	desc := _extractParam(params, "desc", reddo.TypeString, "", nil)
 	domains := _extractParam(params, "domains", reddo.TypeString, "", nil)
 	domains = strings.ToLower(domains.(string))
 
@@ -144,9 +156,20 @@ func apiAdminAddProduct(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *i
 		}
 	}
 
+	contactsMap := map[string]interface{}{
+		"email":    _extractParam(params, "contacts.email", reddo.TypeString, "", nil),
+		"website":  _extractParam(params, "contacts.website", reddo.TypeString, "", nil),
+		"github":   _extractParam(params, "contacts.github", reddo.TypeString, "", nil),
+		"facebook": _extractParam(params, "contacts.facebook", reddo.TypeString, "", nil),
+		"linkedin": _extractParam(params, "contacts.linkedin", reddo.TypeString, "", nil),
+		"slack":    _extractParam(params, "contacts.slack", reddo.TypeString, "", nil),
+		"twitter":  _extractParam(params, "contacts.twitter", reddo.TypeString, "", nil),
+	}
+
 	// create product
-	product := product.NewProduct(goapi.AppVersionNumber, utils.UniqueIdSmall(), name.(string), desc.(string), isPublished.(bool))
-	result, err := productDao.Create(product)
+	prod = product.NewProduct(goapi.AppVersionNumber, utils.UniqueIdSmall(), name.(string), desc.(string), isPublished.(bool))
+	prod.SetId(id.(string)).SetDataAttr("contacts", contactsMap)
+	result, err := productDao.Create(prod)
 	if err != nil || !result {
 		return itineris.NewApiResult(itineris.StatusErrorServer).
 			SetMessage(fmt.Sprintf("cannot create product %s (error: %s)", name, err))
@@ -154,7 +177,7 @@ func apiAdminAddProduct(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *i
 
 	// map domains
 	for _, domain := range domainList {
-		result, err := domainProductMappingDao.Set(domain, product.GetId())
+		result, err := domainProductMappingDao.Set(domain, prod.GetId())
 		if err != nil || !result {
 			return itineris.NewApiResult(201).
 				SetMessage(fmt.Sprintf("Product %s created, but cannot map domain %s to product (error: %s)", name, domain, err))

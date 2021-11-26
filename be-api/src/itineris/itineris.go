@@ -1,5 +1,5 @@
 /*
-Package itineris creates a framework that help building API server over HTTP and gRPC.
+Package itineris creates a framework that helps to build API server over HTTP and gRPC.
 
     HTTP/gRPC are API communication protocols only. Business logic is handled by one single code repository for all communication protocols.
     Data is interchanged (request/response) in JSON format; can be gzipped to reduce space/transmit time consumption.
@@ -11,10 +11,13 @@ package itineris
 
 import (
 	"encoding/json"
-	"github.com/btnguyen2k/consu/reddo"
-	"main/src/utils"
 	"reflect"
+	"sync"
 	"time"
+
+	"github.com/btnguyen2k/consu/reddo"
+	"github.com/btnguyen2k/consu/semita"
+	"main/src/utils"
 )
 
 /*----------------------------------------------------------------------*/
@@ -30,16 +33,12 @@ const (
 	ctxGateway   = "gateway"
 )
 
-/**
-ApiContext encapsulates the context information of an API call.
-*/
+// ApiContext encapsulates the context information of an API call.
 type ApiContext struct {
 	contextData map[string]interface{}
 }
 
-/*
-NewApiContext creates a new ApiContext instance.
-*/
+// NewApiContext creates a new ApiContext instance.
 func NewApiContext() *ApiContext {
 	ctx := &ApiContext{contextData: map[string]interface{}{
 		ctxId:        utils.UniqueId(),
@@ -48,9 +47,7 @@ func NewApiContext() *ApiContext {
 	return ctx
 }
 
-/*
-GetId returns the unique id associated with this API context.
-*/
+// GetId returns the unique id associated with this API context.
 func (ctx *ApiContext) GetId() string {
 	v, err := ctx.GetContextValueAsType(ctxId, reddo.TypeString)
 	if err != nil {
@@ -59,16 +56,12 @@ func (ctx *ApiContext) GetId() string {
 	return v.(string)
 }
 
-/*
-SetId associates a unique id with this API context.
-*/
+// SetId associates a unique id with this API context.
 func (ctx *ApiContext) SetId(id string) *ApiContext {
 	return ctx.SetContextValue(ctxId, id)
 }
 
-/*
-GetApiName returns the API name associated with this context.
-*/
+// GetApiName returns the API name associated with this context.
 func (ctx *ApiContext) GetApiName() string {
 	v, err := ctx.GetContextValueAsType(ctxApiName, reddo.TypeString)
 	if err != nil {
@@ -77,16 +70,12 @@ func (ctx *ApiContext) GetApiName() string {
 	return v.(string)
 }
 
-/*
-SetApiName associates the API name with this context.
-*/
+// SetApiName associates the API name with this context.
 func (ctx *ApiContext) SetApiName(apiName string) *ApiContext {
 	return ctx.SetContextValue(ctxApiName, apiName)
 }
 
-/*
-GetGateway returns gateway name associated with this API context.
-*/
+// GetGateway returns gateway name associated with this API context.
 func (ctx *ApiContext) GetGateway() string {
 	v, err := ctx.GetContextValueAsType(ctxGateway, reddo.TypeString)
 	if err != nil {
@@ -95,16 +84,12 @@ func (ctx *ApiContext) GetGateway() string {
 	return v.(string)
 }
 
-/*
-SetApiName associates a gateway name this API context.
-*/
+// SetGateway associates a gateway name with this API context.
 func (ctx *ApiContext) SetGateway(gateway string) *ApiContext {
 	return ctx.SetContextValue(ctxGateway, gateway)
 }
 
-/*
-GetTimestamp returns the timestamp associated with this API context.
-*/
+// GetTimestamp returns the timestamp associated with this API context.
 func (ctx *ApiContext) GetTimestamp() time.Time {
 	v, err := ctx.GetContextValueAsType(ctxTimestamp, reddo.TypeTime)
 	if err != nil {
@@ -113,18 +98,14 @@ func (ctx *ApiContext) GetTimestamp() time.Time {
 	return v.(time.Time)
 }
 
-/*
-SetTimestamp associates a timestamp with this API context.
-*/
+// SetTimestamp associates a timestamp with this API context.
 func (ctx *ApiContext) SetTimestamp(timestamp time.Time) *ApiContext {
 	return ctx.SetContextValue(ctxTimestamp, timestamp)
 }
 
-/*
-SetContextValue sets a context value.
-
-    If value is nil, the associated context field is removed
-*/
+// SetContextValue sets a context value.
+//
+// If value is nil, the associated context field is removed
 func (ctx *ApiContext) SetContextValue(field string, value interface{}) *ApiContext {
 	if value == nil {
 		return ctx.RemoveContextValue(field)
@@ -133,17 +114,13 @@ func (ctx *ApiContext) SetContextValue(field string, value interface{}) *ApiCont
 	return ctx
 }
 
-/*
-RemoveContextValue removes an associated context field value.
-*/
+// RemoveContextValue removes an associated context field value.
 func (ctx *ApiContext) RemoveContextValue(field string) *ApiContext {
 	delete(ctx.contextData, field)
 	return ctx
 }
 
-/*
-GetContextValue returns a context value.
-*/
+// GetContextValue returns a context value.
 func (ctx *ApiContext) GetContextValue(field string) interface{} {
 	v, ok := ctx.contextData[field]
 	if ok {
@@ -152,23 +129,17 @@ func (ctx *ApiContext) GetContextValue(field string) interface{} {
 	return nil
 }
 
-/*
-GetContextValueAsType returns a context value casted to a specified type.
-*/
+// GetContextValueAsType returns a context value casted to a specified type.
 func (ctx *ApiContext) GetContextValueAsType(field string, typ reflect.Type) (interface{}, error) {
 	return reddo.Convert(ctx.GetContextValue(field), typ)
 }
 
-/*
-GetAllContextValues returns all context values as a map.
-*/
+// GetAllContextValues returns all context values as a map.
 func (ctx *ApiContext) GetAllContextValues() map[string]interface{} {
 	return ctx.contextData
 }
 
-/*
-ToJsonString serializes the ApiContext to JSON string.
-*/
+// ToJsonString serializes the ApiContext to JSON string.
 func (ctx *ApiContext) ToJsonString() string {
 	js, _ := json.Marshal(ctx.contextData)
 	return string(js)
@@ -176,56 +147,44 @@ func (ctx *ApiContext) ToJsonString() string {
 
 /*----------------------------------------------------------------------*/
 
-/**
-ApiAuth encapsulates authentication information of an API call.
-*/
+// ApiAuth encapsulates authentication information of an API call.
 type ApiAuth struct {
 	appId       string
 	accessToken string
 }
 
-/*
-NewApiAuth creates a new ApiAuth instance.
-*/
+// NewApiAuth creates a new ApiAuth instance.
 func NewApiAuth(appId, accessToken string) *ApiAuth {
 	return &ApiAuth{appId: appId, accessToken: accessToken}
 }
 
-/*
-GetAppId returns the app-id associated with the ApiAuth instance.
-*/
+// GetAppId returns the app-id associated with the ApiAuth instance.
 func (auth *ApiAuth) GetAppId() string {
 	return auth.appId
 }
 
-/*
-GetAccessToken returns the access-token associated with the ApiAuth instance.
-*/
+// GetAccessToken returns the access-token associated with the ApiAuth instance.
 func (auth *ApiAuth) GetAccessToken() string {
 	return auth.accessToken
 }
 
 /*----------------------------------------------------------------------*/
 
-/**
-ApiParams encapsulates parameters to be passed to the API.
-*/
+// ApiParams encapsulates parameters to be passed to the API.
 type ApiParams struct {
 	params map[string]interface{}
+	s      *semita.Semita
+	l      sync.RWMutex
 }
 
-/*
-NewApiParams creates a new ApiParams instance.
-*/
+// NewApiParams creates a new ApiParams instance.
 func NewApiParams() *ApiParams {
 	return &ApiParams{params: map[string]interface{}{}}
 }
 
-/*
-SetParam sets a parameter value.
-
-    If value is nil, the associated param is removed
-*/
+// SetParam sets a parameter value.
+//
+// If value is nil, the associated param is removed.
 func (prm *ApiParams) SetParam(key string, value interface{}) *ApiParams {
 	if value == nil {
 		return prm.RemoveParam(key)
@@ -234,35 +193,38 @@ func (prm *ApiParams) SetParam(key string, value interface{}) *ApiParams {
 	return prm
 }
 
-/*
-RemoveParam removes a parameter value.
-*/
+// RemoveParam removes a parameter value.
 func (prm *ApiParams) RemoveParam(key string) *ApiParams {
 	delete(prm.params, key)
 	return prm
 }
 
-/*
-GetParam returns a parameter value.
-*/
+// GetParam returns a parameter value.
 func (prm *ApiParams) GetParam(key string) interface{} {
-	v, ok := prm.params[key]
-	if ok {
-		return v
+	prm.l.Lock()
+	defer prm.l.Unlock()
+	if prm.s == nil {
+		prm.s = semita.NewSemita(&prm.params)
 	}
-	return nil
+	v, err := prm.s.GetValue(key)
+	if err != nil {
+		return nil
+	}
+	return v
+
+	// v, ok := prm.params[key]
+	// if ok {
+	// 	return v
+	// }
+	// return nil
 }
 
-/*
-GetParamAsType returns a parameter value casted to a specified type.
-*/
+// GetParamAsType returns a parameter value casted to a specified type.
 func (prm *ApiParams) GetParamAsType(key string, typ reflect.Type) (interface{}, error) {
 	return reddo.Convert(prm.GetParam(key), typ)
 }
 
-/*
-GetAllParams returns all parameters as a map.
-*/
+// GetAllParams returns all parameters as a map.
 func (prm *ApiParams) GetAllParams() map[string]interface{} {
 	return prm.params
 }
@@ -285,9 +247,7 @@ var (
 	ResultNotFound       = NewApiResult(StatusNotFound).SetMessage("Item not found")
 )
 
-/*
-ApiResult encapsulates result from an API call.
-*/
+// ApiResult encapsulates result from an API call.
 type ApiResult struct {
 	Status    int                    `json:"status"`
 	Message   string                 `json:"message"`
@@ -296,68 +256,50 @@ type ApiResult struct {
 	Extras    map[string]interface{} `json:"extras"`
 }
 
-/*
-NewApiResult creates a new ApiResult instance.
-*/
+// NewApiResult creates a new ApiResult instance.
 func NewApiResult(status int) *ApiResult {
 	return &ApiResult{Status: status, Extras: make(map[string]interface{})}
 }
 
-/*
-GetStatus returns result Status.
-*/
+// GetStatus returns result Status.
 func (rst *ApiResult) GetStatus() int {
 	return rst.Status
 }
 
-/*
-GetMessage returns result Message.
-*/
+// GetMessage returns result Message.
 func (rst *ApiResult) GetMessage() string {
 	return rst.Message
 }
 
-/*
-SetMessage sets the value of result Message.
-*/
+// SetMessage sets the value of result Message.
 func (rst *ApiResult) SetMessage(message string) *ApiResult {
 	rst.Message = message
 	return rst
 }
 
-/*
-GetData returns result Data.
-*/
+// GetData returns result Data.
 func (rst *ApiResult) GetData() interface{} {
 	return rst.Data
 }
 
-/*
-SetData sets the value of result Data.
-*/
+// SetData sets the value of result Data.
 func (rst *ApiResult) SetData(data interface{}) *ApiResult {
 	rst.Data = data
 	return rst
 }
 
-/*
-GetExtras returns result extra info.
-*/
+// GetExtras returns result extra info.
 func (rst *ApiResult) GetExtras() map[string]interface{} {
 	return rst.Extras
 }
 
-/*
-SetExtras sets the value of result extra info.
-*/
+// SetExtras sets the value of result extra info.
 func (rst *ApiResult) SetExtras(extras map[string]interface{}) *ApiResult {
 	rst.Extras = extras
 	return rst
 }
 
-/*
-AddExtraInfo adds an extra info to the result.
-*/
+// AddExtraInfo adds an extra info to the result.
 func (rst *ApiResult) AddExtraInfo(key string, value interface{}) *ApiResult {
 	if rst.Extras == nil {
 		rst.Extras = make(map[string]interface{})
@@ -366,9 +308,7 @@ func (rst *ApiResult) AddExtraInfo(key string, value interface{}) *ApiResult {
 	return rst
 }
 
-/*
-RemoveExtraInfo removes an extra info from the result.
-*/
+// RemoveExtraInfo removes an extra info from the result.
 func (rst *ApiResult) RemoveExtraInfo(key string) *ApiResult {
 	if rst.Extras != nil {
 		delete(rst.Extras, key)
@@ -376,24 +316,18 @@ func (rst *ApiResult) RemoveExtraInfo(key string) *ApiResult {
 	return rst
 }
 
-/*
-GetDebugInfo returns result debug info.
-*/
+// GetDebugInfo returns result debug info.
 func (rst *ApiResult) GetDebugInfo() interface{} {
 	return rst.DebugInfo
 }
 
-/*
-SetDebugInfo sets the value of result debug Data.
-*/
+// SetDebugInfo sets the value of result debug Data.
 func (rst *ApiResult) SetDebugInfo(debugInfo interface{}) *ApiResult {
 	rst.DebugInfo = debugInfo
 	return rst
 }
 
-/*
-Clone replicates the ApiResult instance.
-*/
+// Clone replicates the ApiResult instance.
 func (rst *ApiResult) Clone() *ApiResult {
 	return &ApiResult{
 		Status:    rst.Status,
@@ -404,17 +338,13 @@ func (rst *ApiResult) Clone() *ApiResult {
 	}
 }
 
-/*
-ToJsonString serializes the ApiResult to JSON string.
-*/
+// ToJsonString serializes the ApiResult to JSON string.
 func (rst *ApiResult) ToJsonString() string {
 	js, _ := json.Marshal(*rst)
 	return string(js)
 }
 
-/*
-ToMap exports the ApiResult data to a map.
-*/
+// ToMap exports the ApiResult data to a map.
 func (rst *ApiResult) ToMap() map[string]interface{} {
 	m := map[string]interface{}{
 		"status": rst.Status,
