@@ -168,7 +168,7 @@ func apiAdminAddProduct(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *i
 
 	// create product
 	prod = product.NewProduct(goapi.AppVersionNumber, utils.UniqueIdSmall(), name.(string), desc.(string), isPublished.(bool))
-	prod.SetId(id.(string)).SetDataAttr("contacts", contactsMap)
+	prod.SetId(id.(string)).SetDataAttr(product.ProdAttrContacts, contactsMap)
 	result, err := productDao.Create(prod)
 	if err != nil || !result {
 		return itineris.NewApiResult(itineris.StatusErrorServer).

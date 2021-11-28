@@ -2,6 +2,7 @@ package product
 
 import (
 	"encoding/json"
+	"reflect"
 	"strings"
 
 	"github.com/btnguyen2k/consu/reddo"
@@ -22,6 +23,8 @@ func NewProduct(tagVersion uint64, id, name, desc string, isPublished bool) *Pro
 		sync()
 }
 
+var typContactsMap = reflect.TypeOf(map[string]string{})
+
 // NewProductFromUbo is helper function to create Product bo from a universal bo.
 func NewProductFromUbo(ubo *henge.UniversalBo) *Product {
 	if ubo == nil {
@@ -31,23 +34,28 @@ func NewProductFromUbo(ubo *henge.UniversalBo) *Product {
 	bo := &Product{UniversalBo: ubo}
 	if v, err := ubo.GetDataAttrAs(ProdAttrName, reddo.TypeString); err != nil {
 		return nil
-	} else {
+	} else if v != nil {
 		bo.name, _ = v.(string)
 	}
 	if v, err := ubo.GetDataAttrAs(ProdAttrDesc, reddo.TypeString); err != nil {
 		return nil
-	} else {
+	} else if v != nil {
 		bo.description, _ = v.(string)
 	}
 	if v, err := ubo.GetDataAttrAs(ProdAttrIsPublished, reddo.TypeBool); err != nil {
 		return nil
-	} else {
+	} else if v != nil {
 		bo.isPublished, _ = v.(bool)
 	}
 	if v, err := ubo.GetDataAttrAs(ProdAttrNumTopics, reddo.TypeInt); err != nil {
 		return nil
 	} else if temp, ok := v.(int64); ok {
 		bo.numTopics = int(temp)
+	}
+	if v, err := ubo.GetDataAttrAs(ProdAttrContacts, typContactsMap); err != nil {
+		return nil
+	} else if v != nil {
+		bo.contacts = v.(map[string]string)
 	}
 	return bo.sync()
 }
@@ -65,6 +73,9 @@ const (
 	// ProdAttrNumTopics is the number of document topics belong to this product.
 	ProdAttrNumTopics = "ntopics"
 
+	// ProdAttrContacts is collection of product's contacts (such as GitHub, Website, LinkedIn, etc).
+	ProdAttrContacts = "contacts"
+
 	// prodAttrUbo is for internal use only!
 	prodAttrUbo = "_ubo"
 )
@@ -74,10 +85,11 @@ const (
 //   - Product must be unique
 type Product struct {
 	*henge.UniversalBo `json:"_ubo"`
-	name               string `json:"name"`
-	description        string `json:"desc"`
-	isPublished        bool   `json:"ispub"`
-	numTopics          int    `json:"ntopics"`
+	name               string            `json:"name"`
+	description        string            `json:"desc"`
+	isPublished        bool              `json:"ispub"`
+	numTopics          int               `json:"ntopics"`
+	contacts           map[string]string `json:"contacts"`
 }
 
 // ToMap transforms user's attributes to a map.
@@ -96,10 +108,11 @@ func (p *Product) ToMap(postFunc henge.FuncPostUboToMap) map[string]interface{} 
 	result := map[string]interface{}{
 		henge.FieldId: p.GetId(),
 		bo.SerKeyAttrs: map[string]interface{}{
-			ProdAttrName:        p.name,
-			ProdAttrDesc:        p.description,
-			ProdAttrIsPublished: p.isPublished,
-			ProdAttrNumTopics:   p.numTopics,
+			ProdAttrName:        p.GetName(),
+			ProdAttrDesc:        p.GetDescription(),
+			ProdAttrIsPublished: p.IsPublished(),
+			ProdAttrNumTopics:   p.GetNumTopics(),
+			ProdAttrContacts:    p.GetContacts(),
 		},
 	}
 	if postFunc != nil {
@@ -115,10 +128,11 @@ func (p *Product) MarshalJSON() ([]byte, error) {
 	m := map[string]interface{}{
 		prodAttrUbo: p.UniversalBo.Clone(),
 		bo.SerKeyAttrs: map[string]interface{}{
-			ProdAttrName:        p.name,
-			ProdAttrDesc:        p.description,
-			ProdAttrIsPublished: p.isPublished,
-			ProdAttrNumTopics:   p.numTopics,
+			ProdAttrName:        p.GetName(),
+			ProdAttrDesc:        p.GetDescription(),
+			ProdAttrIsPublished: p.IsPublished(),
+			ProdAttrNumTopics:   p.GetNumTopics(),
+			ProdAttrContacts:    p.GetContacts(),
 		},
 	}
 	return json.Marshal(m)
@@ -152,6 +166,11 @@ func (p *Product) UnmarshalJSON(data []byte) error {
 			return err
 		} else {
 			p.numTopics = int(v)
+		}
+		if v, err := reddo.ToMap(_attrs[ProdAttrContacts], typContactsMap); err != nil {
+			return err
+		} else {
+			p.contacts = v.(map[string]string)
 		}
 	}
 	p.sync()
@@ -202,12 +221,41 @@ func (p *Product) SetNumTopics(v int) *Product {
 	return p
 }
 
+// GetContacts returns value of product's 'contacts' attribute.
+func (p *Product) GetContacts() map[string]string {
+	result := make(map[string]string)
+	for k, v := range p.contacts {
+		result[k] = v
+	}
+	return result
+}
+
+// SetContacts sets value of product's 'contacts' attribute.
+func (p *Product) SetContacts(contacts map[string]string) *Product {
+	m := make(map[string]string)
+	for k, v := range contacts {
+		m[k] = v
+	}
+	p.contacts = m
+	return p
+}
+
+// AddContact adds a new contact (type and value) to product's 'contacts' attribute.
+func (p *Product) AddContact(typ, val string) *Product {
+	if p.contacts == nil {
+		p.contacts = make(map[string]string)
+	}
+	p.contacts[typ] = val
+	return p
+}
+
 // sync is called to synchronize BO's attributes to its UniversalBo.
 func (p *Product) sync() *Product {
 	p.SetDataAttr(ProdAttrName, p.name)
 	p.SetDataAttr(ProdAttrDesc, p.description)
 	p.SetDataAttr(ProdAttrIsPublished, p.isPublished)
 	p.SetDataAttr(ProdAttrNumTopics, p.numTopics)
+	p.SetDataAttr(ProdAttrContacts, p.contacts)
 	p.UniversalBo.Sync()
 	return p
 }
