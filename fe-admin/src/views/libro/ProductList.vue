@@ -388,6 +388,8 @@ export default {
       this.modalEditErr = ''
       this.modalEditShow = true
       this.domainToMapEdit = ''
+      this.waitEditProduct = false
+      this.modalEditFlash = ''
     },
     doEditProductClick() {
       // this workaround is to force switching to Product Info tab for input validation
@@ -399,6 +401,32 @@ export default {
       } else {
         this.$refs.btnSubmitEditProduct.click()
       }
+    },
+    doEditProduct(e) {
+      e.preventDefault()
+      if (this.domainToMapEdit.trim() != '') {
+        this.doMapDomain()
+        return
+      }
+      let vue = this
+      let data = {...vue.formEdit}
+      vue.waitEditProduct = true
+      clientUtils.apiDoPut(clientUtils.apiAdminProduct + "/" + vue.formEdit.id, data,
+          (apiRes) => {
+            if (apiRes.status != 200) {
+              vue.modalEditErr = apiRes.status + ": " + apiRes.message
+            } else {
+              vue.modalEditShow = false
+              vue.loadProductList()
+              vue.myFlashMsg = vue.$i18n.t('message.product_updated_msg', {name: vue.formEdit.name})
+            }
+            vue.waitEditProduct = false
+          },
+          (err) => {
+            vue.modalEditErr = err
+            vue.waitEditProduct = false
+          }
+      )
     },
     doMapDomain() {
       let vue = this

@@ -157,19 +157,20 @@ func apiAdminAddProduct(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *i
 		}
 	}
 
-	contactsMap := map[string]interface{}{
-		"email":    _extractParam(params, "contacts.email", reddo.TypeString, "", nil),
-		"website":  _extractParam(params, "contacts.website", reddo.TypeString, "", nil),
-		"github":   _extractParam(params, "contacts.github", reddo.TypeString, "", nil),
-		"facebook": _extractParam(params, "contacts.facebook", reddo.TypeString, "", nil),
-		"linkedin": _extractParam(params, "contacts.linkedin", reddo.TypeString, "", nil),
-		"slack":    _extractParam(params, "contacts.slack", reddo.TypeString, "", nil),
-		"twitter":  _extractParam(params, "contacts.twitter", reddo.TypeString, "", nil),
+	contactsMap := map[string]string{
+		"email":    _extractParam(params, "contacts.email", reddo.TypeString, "", nil).(string),
+		"website":  _extractParam(params, "contacts.website", reddo.TypeString, "", nil).(string),
+		"github":   _extractParam(params, "contacts.github", reddo.TypeString, "", nil).(string),
+		"facebook": _extractParam(params, "contacts.facebook", reddo.TypeString, "", nil).(string),
+		"linkedin": _extractParam(params, "contacts.linkedin", reddo.TypeString, "", nil).(string),
+		"slack":    _extractParam(params, "contacts.slack", reddo.TypeString, "", nil).(string),
+		"twitter":  _extractParam(params, "contacts.twitter", reddo.TypeString, "", nil).(string),
 	}
 
 	// create product
 	prod = product.NewProduct(goapi.AppVersionNumber, utils.UniqueIdSmall(), name.(string), desc.(string), isPublished.(bool))
-	prod.SetId(id.(string)).SetDataAttr(product.ProdAttrContacts, contactsMap)
+	prod.SetId(id.(string))
+	prod.SetContacts(contactsMap)
 	result, err := productDao.Create(prod)
 	if err != nil || !result {
 		return itineris.NewApiResult(itineris.StatusErrorServer).
@@ -214,11 +215,11 @@ func apiAdminUpdateProduct(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params
 	}
 
 	id := _extractParam(params, "id", reddo.TypeString, "", nil)
-	product, err := productDao.Get(id.(string))
+	prod, err := productDao.Get(id.(string))
 	if err != nil {
 		return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage(err.Error())
 	}
-	if product == nil {
+	if prod == nil {
 		return itineris.NewApiResult(itineris.StatusNotFound).SetMessage("product not found")
 	}
 
@@ -228,14 +229,25 @@ func apiAdminUpdateProduct(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params
 	if name == "" {
 		return itineris.NewApiResult(itineris.StatusErrorClient).SetMessage("name is empty")
 	}
-	desc := _extractParam(params, "description", reddo.TypeString, "", nil)
+	desc := _extractParam(params, "desc", reddo.TypeString, "", nil)
+
+	contactsMap := map[string]string{
+		"email":    _extractParam(params, "contacts.email", reddo.TypeString, "", nil).(string),
+		"website":  _extractParam(params, "contacts.website", reddo.TypeString, "", nil).(string),
+		"github":   _extractParam(params, "contacts.github", reddo.TypeString, "", nil).(string),
+		"facebook": _extractParam(params, "contacts.facebook", reddo.TypeString, "", nil).(string),
+		"linkedin": _extractParam(params, "contacts.linkedin", reddo.TypeString, "", nil).(string),
+		"slack":    _extractParam(params, "contacts.slack", reddo.TypeString, "", nil).(string),
+		"twitter":  _extractParam(params, "contacts.twitter", reddo.TypeString, "", nil).(string),
+	}
 
 	// update product
-	product.SetPublished(isPublished.(bool)).SetName(name.(string)).SetDescription(desc.(string))
-	result, err := productDao.Update(product)
+	prod.SetPublished(isPublished.(bool)).SetName(name.(string)).SetDescription(desc.(string))
+	prod.SetContacts(contactsMap)
+	result, err := productDao.Update(prod)
 	if err != nil || !result {
 		return itineris.NewApiResult(itineris.StatusErrorServer).
-			SetMessage(fmt.Sprintf("cannot update product [%s/%s] (error: %s)", product.GetId(), product.GetName(), err))
+			SetMessage(fmt.Sprintf("cannot update product [%s/%s] (error: %s)", prod.GetId(), prod.GetName(), err))
 	}
 
 	return itineris.NewApiResult(itineris.StatusOk)

@@ -9,7 +9,6 @@ const TheContainer = () => import('@/containers/TheContainer')
 const Dashboard = () => import('@/views/libro/Dashboard')
 
 const ProductList = () => import('@/views/libro/ProductList')
-const EditProduct = () => import('@/views/libro/EditProduct')
 const DeleteProduct = () => import('@/views/libro/DeleteProduct')
 const ProductTopicList = () => import('@/views/libro/ProductTopicList')
 const TopicPageList = () => import('@/views/libro/TopicPageList')
@@ -101,12 +100,6 @@ function configRoutes() {
                             name: 'ProductList',
                             component: ProductList,
                             props: true, //[props=true] to pass flashMsg
-                        },
-                        {
-                            path: '_edit/:id',
-                            meta: {label: i18n.t('message.edit_product')},
-                            name: 'EditProduct',
-                            component: EditProduct,
                         },
                         {
                             path: '_delete/:id',
