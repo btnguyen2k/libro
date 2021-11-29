@@ -79,6 +79,7 @@ var funcProductToMapTransform = func(m map[string]interface{}) map[string]interf
 	result["name"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, product.ProdAttrName), reddo.TypeString)
 	result["desc"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, product.ProdAttrDesc), reddo.TypeString)
 	result["num_topics"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, product.ProdAttrNumTopics), reddo.TypeInt)
+	result["contacts"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, product.ProdAttrContacts), product.TypContactsMap)
 
 	// convert "creation timestamp" to UTC
 	if t, ok := result["t_created"].(time.Time); ok {

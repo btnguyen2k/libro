@@ -23,7 +23,7 @@ func NewProduct(tagVersion uint64, id, name, desc string, isPublished bool) *Pro
 		sync()
 }
 
-var typContactsMap = reflect.TypeOf(map[string]string{})
+var TypContactsMap = reflect.TypeOf(map[string]string{})
 
 // NewProductFromUbo is helper function to create Product bo from a universal bo.
 func NewProductFromUbo(ubo *henge.UniversalBo) *Product {
@@ -52,7 +52,7 @@ func NewProductFromUbo(ubo *henge.UniversalBo) *Product {
 	} else if temp, ok := v.(int64); ok {
 		bo.numTopics = int(temp)
 	}
-	if v, err := ubo.GetDataAttrAs(ProdAttrContacts, typContactsMap); err != nil {
+	if v, err := ubo.GetDataAttrAs(ProdAttrContacts, TypContactsMap); err != nil {
 		return nil
 	} else if v != nil {
 		bo.contacts = v.(map[string]string)
@@ -167,7 +167,7 @@ func (p *Product) UnmarshalJSON(data []byte) error {
 		} else {
 			p.numTopics = int(v)
 		}
-		if v, err := reddo.ToMap(_attrs[ProdAttrContacts], typContactsMap); err != nil {
+		if v, err := reddo.ToMap(_attrs[ProdAttrContacts], TypContactsMap); err != nil {
 			return err
 		} else {
 			p.contacts = v.(map[string]string)
