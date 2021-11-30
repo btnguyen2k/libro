@@ -1,7 +1,6 @@
 <template>
-  <div>
-    <CRow>
-      <CCol sm="12">
+  <CRow>
+    <CCol sm="12">
         <CAlert v-if="foundStatus<0" color="info">{{ $t('message.wait') }}</CAlert>
         <CCard v-if="foundStatus==0" color="danger" text-color="white">
           <CCardHeader>
@@ -38,7 +37,7 @@
               ]">
               <template #id="{item}">
                 <td style="white-space: nowrap; font-size: small" class="col-2">
-                  <CIcon :name="item.icon"/>
+                  <ficon fixedWidth :icon="['fas', _iconize(item.icon)]"/>
                   {{ item.id }}
                 </td>
               </template>
@@ -81,7 +80,6 @@
           </CCardFooter>
         </CCard>
       </CCol>
-    </CRow>
 
     <!-- pop-up dialog to confirm deleting a topic -->
     <CModal color="warning" :title="$t('message.delete_topic')" :centered="true" :show.sync="modalDeleteShow"
@@ -267,12 +265,13 @@
         </CButton>
       </template>
     </CModal>
-  </div>
+  </CRow>
 </template>
 
 <script>
-import clientUtils from "@/utils/api_client";
+import clientUtils from '@/utils/api_client'
 import {freeSet} from '@coreui/icons'
+import {iconize} from './utils'
 
 export default {
   name: 'ProductTopicList',
@@ -308,6 +307,9 @@ export default {
   },
   props: ["flashMsg"],
   methods: {
+    _iconize(icon) {
+      return iconize(icon)
+    },
     loadProductTopicList(prodId) {
       this.foundStatus = -1
       const vue = this

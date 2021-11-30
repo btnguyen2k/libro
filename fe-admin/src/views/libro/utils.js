@@ -87,6 +87,11 @@ function markdownRender(markdownInput, sanitize) {
     return sanitize ? latexHtml : DOMPurify.sanitize(latexHtml, {ADD_ATTR: ['target']})
 }
 
+function iconize(icon) {
+    return icon.startsWith("cil-")?icon.slice(4):(icon.startsWith("fa-")?icon.slice(3):icon)
+}
+
 export {
-    markdownRender
+    markdownRender,
+    iconize,
 }

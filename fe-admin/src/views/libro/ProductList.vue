@@ -365,9 +365,6 @@ export default {
             vue.waitLoadProductList = false
           })
     },
-    iconize(icon) {
-      return icon.startsWith("cil-")?icon.slice(4):(icon.startsWith("fa-")?icon.slice(3):icon)
-    },
     clickAddProduct() {
       this.formAdd = {...emptyForm}
       this.modalAddErr = ''
