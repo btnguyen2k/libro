@@ -74,6 +74,7 @@ const messages = {
             product_added_msg: 'Product "{name}" has been created successfully.',
 
             delete_product: "Delete product",
+            delete_product_msg: 'All topics and pages belong to the product will also be deleted! This product currently has {numTopics} topic(s). Are you sure you wish to delete the product?',
             product_deleted_msg: 'Product "{name}" has been deleted successfully.',
 
             edit_product: "Edit product",
@@ -203,6 +204,7 @@ const messages = {
             product_added_msg: 'Sản phẩm "{name}" đã được tạo thành công.',
 
             delete_product: "Xoá sản phẩm",
+            delete_product_msg: 'Xoá sản phẩm sẽ xoá các chủ đề và trang tài liệu của sản phẩm! Sản phẩm này hiện có {numTopics} chủ đề. Bạn có chắc muốn xoá sản phẩm này?',
             product_deleted_msg: 'Sản phẩm "{name}" đã được xoá thành công.',
 
             edit_product: "Chỉnh sửa sản phẩm",

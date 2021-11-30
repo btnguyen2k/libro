@@ -276,6 +276,29 @@
         </CButton>
       </template>
     </CModal>
+
+    <!-- pop-up dialog to confirm deleting an existing product -->
+    <CModal color="danger" :title="$t('message.delete_product')" :centered="true" :show.sync="modalDeleteShow" :close-on-backdrop="false">
+      <CAlert color="warning">
+        <CIcon name="cil-warning" size="lg" />
+        {{ $t('message.delete_product_msg', {numTopics: prodToDelete['num_topics']}) }}
+      </CAlert>
+      <CAlert v-if="waitDeleteProduct" color="info">{{ $t('message.wait') }}</CAlert>
+      <CAlert v-if="modalDeleteErr" color="danger">{{ modalDeleteErr }}</CAlert>
+      <CInput type="text" :label="$t('message.product_id')" v-model="prodToDelete.id" horizontal plaintext />
+      <CInput type="text" :label="$t('message.product_name')" v-model="prodToDelete.name" horizontal plaintext/>
+      <CTextarea rows="2" type="text" :label="$t('message.product_desc')" v-model="prodToDelete.desc" horizontal plaintext/>
+      <template #footer>
+        <CButton type="button" color="danger" class="m-2" style="width: 96px" @click="doDeleteProduct">
+          <CIcon name="cil-trash" class="align-top"/>
+          {{ $t('message.action_delete') }}
+        </CButton>
+        <CButton type="button" color="secondary" style="width: 96px" @click="modalDeleteShow = false">
+          <CIcon name="cil-arrow-circle-left" class="align-top"/>
+          {{ $t('message.cancel') }}
+        </CButton>
+      </template>
+    </CModal>
   </CRow>
 </template>
 
@@ -306,6 +329,11 @@ export default {
       modalUnmapShow: false,
       modalUnmapMessage: '',
       modalUnmapData: '',
+
+      modalDeleteShow: false,
+      modalDeleteErr: '',
+      waitDeleteProduct: false,
+      prodToDelete: {...emptyForm},
 
       errorMsg: '',
       myFlashMsg: this.flashMsg,
@@ -486,7 +514,30 @@ export default {
       )
     },
     clickDeleteProduct(id) {
-      this.$router.push({name: "DeleteProduct", params: {id: id}})
+      this.prodToDelete = this.prodMap[id]
+      this.modalDeleteErr = ''
+      this.modalDeleteShow = true
+    },
+    doDeleteProduct() {
+      let vue = this
+      vue.waitDeleteProduct = true
+      clientUtils.apiDoDelete(
+          clientUtils.apiAdminProduct + "/" + vue.prodToDelete.id,
+          (apiRes) => {
+            if (apiRes.status != 200) {
+              vue.modalDeleteErr = apiRes.status + ": " + apiRes.message
+            } else {
+              vue.modalDeleteShow = false
+              vue.loadProductList()
+              vue.myFlashMsg = vue.$i18n.t('message.product_deleted_msg', {name: vue.prodToDelete.name})
+            }
+            vue.waitDeleteProduct = false
+          },
+          (err) => {
+            vue.modalDeleteErr = err
+            vue.waitDeleteProduct = false
+          }
+      )
     },
   }
 }

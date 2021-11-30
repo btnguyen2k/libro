@@ -9,7 +9,6 @@ const TheContainer = () => import('@/containers/TheContainer')
 const Dashboard = () => import('@/views/libro/Dashboard')
 
 const ProductList = () => import('@/views/libro/ProductList')
-const DeleteProduct = () => import('@/views/libro/DeleteProduct')
 const ProductTopicList = () => import('@/views/libro/ProductTopicList')
 const TopicPageList = () => import('@/views/libro/TopicPageList')
 
@@ -102,22 +101,18 @@ function configRoutes() {
                             props: true, //[props=true] to pass flashMsg
                         },
                         {
-                            path: '_delete/:id',
-                            meta: {label: i18n.t('message.delete_product')},
-                            name: 'DeleteProduct',
-                            component: DeleteProduct,
-                        },
-                        {
                             path: '_topics/:pid',
                             meta: {label: i18n.t('message.topics')},
                             name: 'ProductTopicList',
                             component: ProductTopicList,
+                            props: true, //[props=true] to pass flashMsg
                         },
                         {
                             path: '_pages/:pid/:tid',
                             meta: {label: i18n.t('message.pages')},
                             name: 'TopicPageList',
                             component: TopicPageList,
+                            props: true, //[props=true] to pass flashMsg
                         },
                     ]
                 },

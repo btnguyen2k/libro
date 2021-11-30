@@ -261,33 +261,53 @@ func apiAdminDeleteProduct(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params
 	}
 
 	id := _extractParam(params, "id", reddo.TypeString, "", nil)
-	product, err := productDao.Get(id.(string))
+	prod, err := productDao.Get(id.(string))
 	if err != nil {
 		return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage(err.Error())
 	}
-	if product == nil {
+	if prod == nil {
 		return itineris.NewApiResult(itineris.StatusNotFound).SetMessage("product not found")
 	}
 
-	domainProductMappings, err := domainProductMappingDao.Rget(product.GetId())
+	_, err = productDao.Delete(prod)
 	if err != nil {
 		return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage(err.Error())
-	}
-	for _, mapping := range domainProductMappings {
-		_, err := domainProductMappingDao.Remove(mapping.Src, mapping.Dest)
-		if err != nil {
-			msg := fmt.Sprintf("error while unmapping domain %s (product has not been deleted): %s", mapping.Src, err)
-			return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage(msg)
-		}
 	}
 
-	_, err = productDao.Delete(product)
-	if err != nil {
-		return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage(err.Error())
-	}
-	// if !ok {
-	// 	return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage("cannot delete product")
-	// }
+	// TODO: post-production-deletion clean-up via event-driven manner
+	go func(prod *product.Product) {
+		// unmap domains
+		if domainProductMappings, err := domainProductMappingDao.Rget(prod.GetId()); err != nil {
+			log.Printf("[WARN] Post-delete product [%s] - Error getting mapped domain names: %e", prod.GetId(), err)
+		} else {
+			for _, mapping := range domainProductMappings {
+				if _, err := domainProductMappingDao.Remove(mapping.Src, mapping.Dest); err != nil {
+					log.Printf("[WARN] Post-delete product [%s] - Error unmapping domain names [%s]: %e", prod.GetId(), mapping.Src, err)
+				}
+			}
+		}
+
+		// delete topics and pages
+		if topics, err := topicDao.GetAll(prod, nil, nil); err != nil {
+			log.Printf("[WARN] Post-delete product [%s] - Error getting all topics for product: %e", prod.GetId(), err)
+		} else {
+			for _, topic := range topics {
+				if pages, err := pageDao.GetAll(topic, nil, nil); err != nil {
+					log.Printf("[WARN] Post-delete product [%s] - Error getting all pages for topic [%s]: %e", prod.GetId(), topic.GetId(), err)
+				} else {
+					for _, page := range pages {
+						if _, err = pageDao.Delete(page); err != nil {
+							log.Printf("[WARN] Post-delete product [%s] - Error deleting page [%s]: %e", prod.GetId(), page.GetId(), err)
+						}
+					}
+				}
+				if _, err = topicDao.Delete(topic); err != nil {
+					log.Printf("[WARN] Post-delete product [%s] - Error deleting topic [%s]: %e", prod.GetId(), topic.GetId(), err)
+				}
+			}
+		}
+	}(prod)
+
 	return itineris.NewApiResult(itineris.StatusOk)
 }
 
