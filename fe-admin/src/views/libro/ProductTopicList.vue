@@ -37,7 +37,7 @@
               ]">
               <template #id="{item}">
                 <td style="white-space: nowrap; font-size: small" class="col-2">
-                  <ficon fixedWidth :icon="['fas', _iconize(item.icon)]"/>
+                  <ficon fixedWidth :icon="_iconize(item.icon)"/>
                   {{ item.id }}
                 </td>
               </template>
@@ -82,18 +82,16 @@
       </CCol>
 
     <!-- pop-up dialog to confirm deleting a topic -->
-    <CModal color="warning" :title="$t('message.delete_topic')" :centered="true" :show.sync="modalDeleteShow"
-            :close-on-backdrop="false">
+    <CModal color="warning" :title="$t('message.delete_topic')" :centered="true" :show.sync="modalDeleteShow" :close-on-backdrop="false">
       <p class="alert alert-warning">
         <CIcon name="cil-warning" size="lg"/>
         {{ $t('message.delete_topic_msg', {numPages: topicToDelete['num_pages']}) }}
       </p>
       <p v-if="modalDeleteErr!=''" class="alert alert-danger">{{ modalDeleteErr }}</p>
-      <CInput type="text" :label="$t('message.topic_icon')+' / '+$t('message.topic_id')" v-model="topicToDelete.id"
-              horizontal plaintext>
+      <CInput type="text" :label="$t('message.topic_icon')+' / '+$t('message.topic_id')" v-model="topicToDelete.id" horizontal plaintext>
         <template #prepend>
           <CButton disabled link>
-            <CIcon :name="topicToDelete.icon"/>
+            <ficon :icon="_iconize(topicToDelete.icon)"/>
           </CButton>
         </template>
       </CInput>
@@ -135,12 +133,12 @@
         >
           <template #prepend>
             <CButton disabled link>
-              <CIcon :name="formAdd.icon"/>
+              <ficon :icon="_iconize(formAdd.icon)"/>
             </CButton>
           </template>
           <template #append>
             <CButton color="primary" @click="modalIconsShow = true">
-              <CIcon name="cil-magnifying-glass"/>
+              <ficon :icon="['fas', 'search']"/>
             </CButton>
           </template>
         </CInput>
@@ -202,12 +200,12 @@
         >
           <template #prepend>
             <CButton disabled link>
-              <CIcon :name="formEdit.icon"/>
+              <ficon :icon="_iconize(formEdit.icon)"/>
             </CButton>
           </template>
           <template #append>
             <CButton color="primary" @click="modalIconsShow = true">
-              <CIcon name="cil-magnifying-glass"/>
+              <ficon :icon="['fas', 'search']"/>
             </CButton>
           </template>
         </CInput>
@@ -248,16 +246,26 @@
     <!-- pop-up dialog to pick an icon -->
     <CModal :title="$t('message.icons')" :centered="true" :show.sync="modalIconsShow">
       <CRow class="text-center">
-        <template v-for="(icon, iconName) in $options.freeSet">
+        <template v-for="(icon, iconName) in $options.fas">
           <CCol class="mb-5" col="3" sm="3" :key="iconName">
-            <CButton size="lg" @click="clickSelectIcon(iconName)">
-              <CIcon size="xl" :content="icon" :title="iconName"/>
+            <CButton size="lg" @click="clickSelectIcon(icon.prefix+'-'+icon.iconName)">
+              <ficon fixedWidth :icon="[icon.prefix, icon.iconName]"/>
             </CButton>
-            <!--<CIcon type="button" @click="clickSelectIcon(iconName)" :height="42" :content="icon" :title="iconName"/>-->
-            <div style="font-size: small">{{ toKebabCase(iconName) }}</div>
+            <div style="font-size: small">{{ icon.prefix }}-{{ icon.iconName }}</div>
           </CCol>
         </template>
       </CRow>
+<!--      <CRow class="text-center">-->
+<!--        <template v-for="(icon, iconName) in $options.freeSet">-->
+<!--          <CCol class="mb-5" col="3" sm="3" :key="iconName">-->
+<!--            <CButton size="lg" @click="clickSelectIcon(iconName)">-->
+<!--              <CIcon size="xl" :content="icon" :title="iconName"/>-->
+<!--            </CButton>-->
+<!--            &lt;!&ndash;<CIcon type="button" @click="clickSelectIcon(iconName)" :height="42" :content="icon" :title="iconName"/>&ndash;&gt;-->
+<!--            <div style="font-size: small">{{ toKebabCase(iconName) }}</div>-->
+<!--          </CCol>-->
+<!--        </template>-->
+<!--      </CRow>-->
       <template #footer>
         <CButton @click="modalInfoShow = false" color="secondary" style="width: 96px">
           <CIcon name="cil-x" class="align-top"/>
@@ -272,10 +280,12 @@
 import clientUtils from '@/utils/api_client'
 import {freeSet} from '@coreui/icons'
 import {iconize} from './utils'
+import { fas } from '@fortawesome/free-solid-svg-icons'
 
 export default {
   name: 'ProductTopicList',
   freeSet,
+  fas,
   mounted() {
     this.loadProductTopicList(this.$route.params.pid)
   },
@@ -338,9 +348,11 @@ export default {
     },
     clickSelectIcon(iconName) {
       if (this.addMode) {
-        this.formAdd.icon = this.toKebabCase(iconName, true)
+        this.formAdd.icon = iconName
+        // this.formAdd.icon = this.toKebabCase(iconName, true)
       } else {
-        this.formEdit.icon = this.toKebabCase(iconName, true)
+        this.formEdit.icon = iconName
+        // this.formEdit.icon = this.toKebabCase(iconName, true)
       }
       this.modalIconsShow = false
     },
