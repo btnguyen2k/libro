@@ -113,7 +113,8 @@
     <!-- pop-up form to add new topic -->
     <CForm @submit.prevent="doAddTopic" method="post">
       <CModal :title="$t('message.add_topic')" :centered="true" :show.sync="modalAddShow" :close-on-backdrop="false">
-        <p v-if="modalAddErr!=''" class="alert alert-danger">{{ modalAddErr }}</p>
+        <CAlert v-if="waitAddTopic" color="info">{{ $t('message.wait') }}</CAlert>
+        <CAlert v-if="modalAddErr" color="danger">{{ modalAddErr }}</CAlert>
         <CInput
             type="text"
             v-model="formAdd.id"
@@ -278,14 +279,16 @@
 
 <script>
 import clientUtils from '@/utils/api_client'
-import {freeSet} from '@coreui/icons'
 import {iconize} from './utils'
+import { fab } from '@fortawesome/free-brands-svg-icons'
+import { far } from '@fortawesome/free-regular-svg-icons'
 import { fas } from '@fortawesome/free-solid-svg-icons'
+
+const emptyForm = {id: '', icon: '', title: '', summary: ''}
 
 export default {
   name: 'ProductTopicList',
-  freeSet,
-  fas,
+  fab, far, fas,
   mounted() {
     this.loadProductTopicList(this.$route.params.pid)
   },
@@ -294,24 +297,25 @@ export default {
       addMode: Boolean,
 
       modalAddShow: false,
-      modalAddErr: "",
-      formAdd: {id: "", icon: "", title: "", summary: ""},
+      modalAddErr: '',
+      formAdd: {...emptyForm},
+      waitAddTopic: false,
 
       modalEditShow: false,
-      modalEditErr: "",
-      formEdit: {id: "", icon: "", title: "", summary: ""},
+      modalEditErr: '',
+      formEdit: {...emptyForm},
 
       modalIconsShow: false,
 
       modalDeleteShow: false,
-      modalDeleteErr: "",
+      modalDeleteErr: '',
       topicToDelete: {},
 
       topicList: [],
       topicMap: {},
 
       myFlashMsg: this.flashMsg,
-      errorMsg: "",
+      errorMsg: '',
       foundStatus: -1,
     }
   },
@@ -358,16 +362,15 @@ export default {
     },
     clickAddTopic() {
       this.addMode = true
-      this.formAdd = {}
+      this.formAdd = {...emptyForm}
       this.modalAddErr = ''
       this.modalAddShow = true
     },
     doAddTopic(e) {
       e.preventDefault()
-      const saveStatus = this.foundStatus
-      this.foundStatus = -1
       let vue = this
-      let data = vue.formAdd
+      let data = {...vue.formAdd}
+      vue.waitAddTopic = true
       let prodId = vue.$route.params.pid
       const apiUrl = clientUtils.apiAdminProductTopics.replaceAll(':product', prodId)
       clientUtils.apiDoPost(apiUrl, data,
@@ -378,12 +381,12 @@ export default {
               vue.loadProductTopicList(prodId)
             } else {
               vue.modalAddErr = apiRes.status + ": " + apiRes.message
-              vue.foundStatus = saveStatus
             }
+            vue.waitAddTopic = false
           },
           (err) => {
             vue.modalAddErr = err
-            vue.foundStatus = saveStatus
+            vue.waitAddTopic = false
           }
       )
     },

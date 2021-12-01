@@ -377,7 +377,6 @@ export default {
       if (tabIndex != this.$refs.formAddProductTabInfo.index) {
         this.$refs.formAddProductTabs.changeTabTo(this.$refs.formAddProductTabInfo.index)
         setTimeout(()=>{this.$refs.btnSubmitAddProduct.click()},125)
-        // this.$refs.formAddProductTabInfo.$nextTick(()=>{this.$refs.btnSubmitAddProduct.click()})
       } else {
         this.$refs.btnSubmitAddProduct.click()
       }
