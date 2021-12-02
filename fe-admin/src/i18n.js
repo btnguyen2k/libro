@@ -35,6 +35,8 @@ const messages = {
             dashboard: 'Dashboard',
 
             icons: "Icons",
+            icon_icon: "Icon",
+            icon_name: "Name",
 
             products: "Products",
             topics: "Topics",
@@ -164,7 +166,9 @@ const messages = {
             home: 'Trang nhà',
             dashboard: 'Tổng hợp',
 
-            icons: "Icon",
+            icons: "Biểu tượng",
+            icon_icon: "Biểu tượng",
+            icon_name: "Tên",
 
             products: "Sản phẩm",
             topics: "Chủ đề",

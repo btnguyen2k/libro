@@ -245,28 +245,30 @@
     </CForm>
 
     <!-- pop-up dialog to pick an icon -->
-    <CModal :title="$t('message.icons')" :centered="true" :show.sync="modalIconsShow">
+    <CModal color="info" :title="$t('message.icons')" :centered="true" :show.sync="modalIconsShow">
       <CRow class="text-center">
-        <template v-for="(icon, iconName) in $options.fas">
-          <CCol class="mb-5" col="3" sm="3" :key="iconName">
-            <CButton size="lg" @click="clickSelectIcon(icon.prefix+'-'+icon.iconName)">
-              <ficon fixedWidth :icon="[icon.prefix, icon.iconName]"/>
-            </CButton>
-            <div style="font-size: small">{{ icon.prefix }}-{{ icon.iconName }}</div>
-          </CCol>
-        </template>
-      </CRow>
-<!--      <CRow class="text-center">-->
-<!--        <template v-for="(icon, iconName) in $options.freeSet">-->
-<!--          <CCol class="mb-5" col="3" sm="3" :key="iconName">-->
-<!--            <CButton size="lg" @click="clickSelectIcon(iconName)">-->
-<!--              <CIcon size="xl" :content="icon" :title="iconName"/>-->
+        <CCol col="12" sm="12">
+          <CDataTable :items="faIconList" :fields="[
+                {key:'prefix', label: $t('message.icon_icon')},
+                {key:'iconName', label: $t('message.icon_name')},
+              ]" pagination :items-per-page="10" hover striped border small table-filter>
+            <template #prefix="{item}">
+              <td style="cursor: pointer" @click="clickSelectIcon(item.prefix+'-'+item.iconName)"><ficon fixedWidth :icon="[item.prefix, item.iconName]"/></td>
+            </template>
+            <template #iconName="{item}">
+              <td style="cursor: pointer" @click="clickSelectIcon(item.prefix+'-'+item.iconName)">{{ item.prefix }}-{{ item.iconName }}</td>
+            </template>
+          </CDataTable>
+        </CCol>
+<!--        <template v-for="(icon, iconName) in $options.faIcons">-->
+<!--          <CCol class="mb-2" col="3" sm="3" :key="iconName">-->
+<!--            <CButton size="lg" @click="clickSelectIcon(icon.prefix+'-'+icon.iconName)">-->
+<!--              <ficon fixedWidth :icon="[icon.prefix, icon.iconName]"/>-->
 <!--            </CButton>-->
-<!--            &lt;!&ndash;<CIcon type="button" @click="clickSelectIcon(iconName)" :height="42" :content="icon" :title="iconName"/>&ndash;&gt;-->
-<!--            <div style="font-size: small">{{ toKebabCase(iconName) }}</div>-->
+<!--            <div style="font-size: small">{{ icon.prefix }}-{{ icon.iconName }}</div>-->
 <!--          </CCol>-->
 <!--        </template>-->
-<!--      </CRow>-->
+      </CRow>
       <template #footer>
         <CButton @click="modalInfoShow = false" color="secondary" style="width: 96px">
           <CIcon name="cil-x" class="align-top"/>
@@ -285,12 +287,31 @@ import { far } from '@fortawesome/free-regular-svg-icons'
 import { fas } from '@fortawesome/free-solid-svg-icons'
 
 const emptyForm = {id: '', icon: '', title: '', summary: ''}
+const faIcons = {...fas, ...far, ...fab}
 
 export default {
   name: 'ProductTopicList',
-  fab, far, fas,
+  faIcons,
   mounted() {
     this.loadProductTopicList(this.$route.params.pid)
+  },
+  computed:{
+    faIconList() {
+      let result = []
+      for (let k in fas) {
+        const item = fas[k]
+        result = result.concat({prefix: item.prefix, iconName: item.iconName})
+      }
+      for (let k in far) {
+        const item = far[k]
+        result = result.concat({prefix: item.prefix, iconName: item.iconName})
+      }
+      for (let k in fab) {
+        const item = fab[k]
+        result = result.concat({prefix: item.prefix, iconName: item.iconName})
+      }
+      return result
+    },
   },
   data() {
     return {
