@@ -87,7 +87,8 @@
         <CIcon name="cil-warning" size="lg"/>
         {{ $t('message.delete_topic_msg', {numPages: topicToDelete['num_pages']}) }}
       </p>
-      <p v-if="modalDeleteErr!=''" class="alert alert-danger">{{ modalDeleteErr }}</p>
+      <CAlert v-if="waitDeleteTopic" color="info">{{ $t('message.wait') }}</CAlert>
+      <CAlert v-if="modalDeleteErr" color="danger">{{ modalDeleteErr }}</CAlert>
       <CInput type="text" :label="$t('message.topic_icon')+' / '+$t('message.topic_id')" v-model="topicToDelete.id" horizontal plaintext>
         <template #prepend>
           <CButton disabled link>
@@ -180,7 +181,8 @@
     <!-- pop-up form to edit existing topic -->
     <CForm @submit.prevent="doEditTopic" method="post">
       <CModal :title="$t('message.edit_topic')" :centered="true" :show.sync="modalEditShow" :close-on-backdrop="false">
-        <p v-if="modalEditErr!=''" class="alert alert-danger">{{ modalEditErr }}</p>
+        <CAlert v-if="waitEditTopic" color="info">{{ $t('message.wait') }}</CAlert>
+        <CAlert v-if="modalEditErr" color="danger">{{ modalEditErr }}</CAlert>
         <CInput
             type="text"
             v-model="formEdit.id"
@@ -260,14 +262,6 @@
             </template>
           </CDataTable>
         </CCol>
-<!--        <template v-for="(icon, iconName) in $options.faIcons">-->
-<!--          <CCol class="mb-2" col="3" sm="3" :key="iconName">-->
-<!--            <CButton size="lg" @click="clickSelectIcon(icon.prefix+'-'+icon.iconName)">-->
-<!--              <ficon fixedWidth :icon="[icon.prefix, icon.iconName]"/>-->
-<!--            </CButton>-->
-<!--            <div style="font-size: small">{{ icon.prefix }}-{{ icon.iconName }}</div>-->
-<!--          </CCol>-->
-<!--        </template>-->
       </CRow>
       <template #footer>
         <CButton @click="modalInfoShow = false" color="secondary" style="width: 96px">
@@ -287,11 +281,9 @@ import { far } from '@fortawesome/free-regular-svg-icons'
 import { fas } from '@fortawesome/free-solid-svg-icons'
 
 const emptyForm = {id: '', icon: '', title: '', summary: ''}
-const faIcons = {...fas, ...far, ...fab}
 
 export default {
   name: 'ProductTopicList',
-  faIcons,
   mounted() {
     this.loadProductTopicList(this.$route.params.pid)
   },
@@ -325,12 +317,14 @@ export default {
       modalEditShow: false,
       modalEditErr: '',
       formEdit: {...emptyForm},
+      waitEditTopic: false,
 
       modalIconsShow: false,
 
       modalDeleteShow: false,
       modalDeleteErr: '',
       topicToDelete: {},
+      waitDeleteTopic: false,
 
       topicList: [],
       topicMap: {},
@@ -423,10 +417,9 @@ export default {
     },
     doEditTopic(e) {
       e.preventDefault()
-      const saveStatus = this.foundStatus
-      this.foundStatus = -1
       let vue = this
-      let data = vue.formEdit
+      let data = {...vue.formEdit}
+      vue.waitEditTopic = true
       let prodId = vue.$route.params.pid
       const apiUrl = clientUtils.apiAdminProductTopic.replaceAll(':product', prodId).replaceAll(':topic', data.id)
       clientUtils.apiDoPut(apiUrl, data,
@@ -437,12 +430,12 @@ export default {
               vue.loadProductTopicList(prodId)
             } else {
               vue.modalEditErr = apiRes.status + ": " + apiRes.message
-              vue.foundStatus = saveStatus
             }
+            vue.waitEditTopic = false
           },
           (err) => {
             vue.modalEditErr = err
-            vue.foundStatus = saveStatus
+            vue.waitEditTopic = false
           }
       )
     },
@@ -452,9 +445,8 @@ export default {
     },
     doDeleteTopic(e) {
       e.preventDefault()
-      const saveStatus = this.foundStatus
-      this.foundStatus = -1
       let vue = this
+      vue.waitDeleteTopic = true
       let prodId = vue.$route.params.pid
       let data = vue.topicToDelete
       const apiUrl = clientUtils.apiAdminProductTopic.replaceAll(':product', prodId).replaceAll(':topic', data.id)
@@ -466,12 +458,12 @@ export default {
               vue.loadProductTopicList(prodId)
             } else {
               vue.modalDeleteErr = apiRes.status + ": " + apiRes.message
-              vue.foundStatus = saveStatus
             }
+            vue.waitDeleteTopic = false
           },
           (err) => {
             vue.modalDeleteErr = err
-            vue.foundStatus = saveStatus
+            vue.waitDeleteTopic = false
           }
       )
     },
