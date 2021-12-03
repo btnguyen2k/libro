@@ -63,7 +63,7 @@
         <CModal size="lg" :title="$t('message.add_product')" :centered="true" :show.sync="modalAddShow" :close-on-backdrop="false">
           <CAlert v-if="waitAddProduct" color="info">{{ $t('message.wait') }}</CAlert>
           <CAlert v-if="modalAddErr" color="danger">{{ modalAddErr }}</CAlert>
-          <CTabs ref="formAddProductTabs">
+          <CTabs ref="formAddProductTabs" v-if="!waitAddProduct">
             <CTab ref="formAddProductTabInfo" active>
               <template slot="title">
                 {{ $t('message.product_info') }}
@@ -144,7 +144,7 @@
           </CTabs>
           <template #footer>
             <button type="submit" ref="btnSubmitAddProduct" style="display:none;" />
-            <CButton type="button" @click="doAddProductClick" color="primary" class="m-2" style="width: 96px">
+            <CButton v-if="!waitAddProduct" type="button" @click="doAddProductClick" color="primary" class="m-2" style="width: 96px">
               <CIcon name="cil-save" class="align-top"/>
               {{ $t('message.action_save') }}
             </CButton>
