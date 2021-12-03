@@ -125,7 +125,7 @@ const messages = {
             page_icon: "Icon",
             page_icon_msg: "Pick an icon from the list",
             page_title: "Title",
-            page_title_msg: "Topic title",
+            page_title_msg: "Page title",
             page_summary: "Summary",
             page_summary_msg: "Short summary of the page",
             page_content: "Content",

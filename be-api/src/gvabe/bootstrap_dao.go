@@ -564,7 +564,7 @@ func _initSamples() {
 	}
 	_initSamplesUpdateStats(demoProd, nil)
 
-	page := doc.NewPage(goapi.AppVersionNumber, topic, "Download", "fa-cloud-download",
+	page := doc.NewPage(goapi.AppVersionNumber, topic, "Download", "fa-download",
 		"Download Libro and install on your infrastructure. "+shortLorem, longLorerm)
 	page.SetPosition(1).SetId(topic.GetId() + "-" + re.ReplaceAllString(strings.ToLower(page.GetTitle()), ""))
 	log.Printf("[INFO] Creating page (%s:%s -> %s)...", demoProdId, topic.GetTitle(), page.GetTitle())

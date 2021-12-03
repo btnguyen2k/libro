@@ -134,14 +134,10 @@
             readonly
         >
           <template #prepend>
-            <CButton disabled link>
-              <ficon :icon="_iconize(formAdd.icon)"/>
-            </CButton>
+            <CButton disabled link><ficon :icon="_iconize(formAdd.icon)"/></CButton>
           </template>
           <template #append>
-            <CButton color="primary" @click="modalIconsShow = true">
-              <ficon :icon="['fas', 'search']"/>
-            </CButton>
+            <CButton color="primary" @click="modalIconsShow = true"><ficon :icon="['fas', 'search']"/></CButton>
           </template>
         </CInput>
         <CInput
@@ -264,7 +260,7 @@
         </CCol>
       </CRow>
       <template #footer>
-        <CButton @click="modalInfoShow = false" color="secondary" style="width: 96px">
+        <CButton @click="modalIconsShow = false" color="secondary" style="width: 96px">
           <CIcon name="cil-x" class="align-top"/>
           {{ $t('message.close') }}
         </CButton>
@@ -358,10 +354,10 @@ export default {
             vue.errorMsg = err
           })
     },
-    toKebabCase(str, full = false) {
-      str = str.replace(/([a-z])([A-Z0-9])/g, '$1-$2').toLowerCase()
-      return full ? str : str.replace(/^[a-z]+-/, '')
-    },
+    // toKebabCase(str, full = false) {
+    //   str = str.replace(/([a-z])([A-Z0-9])/g, '$1-$2').toLowerCase()
+    //   return full ? str : str.replace(/^[a-z]+-/, '')
+    // },
     clickGoback() {
       this.$router.push({name: "ProductList"})
     },
