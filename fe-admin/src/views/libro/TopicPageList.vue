@@ -77,8 +77,7 @@
       </p>
       <CAlert v-if="waitDeletePage" color="info">{{ $t('message.wait') }}</CAlert>
       <CAlert v-if="modalDeleteErr" color="danger">{{ modalDeleteErr }}</CAlert>
-      <CInput type="text" :label="$t('message.page_icon')+' / '+$t('message.page_id')" v-model="pageToDelete.id"
-              horizontal plaintext>
+      <CInput type="text" :label="$t('message.page_icon')+' / '+$t('message.page_id')" v-model="pageToDelete.id" horizontal plaintext>
         <template #prepend>
           <CButton disabled link>
             <ficon :icon="_iconize(pageToDelete.icon)"/>
@@ -86,12 +85,10 @@
         </template>
       </CInput>
       <CInput type="text" :label="$t('message.page_title')" v-model="pageToDelete.title" horizontal plaintext/>
-      <CTextarea rows="2" type="text" :label="$t('message.page_summary')" v-model="pageToDelete.summary" horizontal
-                 plaintext/>
-      <CTextarea rows="8" type="text" :label="$t('message.page_content')" v-model="pageToDelete.content" horizontal
-                 plaintext/>
+      <CTextarea rows="2" type="text" :label="$t('message.page_summary')" v-model="pageToDelete.summary" horizontal plaintext/>
+      <CTextarea rows="8" type="text" :label="$t('message.page_content')" v-model="pageToDelete.content" horizontal plaintext/>
       <template #footer>
-        <CButton type="button" color="danger" class="m-2" style="width: 96px" @click="doDeletePage">
+        <CButton v-if="!waitDeletePage" type="button" color="danger" class="m-2" style="width: 96px" @click="doDeletePage">
           <CIcon name="cil-trash" class="align-top"/>
           {{ $t('message.action_delete') }}
         </CButton>
@@ -107,78 +104,80 @@
       <CModal size="lg" :title="$t('message.add_page')" :centered="true" :show.sync="modalAddShow" :close-on-backdrop="false">
         <CAlert v-if="waitAddPage" color="info">{{ $t('message.wait') }}</CAlert>
         <CAlert v-if="modalAddErr" color="danger">{{ modalAddErr }}</CAlert>
-        <CInput
-            type="text"
-            v-model="formAdd.id"
-            :label="$t('message.page_id')"
-            :placeholder="$t('message.page_id_msg')"
-            v-c-tooltip.hover="$t('message.page_id_msg')"
-            horizontal
-        />
-        <CInput
-            type="text"
-            v-model="formAdd.icon"
-            :label="$t('message.page_icon')"
-            :placeholder="$t('message.page_icon_msg')"
-            v-c-tooltip.hover="$t('message.page_icon_msg')"
-            horizontal
-            readonly
-        >
-          <template #prepend>
-            <CButton disabled link><ficon :icon="_iconize(formAdd.icon)"/></CButton>
-          </template>
-          <template #append>
-            <CButton color="primary" @click="modalIconsShow = true"><ficon :icon="['fas', 'search']"/></CButton>
-          </template>
-        </CInput>
-        <CInput
-            type="text"
-            v-model="formAdd.title"
-            :label="$t('message.page_title')"
-            :placeholder="$t('message.page_title_msg')"
-            v-c-tooltip.hover="$t('message.page_title_msg')"
-            horizontal
-            required
-            was-validated
-        />
-        <CTextarea
-            rows="2"
-            type="text"
-            v-model="formAdd.summary"
-            :label="$t('message.page_summary')"
-            :placeholder="$t('message.page_summary_msg')"
-            v-c-tooltip.hover="$t('message.page_summary_msg')"
-            horizontal
-            required
-            was-validated
-        />
-        <CTabs>
-          <CTab active>
-            <template slot="title">
-              <CIcon name="cib-markdown"/>
-              {{ $t('message.content_editor') }}
+        <div v-if="!waitAddPage">
+          <CInput
+              type="text"
+              v-model="formAdd.id"
+              :label="$t('message.page_id')"
+              :placeholder="$t('message.page_id_msg')"
+              v-c-tooltip.hover="$t('message.page_id_msg')"
+              horizontal
+          />
+          <CInput
+              type="text"
+              v-model="formAdd.icon"
+              :label="$t('message.page_icon')"
+              :placeholder="$t('message.page_icon_msg')"
+              v-c-tooltip.hover="$t('message.page_icon_msg')"
+              horizontal
+              readonly
+          >
+            <template #prepend>
+              <CButton disabled link><ficon :icon="_iconize(formAdd.icon)"/></CButton>
             </template>
-            <CTextarea
-                rows="8"
-                type="text"
-                v-model="formAdd.content"
-                :label="$t('message.page_content')"
-                :placeholder="$t('message.page_content_msg')"
-                horizontal
-                required
-                was-validated
-            />
-          </CTab>
-          <CTab>
-            <template slot="title">
-              <CIcon name="cil-calculator"/>
-              {{ $t('message.content_preview') }}
+            <template #append>
+              <CButton color="primary" @click="modalIconsShow = true"><ficon :icon="['fas', 'search']"/></CButton>
             </template>
-            <div v-html="previewPageContent"></div>
-          </CTab>
-        </CTabs>
+          </CInput>
+          <CInput
+              type="text"
+              v-model="formAdd.title"
+              :label="$t('message.page_title')"
+              :placeholder="$t('message.page_title_msg')"
+              v-c-tooltip.hover="$t('message.page_title_msg')"
+              horizontal
+              required
+              was-validated
+          />
+          <CTextarea
+              rows="2"
+              type="text"
+              v-model="formAdd.summary"
+              :label="$t('message.page_summary')"
+              :placeholder="$t('message.page_summary_msg')"
+              v-c-tooltip.hover="$t('message.page_summary_msg')"
+              horizontal
+              required
+              was-validated
+          />
+          <CTabs>
+            <CTab active>
+              <template slot="title">
+                <CIcon name="cib-markdown"/>
+                {{ $t('message.content_editor') }}
+              </template>
+              <CTextarea
+                  rows="8"
+                  type="text"
+                  v-model="formAdd.content"
+                  :label="$t('message.page_content')"
+                  :placeholder="$t('message.page_content_msg')"
+                  horizontal
+                  required
+                  was-validated
+              />
+            </CTab>
+            <CTab>
+              <template slot="title">
+                <CIcon name="cil-calculator"/>
+                {{ $t('message.content_preview') }}
+              </template>
+              <div v-html="previewPageContent"></div>
+            </CTab>
+          </CTabs>
+        </div>
         <template #footer>
-          <CButton type="submit" color="primary" class="m-2" style="width: 96px">
+          <CButton v-if="!waitAddPage" type="submit" color="primary" class="m-2" style="width: 96px">
             <CIcon name="cil-save" class="align-top"/>
             {{ $t('message.action_save') }}
           </CButton>
@@ -195,83 +194,85 @@
       <CModal size="lg" :title="$t('message.edit_page')" :centered="true" :show.sync="modalEditShow" :close-on-backdrop="false">
         <CAlert v-if="waitEditPage" color="info">{{ $t('message.wait') }}</CAlert>
         <CAlert v-if="modalEditErr" color="danger">{{ modalEditErr }}</CAlert>
-        <CInput
-            type="text"
-            v-model="formEdit.id"
-            :label="$t('message.page_id')"
-            :placeholder="$t('message.page_id_msg')"
-            v-c-tooltip.hover="$t('message.page_id_msg')"
-            horizontal
-            readonly
-        />
-        <CInput
-            type="text"
-            v-model="formEdit.icon"
-            :label="$t('message.page_icon')"
-            :placeholder="$t('message.page_icon_msg')"
-            v-c-tooltip.hover="$t('message.page_icon_msg')"
-            horizontal
-            readonly
-        >
-          <template #prepend>
-            <CButton disabled link>
-              <ficon :icon="_iconize(formEdit.icon)"/>
-            </CButton>
-          </template>
-          <template #append>
-            <CButton color="primary" @click="modalIconsShow = true">
-              <ficon :icon="['fas', 'search']"/>
-            </CButton>
-          </template>
-        </CInput>
-        <CInput
-            type="text"
-            v-model="formEdit.title"
-            :label="$t('message.page_title')"
-            :placeholder="$t('message.page_title_msg')"
-            v-c-tooltip.hover="$t('message.page_title_msg')"
-            horizontal
-            required
-            was-validated
-        />
-        <CTextarea
-            rows="2"
-            type="text"
-            v-model="formEdit.summary"
-            :label="$t('message.page_summary')"
-            :placeholder="$t('message.page_summary_msg')"
-            v-c-tooltip.hover="$t('message.page_summary_msg')"
-            horizontal
-            required
-            was-validated
-        />
-        <CTabs>
-          <CTab active>
-            <template slot="title">
-              <CIcon name="cib-markdown"/>
-              {{ $t('message.content_editor') }}
+        <div v-if="!waitEditPage">
+          <CInput
+              type="text"
+              v-model="formEdit.id"
+              :label="$t('message.page_id')"
+              :placeholder="$t('message.page_id_msg')"
+              v-c-tooltip.hover="$t('message.page_id_msg')"
+              horizontal
+              readonly
+          />
+          <CInput
+              type="text"
+              v-model="formEdit.icon"
+              :label="$t('message.page_icon')"
+              :placeholder="$t('message.page_icon_msg')"
+              v-c-tooltip.hover="$t('message.page_icon_msg')"
+              horizontal
+              readonly
+          >
+            <template #prepend>
+              <CButton disabled link>
+                <ficon :icon="_iconize(formEdit.icon)"/>
+              </CButton>
             </template>
-            <CTextarea
-                rows="8"
-                type="text"
-                v-model="formEdit.content"
-                :label="$t('message.page_content')"
-                :placeholder="$t('message.page_content_msg')"
-                horizontal
-                required
-                was-validated
-            />
-          </CTab>
-          <CTab>
-            <template slot="title">
-              <CIcon name="cil-calculator"/>
-              {{ $t('message.content_preview') }}
+            <template #append>
+              <CButton color="primary" @click="modalIconsShow = true">
+                <ficon :icon="['fas', 'search']"/>
+              </CButton>
             </template>
-            <div v-html="previewPageContent"></div>
-          </CTab>
-        </CTabs>
+          </CInput>
+          <CInput
+              type="text"
+              v-model="formEdit.title"
+              :label="$t('message.page_title')"
+              :placeholder="$t('message.page_title_msg')"
+              v-c-tooltip.hover="$t('message.page_title_msg')"
+              horizontal
+              required
+              was-validated
+          />
+          <CTextarea
+              rows="2"
+              type="text"
+              v-model="formEdit.summary"
+              :label="$t('message.page_summary')"
+              :placeholder="$t('message.page_summary_msg')"
+              v-c-tooltip.hover="$t('message.page_summary_msg')"
+              horizontal
+              required
+              was-validated
+          />
+          <CTabs>
+            <CTab active>
+              <template slot="title">
+                <CIcon name="cib-markdown"/>
+                {{ $t('message.content_editor') }}
+              </template>
+              <CTextarea
+                  rows="8"
+                  type="text"
+                  v-model="formEdit.content"
+                  :label="$t('message.page_content')"
+                  :placeholder="$t('message.page_content_msg')"
+                  horizontal
+                  required
+                  was-validated
+              />
+            </CTab>
+            <CTab>
+              <template slot="title">
+                <CIcon name="cil-calculator"/>
+                {{ $t('message.content_preview') }}
+              </template>
+              <div v-html="previewPageContent"></div>
+            </CTab>
+          </CTabs>
+        </div>
         <template #footer>
-          <CButton type="submit" color="primary" class="m-2" style="width: 96px">
+          <CButton v-if="!waitEditPage" type="submit" color="primary" class="m-2" style="width: 96px">
             <CIcon name="cil-save" class="align-top"/>
             {{ $t('message.action_save') }}
           </CButton>
@@ -420,9 +421,11 @@ export default {
       this.formAdd = {id: "", icon: "", title: "", summary: "", content: ""}
       this.modalAddErr = ''
       this.modalAddShow = true
+      this.myFlashMsg = ''
     },
     doAddPage(e) {
       e.preventDefault()
+      this.modalAddErr = ''
       let vue = this
       let data = {...vue.formAdd}
       vue.waitAddPage = true
@@ -450,9 +453,11 @@ export default {
       this.formEdit = {...this.pageMap[id]} //shallow clone using spread syntax, alternative way: this.formEdit = Object.assign({}, this.pageMap[id])
       this.modalEditErr = ''
       this.modalEditShow = true
+      this.myFlashMsg = ''
     },
     doEditPage(e) {
       e.preventDefault()
+      this.modalEditErr = ''
       let vue = this
       let data = {...vue.formEdit}
       vue.waitEditPage = true
@@ -477,10 +482,13 @@ export default {
     },
     clickDeletePage(id) {
       this.pageToDelete = this.pageMap[id]
+      this.modalDeleteErr = ''
       this.modalDeleteShow = true
+      this.myFlashMsg = ''
     },
     doDeletePage(e) {
       e.preventDefault()
+      this.modalDeleteErr = ''
       let vue = this
       vue.waitDeletePage = true
       let topicId = vue.$route.params.tid

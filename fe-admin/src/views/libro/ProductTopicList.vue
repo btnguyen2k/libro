@@ -1,74 +1,22 @@
 <template>
   <CRow>
     <CCol sm="12">
-        <CAlert v-if="foundStatus<0" color="info">{{ $t('message.wait') }}</CAlert>
-        <CCard v-if="foundStatus==0" color="danger" text-color="white">
-          <CCardHeader>
-            {{ $t('message.error_product_not_found', {id: $route.params.pid}) }}
-            <div class="card-header-actions">
-              <CButton color="light" size="sm" @click="clickGoback">
-                <CIcon name="cil-arrow-circle-left"/> {{ $t('message.action_back') }}
-              </CButton>
-            </div>
-          </CCardHeader>
-        </CCard>
-        <CAlert v-if="errorMsg" color="danger" closeButton>{{ errorMsg }}</CAlert>
-        <CCard accent-color="info" v-if="foundStatus>0">
-          <CCardHeader>
-            <strong>{{ $t('message.topics') }}</strong>
-            <div class="card-header-actions">
-              <CButton color="secondary" size="sm" class="m-2" @click="clickGoback">
-                <CIcon name="cil-arrow-circle-left"/>
-                {{ $t('message.action_back') }}
-              </CButton>
-              <CButton color="primary" size="sm"  @click="clickAddTopic">
-                <CIcon name="cil-playlist-add"/>
-                {{ $t('message.add_topic') }}
-              </CButton>
-            </div>
-          </CCardHeader>
-          <CCardBody>
-            <CAlert v-if="myFlashMsg" color="success" closeButton>{{ myFlashMsg }}</CAlert>
-            <CDataTable :items="topicList" :fields="[
-                {key:'id',label:$t('message.topic_id'),_style:'text-align: left'},
-                {key:'title',label:$t('message.topic_title'),_style:'text-align: left'},
-                {key:'summary',label:$t('message.topic_summary')},
-                {key:'actions',label:$t('message.actions'),_style:'text-align: center'}
-              ]">
-              <template #id="{item}">
-                <td style="white-space: nowrap; font-size: small" class="col-2">
-                  <ficon fixedWidth :icon="_iconize(item.icon)"/>
-                  {{ item.id }}
-                </td>
-              </template>
-              <template #title="{item}">
-                <td class="col-3">
-                  {{ item.title }}
-                </td>
-              </template>
-              <template #actions="{item}">
-                <td style="white-space: nowrap; text-align: center">
-                  <CButton @click="clickTopicPages(item.id)" color="success" size="sm" class="mr-1">
-                    <CIcon name="cil-notes" v-c-tooltip.hover="$t('message.pages')"/>
-                  </CButton>
-                  <CButton @click="clickEditTopic(item.id)" color="primary" size="sm" class="mr-1">
-                    <CIcon name="cil-pencil" v-c-tooltip.hover="$t('message.action_edit')"/>
-                  </CButton>
-                  <CButton @click="clickDeleteTopic(item.id)" color="danger" size="sm" class="mr-3">
-                    <CIcon name="cil-trash" v-c-tooltip.hover="$t('message.action_delete')"/>
-                  </CButton>
-
-                  <CButton @click="doMoveTopicDown(item.id)" color="info" class="mr-1" size="sm" variant="outline">
-                    <CIcon name="cil-arrow-bottom" v-c-tooltip.hover="$t('message.action_move_down')"/>
-                  </CButton>
-                  <CButton @click="doMoveTopicUp(item.id)" color="info" size="sm" variant="outline">
-                    <CIcon name="cil-arrow-top" v-c-tooltip.hover="$t('message.action_move_up')"/>
-                  </CButton>
-                </td>
-              </template>
-            </CDataTable>
-          </CCardBody>
-          <CCardFooter>
+      <CAlert v-if="foundStatus<0" color="info">{{ $t('message.wait') }}</CAlert>
+      <CCard v-if="foundStatus==0" color="danger" text-color="white">
+        <CCardHeader>
+          {{ $t('message.error_product_not_found', {id: $route.params.pid}) }}
+          <div class="card-header-actions">
+            <CButton color="light" size="sm" @click="clickGoback">
+              <CIcon name="cil-arrow-circle-left"/> {{ $t('message.action_back') }}
+            </CButton>
+          </div>
+        </CCardHeader>
+      </CCard>
+      <CAlert v-if="errorMsg" color="danger" closeButton>{{ errorMsg }}</CAlert>
+      <CCard accent-color="info" v-if="foundStatus>0">
+        <CCardHeader>
+          <strong>{{ $t('message.topics') }}</strong>
+          <div class="card-header-actions">
             <CButton color="secondary" size="sm" class="m-2" @click="clickGoback">
               <CIcon name="cil-arrow-circle-left"/>
               {{ $t('message.action_back') }}
@@ -77,9 +25,61 @@
               <CIcon name="cil-playlist-add"/>
               {{ $t('message.add_topic') }}
             </CButton>
-          </CCardFooter>
-        </CCard>
-      </CCol>
+          </div>
+        </CCardHeader>
+        <CCardBody>
+          <CAlert v-if="myFlashMsg" color="success" closeButton>{{ myFlashMsg }}</CAlert>
+          <CDataTable :items="topicList" :fields="[
+              {key:'id',label:$t('message.topic_id'),_style:'text-align: left'},
+              {key:'title',label:$t('message.topic_title'),_style:'text-align: left'},
+              {key:'summary',label:$t('message.topic_summary')},
+              {key:'actions',label:$t('message.actions'),_style:'text-align: center'}
+            ]">
+            <template #id="{item}">
+              <td style="white-space: nowrap; font-size: small" class="col-2">
+                <ficon fixedWidth :icon="_iconize(item.icon)"/>
+                {{ item.id }}
+              </td>
+            </template>
+            <template #title="{item}">
+              <td class="col-3">
+                {{ item.title }}
+              </td>
+            </template>
+            <template #actions="{item}">
+              <td style="white-space: nowrap; text-align: center">
+                <CButton @click="clickTopicPages(item.id)" color="success" size="sm" class="mr-1">
+                  <CIcon name="cil-notes" v-c-tooltip.hover="$t('message.pages')"/>
+                </CButton>
+                <CButton @click="clickEditTopic(item.id)" color="primary" size="sm" class="mr-1">
+                  <CIcon name="cil-pencil" v-c-tooltip.hover="$t('message.action_edit')"/>
+                </CButton>
+                <CButton @click="clickDeleteTopic(item.id)" color="danger" size="sm" class="mr-3">
+                  <CIcon name="cil-trash" v-c-tooltip.hover="$t('message.action_delete')"/>
+                </CButton>
+
+                <CButton @click="doMoveTopicDown(item.id)" color="info" class="mr-1" size="sm" variant="outline">
+                  <CIcon name="cil-arrow-bottom" v-c-tooltip.hover="$t('message.action_move_down')"/>
+                </CButton>
+                <CButton @click="doMoveTopicUp(item.id)" color="info" size="sm" variant="outline">
+                  <CIcon name="cil-arrow-top" v-c-tooltip.hover="$t('message.action_move_up')"/>
+                </CButton>
+              </td>
+            </template>
+          </CDataTable>
+        </CCardBody>
+        <CCardFooter>
+          <CButton color="secondary" size="sm" class="m-2" @click="clickGoback">
+            <CIcon name="cil-arrow-circle-left"/>
+            {{ $t('message.action_back') }}
+          </CButton>
+          <CButton color="primary" size="sm"  @click="clickAddTopic">
+            <CIcon name="cil-playlist-add"/>
+            {{ $t('message.add_topic') }}
+          </CButton>
+        </CCardFooter>
+      </CCard>
+    </CCol>
 
     <!-- pop-up dialog to confirm deleting a topic -->
     <CModal color="warning" :title="$t('message.delete_topic')" :centered="true" :show.sync="modalDeleteShow" :close-on-backdrop="false">
@@ -97,10 +97,9 @@
         </template>
       </CInput>
       <CInput type="text" :label="$t('message.topic_title')" v-model="topicToDelete.title" horizontal plaintext/>
-      <CTextarea rows="4" type="text" :label="$t('message.topic_summary')" v-model="topicToDelete.summary" horizontal
-                 plaintext/>
+      <CTextarea rows="4" type="text" :label="$t('message.topic_summary')" v-model="topicToDelete.summary" horizontal plaintext/>
       <template #footer>
-        <CButton type="button" color="danger" class="m-2" style="width: 96px" @click="doDeleteTopic">
+        <CButton v-if="!waitDeleteTopic" type="button" color="danger" class="m-2" style="width: 96px" @click="doDeleteTopic">
           <CIcon name="cil-trash" class="align-top"/>
           {{ $t('message.action_delete') }}
         </CButton>
@@ -116,53 +115,55 @@
       <CModal :title="$t('message.add_topic')" :centered="true" :show.sync="modalAddShow" :close-on-backdrop="false">
         <CAlert v-if="waitAddTopic" color="info">{{ $t('message.wait') }}</CAlert>
         <CAlert v-if="modalAddErr" color="danger">{{ modalAddErr }}</CAlert>
-        <CInput
-            type="text"
-            v-model="formAdd.id"
-            :label="$t('message.topic_id')"
-            :placeholder="$t('message.topic_id_msg')"
-            v-c-tooltip.hover="$t('message.topic_id_msg')"
-            horizontal
-        />
-        <CInput
-            type="text"
-            v-model="formAdd.icon"
-            :label="$t('message.topic_icon')"
-            :placeholder="$t('message.topic_icon_msg')"
-            v-c-tooltip.hover="$t('message.topic_icon_msg')"
-            horizontal
-            readonly
-        >
-          <template #prepend>
-            <CButton disabled link><ficon :icon="_iconize(formAdd.icon)"/></CButton>
-          </template>
-          <template #append>
-            <CButton color="primary" @click="modalIconsShow = true"><ficon :icon="['fas', 'search']"/></CButton>
-          </template>
-        </CInput>
-        <CInput
-            type="text"
-            v-model="formAdd.title"
-            :label="$t('message.topic_title')"
-            :placeholder="$t('message.topic_title_msg')"
-            v-c-tooltip.hover="$t('message.topic_title_msg')"
-            horizontal
-            required
-            was-validated
-        />
-        <CTextarea
-            rows="4"
-            type="text"
-            v-model="formAdd.summary"
-            :label="$t('message.topic_summary')"
-            :placeholder="$t('message.topic_summary_msg')"
-            v-c-tooltip.hover="$t('message.topic_summary_msg')"
-            horizontal
-            required
-            was-validated
-        />
+        <div v-if="!waitAddTopic">
+          <CInput
+              type="text"
+              v-model="formAdd.id"
+              :label="$t('message.topic_id')"
+              :placeholder="$t('message.topic_id_msg')"
+              v-c-tooltip.hover="$t('message.topic_id_msg')"
+              horizontal
+          />
+          <CInput
+              type="text"
+              v-model="formAdd.icon"
+              :label="$t('message.topic_icon')"
+              :placeholder="$t('message.topic_icon_msg')"
+              v-c-tooltip.hover="$t('message.topic_icon_msg')"
+              horizontal
+              readonly
+          >
+            <template #prepend>
+              <CButton disabled link><ficon :icon="_iconize(formAdd.icon)"/></CButton>
+            </template>
+            <template #append>
+              <CButton color="primary" @click="modalIconsShow = true"><ficon :icon="['fas', 'search']"/></CButton>
+            </template>
+          </CInput>
+          <CInput
+              type="text"
+              v-model="formAdd.title"
+              :label="$t('message.topic_title')"
+              :placeholder="$t('message.topic_title_msg')"
+              v-c-tooltip.hover="$t('message.topic_title_msg')"
+              horizontal
+              required
+              was-validated
+          />
+          <CTextarea
+              rows="4"
+              type="text"
+              v-model="formAdd.summary"
+              :label="$t('message.topic_summary')"
+              :placeholder="$t('message.topic_summary_msg')"
+              v-c-tooltip.hover="$t('message.topic_summary_msg')"
+              horizontal
+              required
+              was-validated
+          />
+        </div>
         <template #footer>
-          <CButton type="submit" color="primary" class="m-2" style="width: 96px">
+          <CButton v-if="!waitAddTopic" type="submit" color="primary" class="m-2" style="width: 96px">
             <CIcon name="cil-save" class="align-top"/>
             {{ $t('message.action_save') }}
           </CButton>
@@ -179,58 +180,60 @@
       <CModal :title="$t('message.edit_topic')" :centered="true" :show.sync="modalEditShow" :close-on-backdrop="false">
         <CAlert v-if="waitEditTopic" color="info">{{ $t('message.wait') }}</CAlert>
         <CAlert v-if="modalEditErr" color="danger">{{ modalEditErr }}</CAlert>
-        <CInput
-            type="text"
-            v-model="formEdit.id"
-            :label="$t('message.topic_id')"
-            :placeholder="$t('message.topic_id_msg')"
-            v-c-tooltip.hover="$t('message.topic_id_msg')"
-            horizontal
-            readonly
-        />
-        <CInput
-            type="text"
-            v-model="formEdit.icon"
-            :label="$t('message.topic_icon')"
-            :placeholder="$t('message.topic_icon_msg')"
-            v-c-tooltip.hover="$t('message.topic_icon_msg')"
-            horizontal
-            readonly
-        >
-          <template #prepend>
-            <CButton disabled link>
-              <ficon :icon="_iconize(formEdit.icon)"/>
-            </CButton>
-          </template>
-          <template #append>
-            <CButton color="primary" @click="modalIconsShow = true">
-              <ficon :icon="['fas', 'search']"/>
-            </CButton>
-          </template>
-        </CInput>
-        <CInput
-            type="text"
-            v-model="formEdit.title"
-            :label="$t('message.topic_title')"
-            :placeholder="$t('message.topic_title_msg')"
-            v-c-tooltip.hover="$t('message.topic_title_msg')"
-            horizontal
-            required
-            was-validated
-        />
-        <CTextarea
-            rows="4"
-            type="text"
-            v-model="formEdit.summary"
-            :label="$t('message.topic_summary')"
-            :placeholder="$t('message.topic_summary_msg')"
-            v-c-tooltip.hover="$t('message.topic_summary_msg')"
-            horizontal
-            required
-            was-validated
-        />
+        <div v-if="!waitEditTopic">
+          <CInput
+              type="text"
+              v-model="formEdit.id"
+              :label="$t('message.topic_id')"
+              :placeholder="$t('message.topic_id_msg')"
+              v-c-tooltip.hover="$t('message.topic_id_msg')"
+              horizontal
+              readonly
+          />
+          <CInput
+              type="text"
+              v-model="formEdit.icon"
+              :label="$t('message.topic_icon')"
+              :placeholder="$t('message.topic_icon_msg')"
+              v-c-tooltip.hover="$t('message.topic_icon_msg')"
+              horizontal
+              readonly
+          >
+            <template #prepend>
+              <CButton disabled link>
+                <ficon :icon="_iconize(formEdit.icon)"/>
+              </CButton>
+            </template>
+            <template #append>
+              <CButton color="primary" @click="modalIconsShow = true">
+                <ficon :icon="['fas', 'search']"/>
+              </CButton>
+            </template>
+          </CInput>
+          <CInput
+              type="text"
+              v-model="formEdit.title"
+              :label="$t('message.topic_title')"
+              :placeholder="$t('message.topic_title_msg')"
+              v-c-tooltip.hover="$t('message.topic_title_msg')"
+              horizontal
+              required
+              was-validated
+          />
+          <CTextarea
+              rows="4"
+              type="text"
+              v-model="formEdit.summary"
+              :label="$t('message.topic_summary')"
+              :placeholder="$t('message.topic_summary_msg')"
+              v-c-tooltip.hover="$t('message.topic_summary_msg')"
+              horizontal
+              required
+              was-validated
+          />
+        </div>
         <template #footer>
-          <CButton type="submit" color="primary" class="m-2" style="width: 96px">
+          <CButton v-if="!waitEditTopic" type="submit" color="primary" class="m-2" style="width: 96px">
             <CIcon name="cil-save" class="align-top"/>
             {{ $t('message.action_save') }}
           </CButton>
@@ -376,9 +379,11 @@ export default {
       this.formAdd = {...emptyForm}
       this.modalAddErr = ''
       this.modalAddShow = true
+      this.myFlashMsg = ''
     },
     doAddTopic(e) {
       e.preventDefault()
+      this.modalAddErr = ''
       let vue = this
       let data = {...vue.formAdd}
       vue.waitAddTopic = true
@@ -410,9 +415,11 @@ export default {
       this.formEdit = {...this.topicMap[id]} //shallow clone using spread syntax, alternative way: this.formEdit = Object.assign({}, this.topicMap[id])
       this.modalEditErr = ''
       this.modalEditShow = true
+      this.myFlashMsg = ''
     },
     doEditTopic(e) {
       e.preventDefault()
+      this.modalEditErr = ''
       let vue = this
       let data = {...vue.formEdit}
       vue.waitEditTopic = true
@@ -437,10 +444,13 @@ export default {
     },
     clickDeleteTopic(id) {
       this.topicToDelete = this.topicMap[id]
+      this.modalDeleteErr = ''
       this.modalDeleteShow = true
+      this.myFlashMsg = ''
     },
     doDeleteTopic(e) {
       e.preventDefault()
+      this.modalDeleteErr = ''
       let vue = this
       vue.waitDeleteTopic = true
       let prodId = vue.$route.params.pid

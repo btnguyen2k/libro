@@ -369,6 +369,7 @@ export default {
       this.formAdd = {...emptyForm}
       this.modalAddErr = ''
       this.modalAddShow = true
+      this.myFlashMsg = ''
     },
     doAddProductClick() {
       // this workaround is to force switching to Product Info tab for input validation
@@ -383,6 +384,7 @@ export default {
     },
     doAddProduct(e) {
       e.preventDefault()
+      this.modalAddErr = ''
       let vue = this
       let data = {...vue.formAdd}
       vue.waitAddProduct = true
@@ -409,11 +411,12 @@ export default {
     },
     clickEditProduct(id) {
       this.formEdit = {...this.prodMap[id]}
+      this.modalEditFlash = ''
       this.modalEditErr = ''
       this.modalEditShow = true
       this.domainToMapEdit = ''
       this.waitEditProduct = false
-      this.modalEditFlash = ''
+      this.myFlashMsg = ''
     },
     doEditProductClick() {
       // this workaround is to force switching to Product Info tab for input validation
@@ -428,6 +431,8 @@ export default {
     },
     doEditProduct(e) {
       e.preventDefault()
+      this.modalEditFlash = ''
+      this.modalEditErr = ''
       if (this.domainToMapEdit.trim() != '') {
         this.doMapDomain()
         return
@@ -453,10 +458,10 @@ export default {
       )
     },
     doMapDomain() {
+      this.modalEditFlash = ''
+      this.modalEditErr = ''
       let vue = this
       const domainName = vue.domainToMapEdit.trim()
-      vue.modalEditErr = ''
-      vue.modalEditFlash = ''
       if (domainName != '') {
         vue.waitEditProduct = true
         let data = {pid: vue.formEdit.id, domain: domainName}
@@ -486,10 +491,10 @@ export default {
       this.modalUnmapMessage = this.$i18n.t('message.product_unmap_domain_msg', {domain: domain})
     },
     doUnmapDomain(domain) {
+      this.modalEditFlash = ''
+      this.modalEditErr = ''
       let vue = this
       vue.modalUnmapShow = false
-      vue.modalEditErr = ''
-      vue.modalEditFlash = ''
       vue.waitEditProduct = true
       clientUtils.apiDoDelete(
           clientUtils.apiAdminDomain+"/"+domain+"/"+vue.formEdit.id,
@@ -513,8 +518,10 @@ export default {
       this.prodToDelete = this.prodMap[id]
       this.modalDeleteErr = ''
       this.modalDeleteShow = true
+      this.myFlashMsg = ''
     },
     doDeleteProduct() {
+      this.modalDeleteErr = ''
       let vue = this
       vue.waitDeleteProduct = true
       clientUtils.apiDoDelete(
