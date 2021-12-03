@@ -162,7 +162,7 @@
         <CAlert v-if="waitEditProduct" color="info">{{ $t('message.wait') }}</CAlert>
         <CAlert v-if="modalEditErr" color="danger">{{ modalEditErr }}</CAlert>
         <CAlert v-if="modalEditFlash" color="success" closeButton>{{ modalEditFlash }}</CAlert>
-        <CTabs ref="formEditProductTabs">
+        <CTabs ref="formEditProductTabs" v-if="!waitEditProduct">
           <CTab ref="formEditProductTabInfo" active>
             <template slot="title">
               {{ $t('message.product_info') }}
@@ -250,7 +250,7 @@
         </CTabs>
         <template #footer>
           <button type="submit" ref="btnSubmitEditProduct" style="display:none;" />
-          <CButton type="button" @click="doEditProductClick" color="primary" class="m-2" style="width: 96px">
+          <CButton v-if="!waitEditProduct" type="button" @click="doEditProductClick" color="primary" class="m-2" style="width: 96px">
             <CIcon name="cil-save" class="align-top"/>
             {{ $t('message.action_save') }}
           </CButton>
@@ -289,7 +289,7 @@
       <CInput type="text" :label="$t('message.product_name')" v-model="prodToDelete.name" horizontal plaintext/>
       <CTextarea rows="2" type="text" :label="$t('message.product_desc')" v-model="prodToDelete.desc" horizontal plaintext/>
       <template #footer>
-        <CButton type="button" color="danger" class="m-2" style="width: 96px" @click="doDeleteProduct">
+        <CButton v-if="!waitDeleteProduct" type="button" color="danger" class="m-2" style="width: 96px" @click="doDeleteProduct">
           <CIcon name="cil-trash" class="align-top"/>
           {{ $t('message.action_delete') }}
         </CButton>
