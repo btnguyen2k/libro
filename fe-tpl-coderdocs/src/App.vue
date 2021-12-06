@@ -10,7 +10,6 @@
 </style>
 
 <script>
-// import "./assets/fontawesome/js/all.min.js";
 // import "./assets/plugins/popper.min.js";
 // import "./assets/plugins/bootstrap/js/bootstrap.js";
 // import "./assets/plugins/smoothscroll.min.js"
@@ -20,41 +19,11 @@
 // import "./assets/plugins/gumshoe/gumshoe.polyfills.min.js"
 // import "./assets/js/docs.js"
 
+import {triggerPopstate, triggerResize} from '@/components/utils'
+window.addEventListener('popstate', () => triggerPopstate())
+window.addEventListener('resize', () => triggerResize())
+
 export default {
   name: 'App'
 }
 </script>
-
-<!--<style lang="scss">-->
-<!--//// Import Main styles for this application-->
-<!--//@import 'assets/scss/style';-->
-<!--</style>-->
-
-<!--<template>-->
-<!--  <div id="app">-->
-<!--    <img alt="Vue logo" src="./assets/logo.png">-->
-<!--    <HelloWorld msg="Welcome to Your Vue.js App"/>-->
-<!--  </div>-->
-<!--</template>-->
-
-<!--<script>-->
-<!--import HelloWorld from './components/HelloWorld.vue'-->
-
-<!--export default {-->
-<!--  name: 'App',-->
-<!--  components: {-->
-<!--    HelloWorld-->
-<!--  }-->
-<!--}-->
-<!--</script>-->
-
-<!--<style>-->
-<!--#app {-->
-<!--  font-family: Avenir, Helvetica, Arial, sans-serif;-->
-<!--  -webkit-font-smoothing: antialiased;-->
-<!--  -moz-osx-font-smoothing: grayscale;-->
-<!--  text-align: center;-->
-<!--  color: #2c3e50;-->
-<!--  margin-top: 60px;-->
-<!--}-->
-<!--</style>-->

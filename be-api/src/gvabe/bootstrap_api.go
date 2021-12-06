@@ -13,7 +13,6 @@ import (
 Setup API handlers: application register its api-handlers by calling router.SetHandler(apiName, apiHandlerFunc)
   - api-handler function must have the following signature: func (itineris.ApiContext, itineris.ApiAuth, itineris.ApiParams) *itineris.ApiResult
 */
-// TODO change this function to implement application's business logic
 func initApiHandlers(router *itineris.ApiRouter) {
 	// pubic APIs
 	router.SetHandler("info", apiInfo)
@@ -23,6 +22,7 @@ func initApiHandlers(router *itineris.ApiRouter) {
 
 	// frontend APIs
 	router.SetHandler("feGetProduct", apiFeGetProduct)
+	router.SetHandler("feGetTopic", apiFeGetTopic)
 
 	// admin APIs
 	router.SetHandler("adminGetStats", apiAdminGetStats)
@@ -62,6 +62,7 @@ var (
 		"verifyLoginToken": true,
 		"loginChannelList": true,
 		"feGetProduct":     false,
+		"feGetTopic":       false,
 	}
 )
 

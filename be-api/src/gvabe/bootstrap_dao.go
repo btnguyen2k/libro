@@ -615,7 +615,7 @@ func _initSamples() {
 		log.Printf("[ERROR] Cannot create page [%s]", page.GetTitle())
 	}
 
-	page = doc.NewPage(goapi.AppVersionNumber, topic, "Admin Frontend", "fa-dashboard",
+	page = doc.NewPage(goapi.AppVersionNumber, topic, "Admin Frontend", "fa-tachometer",
 		"GUI for administrators to manage products, document topics and pages. "+shortLorem, longLorerm)
 	page.SetPosition(2).SetId(topic.GetId() + "-" + re.ReplaceAllString(strings.ToLower(page.GetTitle()), ""))
 	log.Printf("[INFO] Creating page (%s:%s -> %s)...", demoProdId, topic.GetTitle(), page.GetTitle())
@@ -655,7 +655,7 @@ func _initSamples() {
 
 	_initSamplesUpdateStats(demoProd, nil)
 
-	page = doc.NewPage(goapi.AppVersionNumber, topic, "General", "fa-circle-o-notch", "General questions: "+shortLorem, longLorerm)
+	page = doc.NewPage(goapi.AppVersionNumber, topic, "General", "fa-circle-notch", "General questions: "+shortLorem, longLorerm)
 	page.SetPosition(1).SetId(topic.GetId() + "-" + re.ReplaceAllString(strings.ToLower(page.GetTitle()), ""))
 	log.Printf("[INFO] Creating page (%s:%s -> %s)...", demoProdId, topic.GetTitle(), page.GetTitle())
 	result, err = pageDao.Create(page)

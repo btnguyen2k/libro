@@ -24,6 +24,7 @@ let apiLogin = "/api/login"
 let apiVerifyLoginToken = "/api/verifyLoginToken"
 
 let apiProduct = "/api/product/:domain"
+let apiTopic = "/api/topic/:domain/:tid"
 
 function _apiOnSuccess(method, resp, apiUri, callbackSuccessful) {
     if (method == 'GET' && resp.hasOwnProperty("data") && resp.data.status == 403) {
@@ -104,6 +105,7 @@ export default {
     apiVerifyLoginToken,
 
     apiProduct,
+    apiTopic,
 
     apiDoGet,
     apiDoPatch,

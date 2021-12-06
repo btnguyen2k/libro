@@ -13,9 +13,6 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 library.add(fab, far, fas)
 Vue.component('ficon', FontAwesomeIcon)
 
-// import { BootstrapIcon } from 'bootstrap-icons/font/bootstrap-icons'
-// Vue.component('bicon', BootstrapIcon)
-
 Vue.config.performance = true
 Vue.prototype.$log = console.log.bind(console)
 
