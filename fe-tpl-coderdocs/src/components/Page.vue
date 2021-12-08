@@ -3,9 +3,6 @@
   <div v-else-if="foundStatus==0" class="alert alert-danger m-4" role="alert">
     {{ $t('error_product_not_found', {domain: currentHost}) }}
   </div>
-  <div v-else-if="targetTopic==null" class="alert alert-danger m-4" role="alert">
-    {{ $t('error_product_not_found', {domain: currentHost}) }}
-  </div>
   <div v-else>
     <header class="header fixed-top">
       <div class="branding docs-branding">
@@ -17,8 +14,8 @@
               <span></span>
             </button>
             <div class="site-logo">
-              <a class="navbar-brand" href="javascript:;" @click="goHome">
-                <img class="logo-icon me-2" src="images/coderdocs-logo.svg" alt="logo">
+              <a class="navbar-brand" style="cursor: pointer" @click="goHome">
+                <img class="logo-icon me-2" :src="$router.options.base.replace(/\/+$/, '')+'/images/coderdocs-logo.svg'" alt="logo">
                 <span class="logo-text">{{ prodNameFirst }}<span class="text-alt">{{ prodNameLast }}</span></span>
               </a>
             </div>
@@ -27,14 +24,15 @@
             <div class="top-search-box d-none d-lg-flex">
               <form class="search-form" @submit.prevent="popup('not implemented yet')">
                 <input type="text" placeholder="Search the docs..." name="search" class="form-control search-input">
-                <button type="submit" class="btn search-btn" value="Search">
-                  <ficon :icon="['fas', 'search']"/>
-                </button>
+                <button type="submit" class="btn search-btn" value="Search"><ficon :icon="['fas', 'search']"/></button>
               </form>
             </div>
             <ul class="social-list list-inline mx-md-3 mx-lg-5 mb-0 d-none d-lg-flex">
               <li v-if="product.contacts.website" class="list-inline-item">
                 <a :href="product.contacts.website" title="Website"><ficon fixedWidth :icon="['fas', 'globe']"/></a>
+              </li>
+              <li v-if="product.contacts.email" class="list-inline-item">
+                <a :href="'mailto:'+product.contacts.email" title="Email"><ficon fixedWidth :icon="['fas', 'envelope']"/></a>
               </li>
               <li v-if="product.contacts.github" class="list-inline-item">
                 <a :href="product.contacts.github" title="GitHub"><ficon fixedWidth :icon="['fab', 'github']"/></a>
@@ -61,103 +59,69 @@
     <div class="docs-wrapper">
       <div ref="docs-sidebar" id="docs-sidebar" class="docs-sidebar">
         <div class="top-search-box d-lg-none p-3">
-          <form class="search-form">
+          <form class="search-form" @submit.prevent="popup('not implemented yet')">
             <input type="text" placeholder="Search the docs..." name="search" class="form-control search-input">
-            <button type="submit" class="btn search-btn" value="Search"><i class="fas fa-search"></i></button>
+            <button type="submit" class="btn search-btn" value="Search"><ficon :icon="['fas', 'search']"/></button>
           </form>
         </div>
         <nav id="docs-nav" class="docs-nav navbar">
           <ul class="section-items list-unstyled nav flex-column pb-3">
-            <li class="nav-item section-title"><a class="nav-link scrollto active" href="#section-1"><span class="theme-icon-holder me-2"><i class="fas fa-map-signs"></i></span>Introduction</a></li>
-            <li class="nav-item"><a class="nav-link scrollto" href="#item-1-1">Section Item 1.1</a></li>
-            <li class="nav-item"><a class="nav-link scrollto" href="#item-1-2">Section Item 1.2</a></li>
-            <li class="nav-item"><a class="nav-link scrollto" href="#item-1-3">Section Item 1.3</a></li>
-            <li class="nav-item"><a class="nav-link scrollto" href="#item-1-4">Section Item 1.4</a></li>
-            <li class="nav-item"><a class="nav-link scrollto" href="#item-1-5">Section Item 1.5</a></li>
-            <li class="nav-item"><a class="nav-link scrollto" href="#item-1-6">Section Item 1.6</a></li>
-            <li class="nav-item section-title mt-3"><a class="nav-link scrollto" href="#section-2"><span class="theme-icon-holder me-2"><i class="fas fa-arrow-down"></i></span>Installation</a></li>
-            <li class="nav-item"><a class="nav-link scrollto" href="#item-2-1">Section Item 2.1</a></li>
-            <li class="nav-item"><a class="nav-link scrollto" href="#item-2-2">Section Item 2.2</a></li>
-            <li class="nav-item"><a class="nav-link scrollto" href="#item-2-3">Section Item 2.3</a></li>
-            <li class="nav-item section-title mt-3"><a class="nav-link scrollto" href="#section-3"><span class="theme-icon-holder me-2"><i class="fas fa-box"></i></span>APIs</a></li>
-            <li class="nav-item"><a class="nav-link scrollto" href="#item-3-1">Section Item 3.1</a></li>
-            <li class="nav-item"><a class="nav-link scrollto" href="#item-3-2">Section Item 3.2</a></li>
-            <li class="nav-item"><a class="nav-link scrollto" href="#item-3-3">Section Item 3.3</a></li>
-            <li class="nav-item section-title mt-3"><a class="nav-link scrollto" href="#section-4"><span class="theme-icon-holder me-2"><i class="fas fa-cogs"></i></span>Integrations</a></li>
-            <li class="nav-item"><a class="nav-link scrollto" href="#item-4-1">Section Item 4.1</a></li>
-            <li class="nav-item"><a class="nav-link scrollto" href="#item-4-2">Section Item 4.2</a></li>
-            <li class="nav-item"><a class="nav-link scrollto" href="#item-4-3">Section Item 4.3</a></li>
-            <li class="nav-item section-title mt-3"><a class="nav-link scrollto" href="#section-5"><span class="theme-icon-holder me-2"><i class="fas fa-tools"></i></span>Utilities</a></li>
-            <li class="nav-item"><a class="nav-link scrollto" href="#item-5-1">Section Item 5.1</a></li>
-            <li class="nav-item"><a class="nav-link scrollto" href="#item-5-2">Section Item 5.2</a></li>
-            <li class="nav-item"><a class="nav-link scrollto" href="#item-5-3">Section Item 5.3</a></li>
-            <li class="nav-item section-title mt-3"><a class="nav-link scrollto" href="#section-6"><span class="theme-icon-holder me-2"><i class="fas fa-laptop-code"></i></span>Web</a></li>
-            <li class="nav-item"><a class="nav-link scrollto" href="#item-6-1">Section Item 6.1</a></li>
-            <li class="nav-item"><a class="nav-link scrollto" href="#item-6-2">Section Item 6.2</a></li>
-            <li class="nav-item"><a class="nav-link scrollto" href="#item-6-3">Section Item 6.3</a></li>
-            <li class="nav-item section-title mt-3"><a class="nav-link scrollto" href="#section-7"><span class="theme-icon-holder me-2"><i class="fas fa-tablet-alt"></i></span>Mobile</a></li>
-            <li class="nav-item"><a class="nav-link scrollto" href="#item-7-1">Section Item 7.1</a></li>
-            <li class="nav-item"><a class="nav-link scrollto" href="#item-7-2">Section Item 7.2</a></li>
-            <li class="nav-item"><a class="nav-link scrollto" href="#item-7-3">Section Item 7.3</a></li>
-            <li class="nav-item section-title mt-3"><a class="nav-link scrollto" href="#section-8"><span class="theme-icon-holder me-2"><i class="fas fa-book-reader"></i></span>Resources</a></li>
-            <li class="nav-item"><a class="nav-link scrollto" href="#item-8-1">Section Item 8.1</a></li>
-            <li class="nav-item"><a class="nav-link scrollto" href="#item-8-2">Section Item 8.2</a></li>
-            <li class="nav-item"><a class="nav-link scrollto" href="#item-8-3">Section Item 8.3</a></li>
-            <li class="nav-item section-title mt-3"><a class="nav-link scrollto" href="#section-9"><span class="theme-icon-holder me-2"><i class="fas fa-lightbulb"></i></span>FAQs</a></li>
-            <li class="nav-item"><a class="nav-link scrollto" href="#item-9-1">Section Item 9.1</a></li>
-            <li class="nav-item"><a class="nav-link scrollto" href="#item-9-2">Section Item 9.2</a></li>
-            <li class="nav-item"><a class="nav-link scrollto" href="#item-9-3">Section Item 9.3</a></li>
+            <template v-for="itopic in topicList">
+              <li class="nav-item section-title">
+                <a :class="itopic.id==topic.id?'nav-link scrollto active':'nav-link scrollto'" style="cursor: pointer"><span class="theme-icon-holder me-2"><ficon fixedWidth :icon="_iconize(itopic.icon)"/></span>{{itopic.title}}</a>
+              </li>
+              <template v-if="itopic.id==topic.id">
+                <li v-for="ipage in pageList" :key="ipage.id" class="nav-item">
+                  <a :class="ipage.id==page.id?'nav-link scrollto active':'nav-link scrollto'" style="cursor: pointer"><!--<span class="theme-icon-holder me-2"><ficon fixedWidth :icon="_iconize(ipage.icon)"/></span>-->{{ipage.title}}</a>
+                </li>
+              </template>
+            </template>
           </ul>
         </nav>
       </div>
 
+      <div class="docs-content">
+        <div class="container">
+          <article class="docs-article" :id="page.id">
+            <h1 class="docs-heading">{{page.title}} <span class="docs-time">Last updated: yyyy-mm-dd</span></h1>
+            <section class="docs-intro">
+              {{page.summary}}
+            </section>
+            <section class="docs-section" :id="page.id+'-content'" v-html="pageContentRendered">
+            </section>
+          </article>
+          
+          <footer class="footer">
+            <div class="footer-bottom text-center py-5">
+              <!--/* This template is free as long as you keep the footer attribution link. If you'd like to use the template without the attribution link, you can buy the commercial license via our website: themes.3rdwavemedia.com Thank you for your support. :) */-->
+              <small class="copyright">Designed with <ficon style="color: #fb866a;" :icon="['fas', 'heart']"/>
+                by <a class="theme-link" href="http://themes.3rdwavemedia.com" target="_blank">Xiaoying Riley</a> for developers</small>
+            </div>
+          </footer>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
 import clientUtils from "@/utils/api_client"
-import {iconize} from "@/components/utils"
+import {registerPopstate, unregisterPopstate} from "@/components/utils"
+import {registerResize, unregisterResize} from "@/components/utils"
+import {iconize, markdownRender} from "@/components/utils"
+
+const regTrailingSlash = /\/+$/
 
 export default {
-  name: 'Topic',
-  unmounted() {
-    window.removeEventListener('resize', this.responsiveSidebar)
-  },
+  name: 'Page',
   mounted() {
-    this.foundStatus = -1
-    const vue = this
-    const apiUrl = clientUtils.apiProduct.replaceAll(':domain', vue.currentHost)
-    clientUtils.apiDoGet(apiUrl,
-        (apiRes) => {
-          vue.foundStatus = apiRes.status == 200 ? 1 : 0
-          if (vue.foundStatus == 1) {
-            console.log(apiRes)
-            vue.product = apiRes.data
-            vue.topicList = vue.product.topics
-            for (let i = vue.topicList.length-1; i >= 0; i--) {
-              const id = vue.topicList[i].id
-              vue.topicMap[id] = vue.topicList[i]
-            }
-            vue.foundStatus = vue.product.is_published ? 1 : 0
-
-            const tid = vue.$route.params.tid
-            if (vue.foundStatus && !vue.topicMap[tid]) {
-              console.log(vue.$i18n.t('error_topic_not_found', {topic: tid}))
-              vue.$router.push({
-                name: "Error",
-                params: {errorMsg: vue.$i18n.t('error_topic_not_found', {topic: tid}), target: 'Home'}
-              })
-            } else {
-              // CoderDocs
-              window.addEventListener('resize', this.responsiveSidebar)
-              vue.$nextTick(()=>vue.responsiveSidebar())
-            }
-          }
-        },
-        (err) => {
-          vue.errorMsg = err
-        })
+    this.$once("hook:beforeDestroy", () => {
+      unregisterPopstate(this.handleBackFoward)
+      unregisterResize(this.responsiveSidebar)
+    })
+    registerPopstate(this.handleBackFoward)
+    registerResize(this.responsiveSidebar)
+    this.initPage()
   },
   computed: {
     prodNameFirst() {
@@ -169,14 +133,91 @@ export default {
     currentHost() {
       return window.location.host
     },
-    targetTopic() {
-      const tid = this.$route.params.pid
-      return this.topicMap[tid] ? this.topicMap[tid] : null
+    pageContentRendered() {
+      return markdownRender(this.page.content, true)
     },
   },
   methods: {
+    handleBackFoward() {
+      const pathBase = this.$router.options.base.replace(regTrailingSlash, '')
+      const vuePath = window.location.pathname.slice(pathBase.length) // remove the 'base' prefix
+      const result = this.$router.resolve(vuePath)
+      if (result && result.resolved && result.resolved.name=='Page') {
+        this.initPage()
+      }
+    },
+    initPage() {
+      this.foundStatus = -1
+      const vue = this
+      const apiUrl = clientUtils.apiProduct.replaceAll(':domain', vue.currentHost)
+      clientUtils.apiDoGet(apiUrl,
+          (apiRes) => {
+            let foundProduct = apiRes.status == 200 && apiRes.data.is_published
+            if (foundProduct) {
+              vue.product = apiRes.data
+              vue.topicList = vue.product.topics
+              this.fetchTopicInfo(vue.$route.params.tid)
+            } else {
+              vue.foundStatus = 0
+            }
+          },
+          (err) => {
+            vue.errorMsg = err
+          }
+      )
+    },
+    fetchTopicInfo(tid) {
+      const vue = this
+      // now we need to verify if topic exists
+      const apiUrl = clientUtils.apiTopic.replaceAll(':domain', vue.currentHost).replaceAll(':tid', tid)
+      clientUtils.apiDoGet(apiUrl,
+          (apiRes)=>{
+            const foundTopic = apiRes.status == 200
+            if (!foundTopic) {
+              vue.$router.push({
+                name: "Error",
+                params: {errorMsg: vue.$i18n.t('error_topic_not_found', {topic: tid})}
+              })
+              return
+            }
+
+            vue.topic = apiRes.data
+            vue.pageList = vue.topic.pages
+
+            // now we verify if page exists
+            for (let i = vue.pageList.length-1; i>=0; i--) {
+              const pid = vue.pageList[i].id
+              vue.pageMap[pid] = vue.pageList[i]
+            }
+            const pid = vue.$route.params.pid
+            vue.page = vue.pageMap[pid]
+            if (!vue.page) {
+              vue.$router.push({
+                name: "Error",
+                params: {errorMsg: vue.$i18n.t('error_page_not_found', {page: pid}), topic: vue.topic}
+              })
+              return
+            }
+
+            vue.foundStatus = 1 // found product
+            vue.$nextTick(()=>vue.responsiveSidebar())
+          },
+          (err)=>{
+            vue.errorMsg = err
+          }
+      )
+    },
     _iconize(icon) {
       return iconize(icon)
+    },
+    doViewTopic(tid) {
+      this.$router.push({name: "Topic", params: {tid: tid}})
+    },
+    doViewPage(pid) {
+      const tid = this.$route.params.tid
+      if (pid!=this.$route.params.pid) {
+        this.$router.push({name: "Page", params: {tid: tid, pid: pid}}).finally(()=>this.initPage())
+      }
     },
     goHome() {
       this.$router.push({name: "Home"})
@@ -202,8 +243,10 @@ export default {
     return {
       product: {},
       topicList: [],
-      topicMap: {},
-      topic: undefined,
+      topic: {},
+      pageList: [],
+      pageMap: {},
+      page: {},
       foundStatus: -1,
       errorMsg: '',
     }

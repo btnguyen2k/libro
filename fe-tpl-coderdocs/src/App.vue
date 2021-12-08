@@ -5,7 +5,7 @@
 <style lang="css">
 @import "assets/css/theme.css";
 @import "assets/plugins/simplelightbox/simple-lightbox.min.css";
-@import "//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.2/styles/atom-one-dark.min.css";
+/*@import "//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.2/styles/atom-one-dark.min.css";*/
 @import "//fonts.googleapis.com/css?family=Poppins:300,400,500,600,700&display=swap";
 </style>
 

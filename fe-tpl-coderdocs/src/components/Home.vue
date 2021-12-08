@@ -10,7 +10,7 @@
           <div class="docs-logo-wrapper">
             <div class="site-logo">
               <a class="navbar-brand" @click="goHome" style="cursor: pointer">
-                <img class="logo-icon me-2" src="images/coderdocs-logo.svg" alt="logo">
+                <img class="logo-icon me-2" :src="$router.options.base.replace(/\/+$/, '')+'/images/coderdocs-logo.svg'" alt="logo">
                 <span class="logo-text">{{ prodNameFirst }}<span class="text-alt">{{ prodNameLast }}</span></span>
               </a>
             </div>
@@ -57,9 +57,7 @@
         <div class="main-search-box pt-3 d-block mx-auto">
           <form class="search-form w-100" @submit.prevent="popup('not implemented yet')">
             <input type="text" placeholder="Search the docs..." name="search" class="form-control search-input">
-            <button type="submit" class="btn search-btn" value="Search">
-              <ficon :icon="['fas', 'search']"/>
-            </button>
+            <button type="submit" class="btn search-btn" value="Search"><ficon :icon="['fas', 'search']"/></button>
           </form>
         </div>
       </div>
@@ -71,11 +69,13 @@
           <div class="row justify-content-center">
             <div v-for="topic in topicList" class="col-12 col-lg-4 py-3">
               <div class="card shadow-sm border-primary">
-                <div class="card-body">
-                  <h5 class="card-title mb-3">
+                <div class="card-header bg-primary">
+                  <h5 class="card-title">
                     <span class="theme-icon-holder card-icon-holder me-2"><ficon :icon="_iconize(topic.icon)"/></span>
-                    <span class="card-title-text">{{ topic.title }}</span>
+                    <span class="card-title-text text-white">{{ topic.title }}</span>
                   </h5>
+                </div>
+                <div class="card-body">
                   <div class="card-text">{{ topic.summary }}</div>
                   <a class="card-link-mask" style="cursor: pointer" @click="doViewTopic(topic.id)"></a>
                 </div>

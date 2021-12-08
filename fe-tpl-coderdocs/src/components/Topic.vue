@@ -8,14 +8,9 @@
       <div class="branding docs-branding">
         <div class="container-fluid position-relative py-2">
           <div class="docs-logo-wrapper">
-            <button ref="docs-sidebar-toggler" id="docs-sidebar-toggler" class="docs-sidebar-toggler docs-sidebar-visible me-2 d-xl-none" type="button">
-              <span></span>
-              <span></span>
-              <span></span>
-            </button>
             <div class="site-logo">
-              <a class="navbar-brand" style="cursor: pointer" @click="goHome">
-                <img class="logo-icon me-2" src="images/coderdocs-logo.svg" alt="logo">
+              <a class="navbar-brand" @click="goHome" style="cursor: pointer">
+                <img class="logo-icon me-2" :src="$router.options.base.replace(/\/+$/, '')+'/images/coderdocs-logo.svg'" alt="logo">
                 <span class="logo-text">{{ prodNameFirst }}<span class="text-alt">{{ prodNameLast }}</span></span>
               </a>
             </div>
@@ -24,9 +19,7 @@
             <div class="top-search-box d-none d-lg-flex">
               <form class="search-form" @submit.prevent="popup('not implemented yet')">
                 <input type="text" placeholder="Search the docs..." name="search" class="form-control search-input">
-                <button type="submit" class="btn search-btn" value="Search">
-                  <ficon :icon="['fas', 'search']"/>
-                </button>
+                <button type="submit" class="btn search-btn" value="Search"><ficon :icon="['fas', 'search']"/></button>
               </form>
             </div>
             <ul class="social-list list-inline mx-md-3 mx-lg-5 mb-0 d-none d-lg-flex">
@@ -52,7 +45,8 @@
                 <a :href="product.contacts.twitter" title="Twitter"><ficon fixedWidth :icon="['fab', 'twitter']"/></a>
               </li>
             </ul>
-<!--            <a href="https://themes.3rdwavemedia.com/bootstrap-templates/startup/coderdocs-free-bootstrap-5-documentation-template-for-software-projects/" class="btn btn-primary d-none d-lg-flex">Download</a>-->
+            <!--            <a href="https://themes.3rdwavemedia.com/bootstrap-templates/startup/coderdocs-free-bootstrap-5-documentation-template-for-software-projects/"-->
+            <!--               class="btn btn-primary d-none d-lg-flex">Download</a>-->
           </div>
         </div>
       </div>
@@ -80,8 +74,6 @@
                     <span class="theme-icon-holder card-icon-holder me-2"><ficon :icon="['fas', 'exclamation']"/></span>
                     <span class="card-title-text">{{ $t('empty_topic') }}</span>
                   </h5>
-<!--                  <div class="card-text">{{ page.summary }}</div>-->
-<!--                  <a class="card-link-mask" href="javascript:;" @click="doViewPage(page.id)"></a>-->
                 </div>
               </div>
             </div>
@@ -163,8 +155,9 @@
 
 <script>
 import clientUtils from "@/utils/api_client"
-import {iconize} from "@/components/utils"
-import {registerPopstate, unregisterPopstate} from "@/components/utils"
+import {iconize, registerPopstate, unregisterPopstate} from "@/components/utils"
+
+const regTrailingSlash = /\/+$/
 
 export default {
   name: 'Topic',
@@ -173,7 +166,7 @@ export default {
       unregisterPopstate(this.handleBackFoward)
     })
     registerPopstate(this.handleBackFoward)
-    this.fetchProductInfo()
+    this.initPage()
   },
   computed: {
     prodNameFirst() {
@@ -188,13 +181,14 @@ export default {
   },
   methods: {
     handleBackFoward() {
-      const vuePath = window.location.pathname.slice(4)
+      const pathBase = this.$router.options.base.replace(regTrailingSlash, '')
+      const vuePath = window.location.pathname.slice(pathBase.length) // remove the 'base' prefix
       const result = this.$router.resolve(vuePath)
       if (result && result.resolved && result.resolved.name=='Topic') {
-        this.fetchProductInfo()
+        this.initPage()
       }
     },
-    fetchProductInfo() {
+    initPage() {
       this.foundStatus = -1
       const vue = this
       const apiUrl = clientUtils.apiProduct.replaceAll(':domain', vue.currentHost)
@@ -224,7 +218,7 @@ export default {
             if (!foundTopic) {
               vue.$router.push({
                 name: "Error",
-                params: {errorMsg: vue.$i18n.t('error_topic_not_found', {topic: tid}), target: 'Home'}
+                params: {errorMsg: vue.$i18n.t('error_topic_not_found', {topic: tid})}
               })
               return
             }
@@ -243,8 +237,12 @@ export default {
     },
     doViewTopic(tid) {
       if (tid!=this.$route.params.tid) {
-        this.$router.push({name: "Topic", params: {tid: tid}}).finally(()=>this.fetchProductInfo())
+        this.$router.push({name: "Topic", params: {tid: tid}}).finally(()=>this.initPage())
       }
+    },
+    doViewPage(pid) {
+      const tid = this.$route.params.tid
+      this.$router.push({name: "Page", params: {tid: tid, pid: pid}})
     },
     goHome() {
       this.$router.push({name: "Home"})
@@ -252,27 +250,13 @@ export default {
     popup(msg) {
       alert(msg)
     },
-    responsiveSidebar() { // CoderDocs
-      const w = window.innerWidth
-      const sidebar = this.$refs['docs-sidebar']
-      if (sidebar) {
-        if (w >= 1024) {
-          sidebar.classList.remove('sidebar-hidden')
-          sidebar.classList.add('sidebar-visible')
-        } else {
-          sidebar.classList.remove('sidebar-visible')
-          sidebar.classList.add('sidebar-hidden')
-        }
-      }
-    }
   },
   data() {
     return {
       product: {},
+      topicList: [],
       topic: {},
       pageList: [],
-
-      topicList: [],
       foundStatus: -1,
       errorMsg: '',
     }
