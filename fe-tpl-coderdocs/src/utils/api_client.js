@@ -17,14 +17,14 @@ const apiClient = Axios.create({
 
 const headerAppId = appConfig.APP_CONFIG.api_client.header_app_id
 const headerAccessToken = appConfig.APP_CONFIG.api_client.header_access_token
-let appId = appConfig.APP_ID
+const appId = appConfig.APP_ID
 
-let apiInfo = "/info"
-let apiLogin = "/api/login"
-let apiVerifyLoginToken = "/api/verifyLoginToken"
+const apiInfo = "/info"
+// const apiLogin = "/api/login"
+// const apiVerifyLoginToken = "/api/verifyLoginToken"
 
-let apiProduct = "/api/product/:domain"
-let apiTopic = "/api/topic/:domain/:tid"
+const apiProduct = "/api/product/:domain"
+const apiTopic = "/api/topic/:domain/:tid"
 
 function _apiOnSuccess(method, resp, apiUri, callbackSuccessful) {
     if (method == 'GET' && resp.hasOwnProperty("data") && resp.data.status == 403) {
@@ -49,67 +49,85 @@ function _apiOnError(err, apiUri, callbackError) {
     }
 }
 
+let cacheExpiryMs = 3600000
+let cache = {}
+
+function setCacheExpiry(_cacheExpiryMs) {
+    cacheExpiryMs = _cacheExpiryMs
+}
+
 function apiDoGet(apiUri, callbackSuccessful, callbackError) {
+    if (cacheExpiryMs > 0) {
+        const cacheEntry = cache[apiUri]
+        if (cacheEntry && cacheEntry.expiry > new Date().valueOf()) {
+            _apiOnSuccess('GET', cacheEntry.data, apiUri, callbackSuccessful)
+            return
+        }
+    }
     const session = utils.loadLoginSession()
     const headers = {}
     headers[headerAppId] = appId
     headers[headerAccessToken] = session != null ? session.token : ""
     return apiClient.get(apiUri, {
         headers: headers, cache: false
-    }).then(res => _apiOnSuccess('GET', res, apiUri, callbackSuccessful)).catch(err => _apiOnError(err, apiUri, callbackError))
+    }).then(res => {
+        const cacheEntry = {expiry: new Date().valueOf() + cacheExpiryMs, data: res,}
+        cache[apiUri] = cacheEntry
+        _apiOnSuccess('GET', res, apiUri, callbackSuccessful)
+    }).catch(err => _apiOnError(err, apiUri, callbackError))
 }
 
-function apiDoPatch(apiUri, data, callbackSuccessful, callbackError) {
-    const session = utils.loadLoginSession()
-    const headers = {}
-    headers[headerAppId] = appId
-    headers[headerAccessToken] = session != null ? session.token : ""
-    apiClient.patch(apiUri, data, {
-        headers: headers, cache: false
-    }).then(res => _apiOnSuccess('PATCH', res, apiUri, callbackSuccessful)).catch(err => _apiOnError(err, apiUri, callbackError))
-}
+// function apiDoPatch(apiUri, data, callbackSuccessful, callbackError) {
+//     const session = utils.loadLoginSession()
+//     const headers = {}
+//     headers[headerAppId] = appId
+//     headers[headerAccessToken] = session != null ? session.token : ""
+//     apiClient.patch(apiUri, data, {
+//         headers: headers, cache: false
+//     }).then(res => _apiOnSuccess('PATCH', res, apiUri, callbackSuccessful)).catch(err => _apiOnError(err, apiUri, callbackError))
+// }
 
-function apiDoPost(apiUri, data, callbackSuccessful, callbackError) {
-    const session = utils.loadLoginSession()
-    const headers = {}
-    headers[headerAppId] = appId
-    headers[headerAccessToken] = session != null ? session.token : ""
-    apiClient.post(apiUri, data, {
-        headers: headers, cache: false
-    }).then(res => _apiOnSuccess('POST', res, apiUri, callbackSuccessful)).catch(err => _apiOnError(err, apiUri, callbackError))
-}
+// function apiDoPost(apiUri, data, callbackSuccessful, callbackError) {
+//     const session = utils.loadLoginSession()
+//     const headers = {}
+//     headers[headerAppId] = appId
+//     headers[headerAccessToken] = session != null ? session.token : ""
+//     apiClient.post(apiUri, data, {
+//         headers: headers, cache: false
+//     }).then(res => _apiOnSuccess('POST', res, apiUri, callbackSuccessful)).catch(err => _apiOnError(err, apiUri, callbackError))
+// }
 
-function apiDoPut(apiUri, data, callbackSuccessful, callbackError) {
-    const session = utils.loadLoginSession()
-    const headers = {}
-    headers[headerAppId] = appId
-    headers[headerAccessToken] = session != null ? session.token : ""
-    apiClient.put(apiUri, data, {
-        headers: headers, cache: false
-    }).then(res => _apiOnSuccess('PUT', res, apiUri, callbackSuccessful)).catch(err => _apiOnError(err, apiUri, callbackError))
-}
+// function apiDoPut(apiUri, data, callbackSuccessful, callbackError) {
+//     const session = utils.loadLoginSession()
+//     const headers = {}
+//     headers[headerAppId] = appId
+//     headers[headerAccessToken] = session != null ? session.token : ""
+//     apiClient.put(apiUri, data, {
+//         headers: headers, cache: false
+//     }).then(res => _apiOnSuccess('PUT', res, apiUri, callbackSuccessful)).catch(err => _apiOnError(err, apiUri, callbackError))
+// }
 
-function apiDoDelete(apiUri, callbackSuccessful, callbackError) {
-    const session = utils.loadLoginSession()
-    const headers = {}
-    headers[headerAppId] = appId
-    headers[headerAccessToken] = session != null ? session.token : ""
-    apiClient.delete(apiUri, {
-        headers: headers, cache: false
-    }).then(res => _apiOnSuccess('DELETE', res, apiUri, callbackSuccessful)).catch(err => _apiOnError(err, apiUri, callbackError))
-}
+// function apiDoDelete(apiUri, callbackSuccessful, callbackError) {
+//     const session = utils.loadLoginSession()
+//     const headers = {}
+//     headers[headerAppId] = appId
+//     headers[headerAccessToken] = session != null ? session.token : ""
+//     apiClient.delete(apiUri, {
+//         headers: headers, cache: false
+//     }).then(res => _apiOnSuccess('DELETE', res, apiUri, callbackSuccessful)).catch(err => _apiOnError(err, apiUri, callbackError))
+// }
 
 export default {
+    setCacheExpiry,
+
     apiInfo,
-    apiLogin,
-    apiVerifyLoginToken,
+    // apiLogin,
+    // apiVerifyLoginToken,
 
     apiProduct,
     apiTopic,
 
     apiDoGet,
-    apiDoPatch,
-    apiDoPost,
-    apiDoPut,
-    apiDoDelete,
+    // apiDoPatch,
+    // apiDoPut,
 }

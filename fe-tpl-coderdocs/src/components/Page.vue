@@ -68,11 +68,11 @@
           <ul class="section-items list-unstyled nav flex-column pb-3">
             <template v-for="itopic in topicList">
               <li class="nav-item section-title">
-                <a :class="itopic.id==topic.id?'nav-link scrollto active':'nav-link scrollto'" style="cursor: pointer"><span class="theme-icon-holder me-2"><ficon fixedWidth :icon="_iconize(itopic.icon)"/></span>{{itopic.title}}</a>
+                <a :class="itopic.id==topic.id?'nav-link scrollto active':'nav-link scrollto'" style="cursor: pointer" @click="doViewTopic(itopic.id)"><span class="theme-icon-holder me-2"><ficon fixedWidth :icon="_iconize(itopic.icon)"/></span>{{itopic.title}}</a>
               </li>
               <template v-if="itopic.id==topic.id">
                 <li v-for="ipage in pageList" :key="ipage.id" class="nav-item">
-                  <a :class="ipage.id==page.id?'nav-link scrollto active':'nav-link scrollto'" style="cursor: pointer"><!--<span class="theme-icon-holder me-2"><ficon fixedWidth :icon="_iconize(ipage.icon)"/></span>-->{{ipage.title}}</a>
+                  <a :class="ipage.id==page.id?'nav-link scrollto active':'nav-link scrollto'" style="cursor: pointer" @click="doViewPage(ipage.id)"><!--<span class="theme-icon-holder me-2"><ficon fixedWidth :icon="_iconize(ipage.icon)"/></span>-->{{ipage.title}}</a>
                 </li>
               </template>
             </template>
@@ -83,14 +83,14 @@
       <div class="docs-content">
         <div class="container">
           <article class="docs-article" :id="page.id">
-            <h1 class="docs-heading">{{page.title}} <span class="docs-time">Last updated: yyyy-mm-dd</span></h1>
+            <h1 class="docs-heading"><span class="me-2"><ficon :icon="_iconize(page.icon)"/></span>{{page.title}} <span class="docs-time">Last updated: yyyy-mm-dd</span></h1>
             <section class="docs-intro">
               {{page.summary}}
             </section>
             <section class="docs-section" :id="page.id+'-content'" v-html="pageContentRendered">
             </section>
           </article>
-          
+
           <footer class="footer">
             <div class="footer-bottom text-center py-5">
               <!--/* This template is free as long as you keep the footer attribution link. If you'd like to use the template without the attribution link, you can buy the commercial license via our website: themes.3rdwavemedia.com Thank you for your support. :) */-->
@@ -190,6 +190,14 @@ export default {
               vue.pageMap[pid] = vue.pageList[i]
             }
             const pid = vue.$route.params.pid
+            if (pid=='') {
+              if (vue.pageList.length>0) {
+                this.$router.push({name: "Page", params: {tid: tid, pid: vue.pageList[0].id}}).finally(()=>this.initPage())
+              } else {
+                this.$router.push({name: "Topic", params: {tid: tid}})
+              }
+              return
+            }
             vue.page = vue.pageMap[pid]
             if (!vue.page) {
               vue.$router.push({
@@ -211,11 +219,17 @@ export default {
       return iconize(icon)
     },
     doViewTopic(tid) {
-      this.$router.push({name: "Topic", params: {tid: tid}})
+      if (tid==this.$route.params.tid) {
+        this.doViewPage(this.pageList[0].id)
+      } else {
+        this.foundStatus = -1
+        this.$route.params.pid = ''
+        this.fetchTopicInfo(tid)
+      }
     },
     doViewPage(pid) {
-      const tid = this.$route.params.tid
       if (pid!=this.$route.params.pid) {
+        const tid = this.$route.params.tid
         this.$router.push({name: "Page", params: {tid: tid, pid: pid}}).finally(()=>this.initPage())
       }
     },
