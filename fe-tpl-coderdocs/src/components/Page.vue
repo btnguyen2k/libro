@@ -8,7 +8,7 @@
       <div class="branding docs-branding">
         <div class="container-fluid position-relative py-2">
           <div class="docs-logo-wrapper">
-            <button ref="docs-sidebar-toggler" id="docs-sidebar-toggler" class="docs-sidebar-toggler docs-sidebar-visible me-2 d-xl-none" type="button">
+            <button @click="coderDocsSidebarToggler" ref="docs-sidebar-toggler" id="docs-sidebar-toggler" class="docs-sidebar-toggler docs-sidebar-visible me-2 d-xl-none" type="button">
               <span></span>
               <span></span>
               <span></span>
@@ -83,7 +83,8 @@
       <div class="docs-content">
         <div class="container">
           <article class="docs-article" :id="page.id">
-            <h1 class="docs-heading"><span class="me-2"><ficon :icon="_iconize(page.icon)"/></span>{{page.title}} <span class="docs-time">Last updated: yyyy-mm-dd</span></h1>
+            <h1 class="docs-heading"><span class="me-2"><ficon :icon="_iconize(page.icon)"/></span>{{page.title}}
+              <span class="docs-time">Last updated: {{pageUpdatedTimestamp}}</span></h1>
             <section class="docs-intro">
               {{page.summary}}
             </section>
@@ -118,10 +119,10 @@ export default {
   mounted() {
     this.$once("hook:beforeDestroy", () => {
       unregisterPopstate(this.handleBackFoward)
-      unregisterResize(this.responsiveSidebar)
+      unregisterResize(this.coderDocsResponsiveSidebar) // CoderDocs
     })
     registerPopstate(this.handleBackFoward)
-    registerResize(this.responsiveSidebar)
+    registerResize(this.coderDocsResponsiveSidebar) // CoderDocs: onresize
     this.initPage()
   },
   computed: {
@@ -136,6 +137,10 @@ export default {
     },
     pageContentRendered() {
       return markdownRender(this.page.content, true)
+    },
+    pageUpdatedTimestamp() {
+      const d = new Date(this.page.t_updated)
+      return d.toLocaleString()
     },
   },
   methods: {
@@ -209,7 +214,10 @@ export default {
             }
 
             vue.foundStatus = 1 // found product
-            vue.$nextTick(()=>vue.responsiveSidebar())
+            vue.$nextTick(()=>{
+              // CoderDocs: onload
+              vue.coderDocsResponsiveSidebar()
+            })
           },
           (err)=>{
             vue.errorMsg = err
@@ -240,7 +248,7 @@ export default {
     popup(msg) {
       alert(msg)
     },
-    responsiveSidebar() { // CoderDocs
+    coderDocsResponsiveSidebar() { // CoderDocs
       const w = window.innerWidth
       const sidebar = this.$refs['docs-sidebar']
       if (sidebar) {
@@ -252,7 +260,19 @@ export default {
           sidebar.classList.add('sidebar-hidden')
         }
       }
-    }
+    },
+    coderDocsSidebarToggler() { // CoderDocs
+      const sidebar = this.$refs['docs-sidebar']
+      if (sidebar) {
+        if (sidebar.classList.contains('sidebar-visible')) {
+          sidebar.classList.remove('sidebar-visible');
+          sidebar.classList.add('sidebar-hidden');
+        } else {
+          sidebar.classList.remove('sidebar-hidden');
+          sidebar.classList.add('sidebar-visible');
+        }
+      }
+    },
   },
   data() {
     return {

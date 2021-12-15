@@ -11,6 +11,9 @@ const messages = {
         topics: 'Topics',
         pages: 'Pages',
 
+        page_updated_timestamp: 'Last updated',
+        page_created_timestamp: 'Creation time',
+
         error_unknown: "Error occurred, try again after a moment! If the problem persists, please contact website administrator.",
         error_product_not_found: 'No product mapped to domain "{domain}".',
         error_topic_not_found: 'Topic "{topic}" not found.',
@@ -25,6 +28,9 @@ const messages = {
         contacts: 'Liên hệ',
         topics: 'Chủ đề',
         pages: 'Trang tài liệu',
+
+        page_updated_timestamp: 'Cập nhật lần cuối',
+        page_created_timestamp: 'Thời điểm tạo',
 
         error_unknown: "Có lỗi xảy ra, vui lòng thử lại sau. Nếu sự cố vẫn còn tiếp diễn, hãy liên lạc với người quản trị website.",
         error_product_not_found: 'Không có sản phẩm nào tương ứng với tên miền "{domain}".',
