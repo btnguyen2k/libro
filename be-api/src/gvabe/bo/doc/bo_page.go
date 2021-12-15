@@ -129,6 +129,8 @@ type Page struct {
 func (p *Page) ToMap(postFunc henge.FuncPostUboToMap) map[string]interface{} {
 	result := map[string]interface{}{
 		henge.FieldId: p.GetId(),
+		henge.FieldTimeCreated: p.GetTimeCreated(),
+		henge.FieldTimeUpdated: p.GetTimeUpdated(),
 		bo.SerKeyFields: map[string]interface{}{
 			PageFieldProductId: p.productId,
 			PageFieldTopicId:   p.topicId,

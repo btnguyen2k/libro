@@ -73,6 +73,7 @@ var funcProductToMapTransform = func(m map[string]interface{}) map[string]interf
 	result := map[string]interface{}{
 		"id":        m[henge.FieldId],
 		"t_created": m[henge.FieldTimeCreated],
+		"t_updated": m[henge.FieldTimeUpdated],
 		"domains":   make([]string, 0),
 	}
 	result["is_published"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, product.ProdAttrIsPublished), reddo.TypeBool)
@@ -81,9 +82,12 @@ var funcProductToMapTransform = func(m map[string]interface{}) map[string]interf
 	result["num_topics"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, product.ProdAttrNumTopics), reddo.TypeInt)
 	result["contacts"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, product.ProdAttrContacts), product.TypContactsMap)
 
-	// convert "creation timestamp" to UTC
+	// convert "timestamp" to UTC
 	if t, ok := result["t_created"].(time.Time); ok {
 		result["t_created"] = t.In(time.UTC)
+	}
+	if t, ok := result["t_updated"].(time.Time); ok {
+		result["t_updated"] = t.In(time.UTC)
 	}
 
 	// populate "domains" field
@@ -406,6 +410,7 @@ var funcTopicToMapTransform = func(m map[string]interface{}) map[string]interfac
 	result := map[string]interface{}{
 		"id":        m[henge.FieldId],
 		"t_created": m[henge.FieldTimeCreated],
+		"t_updated": m[henge.FieldTimeUpdated],
 	}
 	result["product_id"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyFields, doc.TopicFieldProductId), reddo.TypeString)
 	result["pos"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyFields, doc.TopicFieldPosition), reddo.TypeInt)
@@ -414,9 +419,12 @@ var funcTopicToMapTransform = func(m map[string]interface{}) map[string]interfac
 	result["summary"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, doc.TopicAttrSummary), reddo.TypeString)
 	result["num_pages"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, doc.TopicAttrNumPages), reddo.TypeInt)
 
-	// convert "creation timestamp" to UTC
+	// convert "timestamp" to UTC
 	if t, ok := result["t_created"].(time.Time); ok {
 		result["t_created"] = t.In(time.UTC)
+	}
+	if t, ok := result["t_updated"].(time.Time); ok {
+		result["t_updated"] = t.In(time.UTC)
 	}
 
 	return result
@@ -724,6 +732,7 @@ var funcPageToMapTransform = func(m map[string]interface{}) map[string]interface
 	result := map[string]interface{}{
 		"id":        m[henge.FieldId],
 		"t_created": m[henge.FieldTimeCreated],
+		"t_updated": m[henge.FieldTimeUpdated],
 	}
 	result["product_id"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyFields, doc.PageFieldProductId), reddo.TypeString)
 	result["topic_id"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyFields, doc.PageFieldTopicId), reddo.TypeString)
@@ -733,9 +742,12 @@ var funcPageToMapTransform = func(m map[string]interface{}) map[string]interface
 	result["summary"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, doc.PageAttrSummary), reddo.TypeString)
 	result["content"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, doc.PageAttrContent), reddo.TypeString)
 
-	// convert "creation timestamp" to UTC
+	// convert "timestamp" to UTC
 	if t, ok := result["t_created"].(time.Time); ok {
 		result["t_created"] = t.In(time.UTC)
+	}
+	if t, ok := result["t_updated"].(time.Time); ok {
+		result["t_updated"] = t.In(time.UTC)
 	}
 
 	return result

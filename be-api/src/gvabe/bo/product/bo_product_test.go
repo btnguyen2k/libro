@@ -5,6 +5,7 @@ import (
 	"math/rand"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/btnguyen2k/henge"
 	"main/src/gvabe/bo"
@@ -12,6 +13,8 @@ import (
 
 func TestNewProduct(t *testing.T) {
 	name := "TestNewProduct"
+	tstart := time.Now()
+	henge.TimestampRounding = henge.TimestampRoundSettingNone
 	_tagVersion := uint64(1337)
 	_id := "libro"
 	_name := "Libro"
@@ -61,14 +64,23 @@ func TestNewProduct(t *testing.T) {
 	if contacts, expected := prod.GetContacts(), map[string]string{}; !reflect.DeepEqual(contacts, expected) {
 		t.Fatalf("%s failed: expected contacts to be %#v but received %#v", name, expected, contacts)
 	}
+
+	tend := time.Now()
+	if prod.GetTimeCreated().Before(tstart) || prod.GetTimeCreated().After(tend) {
+		t.Fatalf("%s failed: timestamp-created is invalid\nStart: %s / Created: %s / End: %s", name, tstart, prod.GetTimeCreated(), tend)
+	}
+	if prod.GetTimeUpdated().Before(tstart) || prod.GetTimeUpdated().After(tend) || prod.GetTimeUpdated().Before(prod.GetTimeCreated()) {
+		t.Fatalf("%s failed: timestamp-updated is invalid\nStart: %s / Updated: %s / End: %s", name, tstart, prod.GetTimeUpdated(), tend)
+	}
 }
 
 func TestNewProductFromUbo(t *testing.T) {
 	name := "TestNewProductFromUbo"
-
 	if NewProductFromUbo(nil) != nil {
 		t.Fatalf("%s failed: NewProductFromUbo(nil) should return nil", name)
 	}
+	tstart := time.Now()
+	henge.TimestampRounding = henge.TimestampRoundSettingNone
 	_tagVersion := uint64(1337)
 	_id := "libro"
 	_name := "Libro"
@@ -112,8 +124,18 @@ func TestNewProductFromUbo(t *testing.T) {
 	if contacts, expected := prod.GetContacts(), map[string]string{"github": "btnguyen2k/libro", "fb": "fb/libro"}; !reflect.DeepEqual(contacts, expected) {
 		t.Fatalf("%s failed: expected contacts to be %#v but received %#v", name, expected, contacts)
 	}
+	prod.SetNumTopics(_numTopics) // force change 'timestamp-updated'
+
+	tend := time.Now()
+	if prod.GetTimeCreated().Before(tstart) || prod.GetTimeCreated().After(tend) {
+		t.Fatalf("%s failed: timestamp-created is invalid\nStart: %s / Created: %s / End: %s", name, tstart, prod.GetTimeCreated(), tend)
+	}
+	if prod.GetTimeUpdated().Before(tstart) || prod.GetTimeUpdated().After(tend) || prod.GetTimeUpdated().Before(prod.GetTimeCreated()) {
+		t.Fatalf("%s failed: timestamp-updated is invalid\nStart: %s / Updated: %s / End: %s", name, tstart, prod.GetTimeUpdated(), tend)
+	}
 }
 
+// no contacts info
 func TestProduct_ToMap(t *testing.T) {
 	name := "TestProduct_ToMap"
 	_tagVersion := uint64(1337)
@@ -130,7 +152,9 @@ func TestProduct_ToMap(t *testing.T) {
 
 	m := prod.ToMap(nil)
 	expected := map[string]interface{}{
-		henge.FieldId: _id,
+		henge.FieldId:          _id,
+		henge.FieldTimeCreated: prod.GetTimeCreated(),
+		henge.FieldTimeUpdated: prod.GetTimeUpdated(),
 		bo.SerKeyAttrs: map[string]interface{}{
 			ProdAttrName:        _name,
 			ProdAttrDesc:        _desc,
@@ -145,12 +169,16 @@ func TestProduct_ToMap(t *testing.T) {
 
 	m = prod.ToMap(func(input map[string]interface{}) map[string]interface{} {
 		return map[string]interface{}{
-			"FieldId":     input[henge.FieldId],
-			"SerKeyAttrs": input[bo.SerKeyAttrs],
+			"FieldId":          input[henge.FieldId],
+			"FieldTimeCreated": input[henge.FieldTimeCreated],
+			"FieldTimeUpdated": input[henge.FieldTimeUpdated],
+			"SerKeyAttrs":      input[bo.SerKeyAttrs],
 		}
 	})
 	expected = map[string]interface{}{
-		"FieldId": _id,
+		"FieldId":          _id,
+		"FieldTimeCreated": prod.GetTimeCreated(),
+		"FieldTimeUpdated": prod.GetTimeUpdated(),
 		"SerKeyAttrs": map[string]interface{}{
 			ProdAttrName:        _name,
 			ProdAttrDesc:        _desc,
@@ -164,8 +192,9 @@ func TestProduct_ToMap(t *testing.T) {
 	}
 }
 
+// some contacts info
 func TestProduct_ToMap2(t *testing.T) {
-	name := "TestProduct_ToMap"
+	name := "TestProduct_ToMap2"
 	_tagVersion := uint64(1337)
 	_id := "libro"
 	_name := "Libro"
@@ -181,7 +210,9 @@ func TestProduct_ToMap2(t *testing.T) {
 
 	m := prod.ToMap(nil)
 	expected := map[string]interface{}{
-		henge.FieldId: _id,
+		henge.FieldId:          _id,
+		henge.FieldTimeCreated: prod.GetTimeCreated(),
+		henge.FieldTimeUpdated: prod.GetTimeUpdated(),
 		bo.SerKeyAttrs: map[string]interface{}{
 			ProdAttrName:        _name,
 			ProdAttrDesc:        _desc,
@@ -196,12 +227,16 @@ func TestProduct_ToMap2(t *testing.T) {
 
 	m = prod.ToMap(func(input map[string]interface{}) map[string]interface{} {
 		return map[string]interface{}{
-			"FieldId":     input[henge.FieldId],
-			"SerKeyAttrs": input[bo.SerKeyAttrs],
+			"FieldId":          input[henge.FieldId],
+			"FieldTimeCreated": input[henge.FieldTimeCreated],
+			"FieldTimeUpdated": input[henge.FieldTimeUpdated],
+			"SerKeyAttrs":      input[bo.SerKeyAttrs],
 		}
 	})
 	expected = map[string]interface{}{
-		"FieldId": _id,
+		"FieldId":          _id,
+		"FieldTimeCreated": prod.GetTimeCreated(),
+		"FieldTimeUpdated": prod.GetTimeUpdated(),
 		"SerKeyAttrs": map[string]interface{}{
 			ProdAttrName:        _name,
 			ProdAttrDesc:        _desc,
@@ -215,6 +250,7 @@ func TestProduct_ToMap2(t *testing.T) {
 	}
 }
 
+// no contacts info
 func TestProduct_json(t *testing.T) {
 	name := "TestProduct_json"
 	_tagVersion := uint64(1337)
@@ -260,10 +296,12 @@ func TestProduct_json(t *testing.T) {
 	if prod1.GetChecksum() != prod2.GetChecksum() {
 		t.Fatalf("%s failed: expected %#v but received %#v", name, prod1.GetChecksum(), prod2.GetChecksum())
 	}
+
 }
 
+// some contacts info
 func TestProduct_json2(t *testing.T) {
-	name := "TestProduct_json"
+	name := "TestProduct_json2"
 	_tagVersion := uint64(1337)
 	_id := "libro"
 	_name := "Libro"

@@ -118,7 +118,9 @@ type Topic struct {
 //   }
 func (t *Topic) ToMap(postFunc henge.FuncPostUboToMap) map[string]interface{} {
 	result := map[string]interface{}{
-		henge.FieldId: t.GetId(),
+		henge.FieldId:          t.GetId(),
+		henge.FieldTimeCreated: t.GetTimeCreated(),
+		henge.FieldTimeUpdated: t.GetTimeUpdated(),
 		bo.SerKeyFields: map[string]interface{}{
 			TopicFieldProductId: t.productId,
 			TopicFieldPosition:  t.position,

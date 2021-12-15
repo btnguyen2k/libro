@@ -107,6 +107,8 @@ type Product struct {
 func (p *Product) ToMap(postFunc henge.FuncPostUboToMap) map[string]interface{} {
 	result := map[string]interface{}{
 		henge.FieldId: p.GetId(),
+		henge.FieldTimeCreated: p.GetTimeCreated(),
+		henge.FieldTimeUpdated: p.GetTimeUpdated(),
 		bo.SerKeyAttrs: map[string]interface{}{
 			ProdAttrName:        p.GetName(),
 			ProdAttrDesc:        p.GetDescription(),

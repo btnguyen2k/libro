@@ -5,6 +5,7 @@ import (
 	"math/rand"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/btnguyen2k/henge"
 	"main/src/gvabe/bo"
@@ -14,6 +15,8 @@ import (
 
 func TestNewPage(t *testing.T) {
 	name := "TestNewPage"
+	tstart := time.Now()
+	henge.TimestampRounding = henge.TimestampRoundSettingNone
 	_tagVersion := uint64(1337)
 	_prodId := "libro"
 	_name := "Libro"
@@ -66,14 +69,23 @@ func TestNewPage(t *testing.T) {
 	if content := page.GetContent(); content != _content {
 		t.Fatalf("%s failed: expected content to be %#v but received %#v", name, _content, content)
 	}
+
+	tend := time.Now()
+	if page.GetTimeCreated().Before(tstart) || page.GetTimeCreated().After(tend) {
+		t.Fatalf("%s failed: timestamp-created is invalid\nStart: %s / Created: %s / End: %s", name, tstart, page.GetTimeCreated(), tend)
+	}
+	if page.GetTimeUpdated().Before(tstart) || page.GetTimeUpdated().After(tend) || page.GetTimeUpdated().Before(page.GetTimeCreated()) {
+		t.Fatalf("%s failed: timestamp-updated is invalid\nStart: %s / Updated: %s / End: %s", name, tstart, page.GetTimeUpdated(), tend)
+	}
 }
 
 func TestNewPageFromUbo(t *testing.T) {
 	name := "TestNewPageFromUbo"
-
 	if NewPageFromUbo(nil) != nil {
 		t.Fatalf("%s failed: NewPageFromUbo(nil) should return nil", name)
 	}
+	tstart := time.Now()
+	henge.TimestampRounding = henge.TimestampRoundSettingNone
 	_tagVersion := uint64(1337)
 	_id := utils.UniqueId()
 	_prodId := "libro"
@@ -123,6 +135,14 @@ func TestNewPageFromUbo(t *testing.T) {
 	if content := page.GetContent(); content != _content {
 		t.Fatalf("%s failed: expected content to be %#v but received %#v", name, _content, content)
 	}
+
+	tend := time.Now()
+	if page.GetTimeCreated().Before(tstart) || page.GetTimeCreated().After(tend) {
+		t.Fatalf("%s failed: timestamp-created is invalid\nStart: %s / Created: %s / End: %s", name, tstart, page.GetTimeCreated(), tend)
+	}
+	if page.GetTimeUpdated().Before(tstart) || page.GetTimeUpdated().After(tend) || page.GetTimeUpdated().Before(page.GetTimeCreated()) {
+		t.Fatalf("%s failed: timestamp-updated is invalid\nStart: %s / Updated: %s / End: %s", name, tstart, page.GetTimeUpdated(), tend)
+	}
 }
 
 func TestPage_ToMap(t *testing.T) {
@@ -154,7 +174,9 @@ func TestPage_ToMap(t *testing.T) {
 	_id := page.GetId()
 	m := page.ToMap(nil)
 	expected := map[string]interface{}{
-		henge.FieldId: _id,
+		henge.FieldId:          _id,
+		henge.FieldTimeCreated: page.GetTimeCreated(),
+		henge.FieldTimeUpdated: page.GetTimeUpdated(),
 		bo.SerKeyFields: map[string]interface{}{
 			PageFieldProductId: _prod.GetId(),
 			PageFieldTopicId:   _topic.GetId(),
@@ -173,13 +195,17 @@ func TestPage_ToMap(t *testing.T) {
 
 	m = page.ToMap(func(input map[string]interface{}) map[string]interface{} {
 		return map[string]interface{}{
-			"FieldId":      input[henge.FieldId],
-			"SerKeyFields": input[bo.SerKeyFields],
-			"SerKeyAttrs":  input[bo.SerKeyAttrs],
+			"FieldId":          input[henge.FieldId],
+			"FieldTimeCreated": input[henge.FieldTimeCreated],
+			"FieldTimeUpdated": input[henge.FieldTimeUpdated],
+			"SerKeyFields":     input[bo.SerKeyFields],
+			"SerKeyAttrs":      input[bo.SerKeyAttrs],
 		}
 	})
 	expected = map[string]interface{}{
-		"FieldId": _id,
+		"FieldId":          _id,
+		"FieldTimeCreated": page.GetTimeCreated(),
+		"FieldTimeUpdated": page.GetTimeUpdated(),
 		"SerKeyFields": map[string]interface{}{
 			PageFieldProductId: _prod.GetId(),
 			PageFieldTopicId:   _topic.GetId(),
