@@ -14,9 +14,6 @@ const TopicPageList = () => import('@/views/libro/TopicPageList')
 
 // Views - Pages
 const Login = () => import('@/views/gva/pages/Login')
-const Page404 = () => import('@/views/pages/Page404')
-const Page500 = () => import('@/views/pages/Page500')
-const Register = () => import('@/views/pages/Register')
 
 Vue.use(Router)
 
@@ -130,19 +127,10 @@ function configRoutes() {
             },
             children: [
                 {
-                    path: '404', name: 'Page404', component: Page404
-                },
-                {
-                    path: '500', name: 'Page500', component: Page500
-                },
-                {
                     path: 'login', name: 'Login', component: Login,
                     props: (route) => ({returnUrl: route.query.returnUrl}),
                     params: (route) => ({returnUrl: route.query.returnUrl}),
                 },
-                {
-                    path: 'register', name: 'Register', component: Register
-                }
             ]
         }
     ]
