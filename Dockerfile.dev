@@ -63,12 +63,3 @@ WORKDIR /app
 EXPOSE 8000
 CMD ["/app/main"]
 #ENTRYPOINT /app/main
-
-# FROM gcr.io/distroless/base-debian11
-# LABEL maintainer="Thanh Nguyen"
-# COPY --from=builder_be /build/be-api/main /main
-# COPY --from=builder_be /build/be-api/config /config
-# COPY --from=builder_fe /build/fe-admin/dist /frontend
-# WORKDIR /
-# EXPOSE 8000
-# CMD ["/main"]
