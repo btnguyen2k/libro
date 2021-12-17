@@ -128,6 +128,10 @@ func initEchoServer() {
 	const feDir = "./frontend"
 	const feAdminPath = "/admin"
 	e.Static(feAdminPath, feDir+feAdminPath)
+	const feDocPath = "/doc"
+	const feTemplate = "coderdocs" // TODO for now Libro provide only 1 frontend template
+	e.Static(feDocPath, feDir+"/tpl_"+feTemplate)
+
 	e.GET("/manifest.json", func(c echo.Context) error {
 		if fcontent, err := ioutil.ReadFile(feDir + feAdminPath + "/manifest.json"); err != nil {
 			if os.IsNotExist(err) {
@@ -151,7 +155,7 @@ func initEchoServer() {
 		}
 	})
 	e.GET("/", func(c echo.Context) error {
-		return nil
+		return c.Redirect(http.StatusPermanentRedirect, feDocPath)
 	})
 
 	// register API http endpoints

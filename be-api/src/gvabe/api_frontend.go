@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/btnguyen2k/consu/reddo"
-	"main/src/gvabe/bo/product"
+	"main/src/gvabe/bo/libro"
 	"main/src/itineris"
 )
 
@@ -15,7 +15,7 @@ func authenticateFeApiCall(ctx *itineris.ApiContext) *itineris.ApiResult {
 
 /*----------------------------------------------------------------------*/
 
-func _fetchProductForDomain(domain string) (prod *product.Product, err error) {
+func _fetchProductForDomain(domain string) (prod *libro.Product, err error) {
 	mapping, err := domainProductMappingDao.Get(domain)
 	log.Printf("\t[DEBUG] - _fetchProductForDomain, domain %s / mapping %#v", domain, mapping)
 	if err != nil {

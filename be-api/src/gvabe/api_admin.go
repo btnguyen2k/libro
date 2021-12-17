@@ -12,8 +12,7 @@ import (
 	"github.com/btnguyen2k/henge"
 	"main/src/goapi"
 	"main/src/gvabe/bo"
-	"main/src/gvabe/bo/doc"
-	"main/src/gvabe/bo/product"
+	"main/src/gvabe/bo/libro"
 	"main/src/gvabe/bo/user"
 	"main/src/itineris"
 	"main/src/respicite"
@@ -76,11 +75,11 @@ var funcProductToMapTransform = func(m map[string]interface{}) map[string]interf
 		"t_updated": m[henge.FieldTimeUpdated],
 		"domains":   make([]string, 0),
 	}
-	result["is_published"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, product.ProdAttrIsPublished), reddo.TypeBool)
-	result["name"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, product.ProdAttrName), reddo.TypeString)
-	result["desc"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, product.ProdAttrDesc), reddo.TypeString)
-	result["num_topics"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, product.ProdAttrNumTopics), reddo.TypeInt)
-	result["contacts"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, product.ProdAttrContacts), product.TypContactsMap)
+	result["is_published"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, libro.ProdAttrIsPublished), reddo.TypeBool)
+	result["name"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, libro.ProdAttrName), reddo.TypeString)
+	result["desc"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, libro.ProdAttrDesc), reddo.TypeString)
+	result["num_topics"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, libro.ProdAttrNumTopics), reddo.TypeInt)
+	result["contacts"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, libro.ProdAttrContacts), libro.TypContactsMap)
 
 	// convert "timestamp" to UTC
 	if t, ok := result["t_created"].(time.Time); ok {
@@ -172,7 +171,7 @@ func apiAdminAddProduct(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *i
 	}
 
 	// create product
-	prod = product.NewProduct(goapi.AppVersionNumber, utils.UniqueIdSmall(), name.(string), desc.(string), isPublished.(bool))
+	prod = libro.NewProduct(goapi.AppVersionNumber, utils.UniqueIdSmall(), name.(string), desc.(string), isPublished.(bool))
 	prod.SetId(id.(string))
 	prod.SetContacts(contactsMap)
 	result, err := productDao.Create(prod)
@@ -279,7 +278,7 @@ func apiAdminDeleteProduct(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params
 	}
 
 	// TODO: post-production-deletion clean-up via event-driven manner
-	go func(prod *product.Product) {
+	go func(prod *libro.Product) {
 		// unmap domains
 		if domainProductMappings, err := domainProductMappingDao.Rget(prod.GetId()); err != nil {
 			log.Printf("[WARN] Post-delete product [%s] - Error getting mapped domain names: %e", prod.GetId(), err)
@@ -412,12 +411,12 @@ var funcTopicToMapTransform = func(m map[string]interface{}) map[string]interfac
 		"t_created": m[henge.FieldTimeCreated],
 		"t_updated": m[henge.FieldTimeUpdated],
 	}
-	result["product_id"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyFields, doc.TopicFieldProductId), reddo.TypeString)
-	result["pos"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyFields, doc.TopicFieldPosition), reddo.TypeInt)
-	result["title"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, doc.TopicAttrTitle), reddo.TypeString)
-	result["icon"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, doc.TopicAttrIcon), reddo.TypeString)
-	result["summary"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, doc.TopicAttrSummary), reddo.TypeString)
-	result["num_pages"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, doc.TopicAttrNumPages), reddo.TypeInt)
+	result["product_id"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyFields, libro.TopicFieldProductId), reddo.TypeString)
+	result["pos"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyFields, libro.TopicFieldPosition), reddo.TypeInt)
+	result["title"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, libro.TopicAttrTitle), reddo.TypeString)
+	result["icon"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, libro.TopicAttrIcon), reddo.TypeString)
+	result["summary"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, libro.TopicAttrSummary), reddo.TypeString)
+	result["num_pages"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, libro.TopicAttrNumPages), reddo.TypeInt)
 
 	// convert "timestamp" to UTC
 	if t, ok := result["t_created"].(time.Time); ok {
@@ -496,7 +495,7 @@ func apiAdminAddProductTopic(ctx *itineris.ApiContext, _ *itineris.ApiAuth, para
 		return itineris.NewApiResult(itineris.StatusErrorClient).SetMessage("title is empty")
 	}
 
-	topic = doc.NewTopic(goapi.AppVersionNumber, product, title.(string), icon.(string), summary.(string))
+	topic = libro.NewTopic(goapi.AppVersionNumber, product, title.(string), icon.(string), summary.(string))
 	topic.SetId(id.(string))
 	result, err := topicDao.Create(topic)
 	if err != nil || !result {
@@ -505,7 +504,7 @@ func apiAdminAddProductTopic(ctx *itineris.ApiContext, _ *itineris.ApiAuth, para
 	}
 
 	// TODO: update product's stats via event-driven manner
-	go func(topic *doc.Topic) {
+	go func(topic *libro.Topic) {
 		prod, err := productDao.Get(topic.GetProductId())
 		if err != nil {
 			log.Printf("[WARN] Post-add topic [%s] - Error getting product [%s]: %e", topic.GetId(), topic.GetProductId(), err)
@@ -562,7 +561,7 @@ func apiAdminDeleteProductTopic(ctx *itineris.ApiContext, _ *itineris.ApiAuth, p
 	}
 
 	// TODO: delete pages & update product's stats via event-driven manner
-	go func(topic *doc.Topic) {
+	go func(topic *libro.Topic) {
 		prod, err := productDao.Get(topic.GetProductId())
 		if err != nil {
 			log.Printf("[WARN] Post-delete topic [%s] - Error getting product [%s]: %e", topic.GetId(), topic.GetProductId(), err)
@@ -734,13 +733,13 @@ var funcPageToMapTransform = func(m map[string]interface{}) map[string]interface
 		"t_created": m[henge.FieldTimeCreated],
 		"t_updated": m[henge.FieldTimeUpdated],
 	}
-	result["product_id"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyFields, doc.PageFieldProductId), reddo.TypeString)
-	result["topic_id"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyFields, doc.PageFieldTopicId), reddo.TypeString)
-	result["pos"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyFields, doc.PageFieldPosition), reddo.TypeInt)
-	result["title"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, doc.PageAttrTitle), reddo.TypeString)
-	result["icon"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, doc.PageAttrIcon), reddo.TypeString)
-	result["summary"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, doc.PageAttrSummary), reddo.TypeString)
-	result["content"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, doc.PageAttrContent), reddo.TypeString)
+	result["product_id"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyFields, libro.PageFieldProductId), reddo.TypeString)
+	result["topic_id"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyFields, libro.PageFieldTopicId), reddo.TypeString)
+	result["pos"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyFields, libro.PageFieldPosition), reddo.TypeInt)
+	result["title"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, libro.PageAttrTitle), reddo.TypeString)
+	result["icon"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, libro.PageAttrIcon), reddo.TypeString)
+	result["summary"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, libro.PageAttrSummary), reddo.TypeString)
+	result["content"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, libro.PageAttrContent), reddo.TypeString)
 
 	// convert "timestamp" to UTC
 	if t, ok := result["t_created"].(time.Time); ok {
@@ -818,7 +817,7 @@ func apiAdminAddTopicPage(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params 
 		return itineris.NewApiResult(itineris.StatusErrorClient).SetMessage("title is empty")
 	}
 
-	page = doc.NewPage(goapi.AppVersionNumber, topic, title.(string), icon.(string), summary.(string), content.(string))
+	page = libro.NewPage(goapi.AppVersionNumber, topic, title.(string), icon.(string), summary.(string), content.(string))
 	page.SetId(id.(string))
 	result, err := pageDao.Create(page)
 	if err != nil || !result {
@@ -827,7 +826,7 @@ func apiAdminAddTopicPage(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params 
 	}
 
 	// TODO: update topic's stats via event-driven manner
-	go func(page *doc.Page) {
+	go func(page *libro.Page) {
 		topic, err := topicDao.Get(page.GetTopicId())
 		if err != nil {
 			log.Printf("[WARN] Post-add page [%s] - Error getting topic [%s]: %e", page.GetId(), page.GetTopicId(), err)
@@ -882,7 +881,7 @@ func apiAdminDeleteTopicPage(ctx *itineris.ApiContext, _ *itineris.ApiAuth, para
 	}
 
 	// TODO: update topic's stats via event-driven manner
-	go func(page *doc.Page) {
+	go func(page *libro.Page) {
 		topic, err := topicDao.Get(page.GetTopicId())
 		if err != nil {
 			log.Printf("[WARN] Post-delete page [%s] - Error getting topic [%s]: %e", page.GetId(), page.GetTopicId(), err)

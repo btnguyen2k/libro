@@ -16,17 +16,16 @@ import (
 	"strings"
 
 	"main/src/goapi"
-	"main/src/gvabe/bo/doc"
-	"main/src/gvabe/bo/product"
+	"main/src/gvabe/bo/libro"
 	"main/src/gvabe/bo/user"
 	"main/src/respicite"
 )
 
 var (
-	userDao                 user.UserDao
-	productDao              product.ProductDao
-	topicDao                doc.TopicDao
-	pageDao                 doc.PageDao
+	userDao    user.UserDao
+	productDao libro.ProductDao
+	topicDao                libro.TopicDao
+	pageDao                 libro.PageDao
 	domainProductMappingDao respicite.M2oDao
 )
 
