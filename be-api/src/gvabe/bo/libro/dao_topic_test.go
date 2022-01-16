@@ -147,7 +147,8 @@ func doTestTopicDaoCreateUpdateGet(t *testing.T, name string, dao TopicDao) {
 		t.Fatalf("%s failed: %#v / %s", name+"/Create", ok, err)
 	}
 
-	bo0.SetProductId(_prodId + "-new").SetIcon(_icon + "-new").SetTitle(_title + "-new").SetSummary(_summary + "-new").SetPosition(_pos + 1).SetNumPages(_numPages + 2).SetTagVersion(_tagVersion + 3)
+	// product-id is partition key, do not change it!
+	bo0.SetIcon(_icon + "-new").SetTitle(_title + "-new").SetSummary(_summary + "-new").SetPosition(_pos + 1).SetNumPages(_numPages + 2).SetTagVersion(_tagVersion + 3)
 	bo0.SetDataAttr("props.owner", _name+"-new")
 	bo0.SetDataAttr("props.email", _email+"-new")
 	bo0.SetDataAttr("age", _age+2)
@@ -176,9 +177,9 @@ func doTestTopicDaoCreateUpdateGet(t *testing.T, name string, dao TopicDao) {
 		if v1, v0 := bo1.GetId(), _id; v1 != v0 {
 			t.Fatalf("%s failed: expected %#v but received %#v", name, v0, v1)
 		}
-		if v1, v0 := bo1.GetProductId(), _prod.GetId()+"-new"; v1 != v0 {
-			t.Fatalf("%s failed: expected %#v but received %#v", name, v0, v1)
-		}
+		// if v1, v0 := bo1.GetProductId(), _prod.GetId()+"-new"; v1 != v0 {
+		// 	t.Fatalf("%s failed: expected %#v but received %#v", name, v0, v1)
+		// }
 		if v1, v0 := bo1.GetIcon(), _icon+"-new"; v1 != v0 {
 			t.Fatalf("%s failed: expected %#v but received %#v", name, v0, v1)
 		}

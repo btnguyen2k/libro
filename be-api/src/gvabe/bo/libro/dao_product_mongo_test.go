@@ -17,7 +17,7 @@ func initProductDaoMongo(mc *prom.MongoConnect) ProductDao {
 
 var setupTestProductDaoMongo = func(t *testing.T, testName string) {
 	var err error
-	testMc, err = newMongoConnect(t, testName, "", "")
+	testMc, err = newMongoConnect(t, testName)
 	if err != nil {
 		t.Fatalf("%s failed: error [%s]", testName, err)
 	} else if testMc == nil {
@@ -27,6 +27,10 @@ var setupTestProductDaoMongo = func(t *testing.T, testName string) {
 	err = mongoInitCollection(testMc, testMongoCollectionProduct)
 	if err != nil {
 		t.Fatalf("%s failed: error [%s]", testName+"/mongoInitCollection", err)
+	}
+	err = InitProductTableMongo(testMc, testMongoCollectionProduct)
+	if err != nil {
+		t.Fatalf("%s failed: error [%s]", testName+"/"+testDbType+"/InitProductTableMongo", err)
 	}
 }
 
@@ -54,7 +58,6 @@ func TestProductDaoMongo_CreateGet(t *testing.T) {
 	testName := "TestProductDaoMongo_CreateGet"
 	teardownTest := setupTest(t, testName, setupTestProductDaoMongo, teardownTestProductDaoMongo)
 	defer teardownTest(t)
-
 	dao := initProductDaoMongo(testMc)
 	doTestProductDaoCreateGet(t, testName, dao)
 }
@@ -63,7 +66,6 @@ func TestProductDaoMongo_CreateUpdateGet(t *testing.T) {
 	testName := "TestProductDaoMongo_CreateGet"
 	teardownTest := setupTest(t, testName, setupTestProductDaoMongo, teardownTestProductDaoMongo)
 	defer teardownTest(t)
-
 	dao := initProductDaoMongo(testMc)
 	doTestProductDaoCreateUpdateGet(t, testName, dao)
 }
@@ -72,7 +74,6 @@ func TestProductDaoMongo_CreateDelete(t *testing.T) {
 	testName := "TestProductDaoMongo_CreateDelete"
 	teardownTest := setupTest(t, testName, setupTestProductDaoMongo, teardownTestProductDaoMongo)
 	defer teardownTest(t)
-
 	dao := initProductDaoMongo(testMc)
 	doTestProductDaoCreateDelete(t, testName, dao)
 }
@@ -81,7 +82,6 @@ func TestProductDaoMongo_GetAll(t *testing.T) {
 	testName := "TestProductDaoMongo_GetAll"
 	teardownTest := setupTest(t, testName, setupTestProductDaoMongo, teardownTestProductDaoMongo)
 	defer teardownTest(t)
-
 	dao := initProductDaoMongo(testMc)
 	doTestProductDaoGetAll(t, testName, dao)
 }
@@ -90,7 +90,6 @@ func TestProductDaoMongo_GetN(t *testing.T) {
 	testName := "TestProductDaoMongo_GetN"
 	teardownTest := setupTest(t, testName, setupTestProductDaoMongo, teardownTestProductDaoMongo)
 	defer teardownTest(t)
-
 	dao := initProductDaoMongo(testMc)
 	doTestProductDaoGetN(t, testName, dao)
 }

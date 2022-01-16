@@ -11,12 +11,12 @@ import (
 func NewPageDaoCosmosdb(sqlc *prom.SqlConnect, tableName string, txModeOnWrite bool) PageDao {
 	dao := &BasePageDaoImpl{}
 	spec := &henge.CosmosdbDaoSpec{
-		// PkName:        henge.CosmosdbColId,
-		PkName:        PageColProductId,
+		// PkName:        PageColProductId,
+		PkName:        henge.CosmosdbColId,
 		TxModeOnWrite: txModeOnWrite,
 	}
 	dao.UniversalDao = henge.NewUniversalDaoCosmosdbSql(sqlc, tableName, spec)
 	return dao
 }
 
-/* There is no function CreateCosmosdbTableForPages, use CreateSqlTableForPages instead. */
+/* There is no function CreateCosmosdbTableForPages, use InitPageTableSql instead. */

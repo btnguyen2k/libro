@@ -1,6 +1,7 @@
 package libro
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/btnguyen2k/prom"
@@ -35,10 +36,15 @@ var setupTestProductDaoSql = func(t *testing.T, testName string) {
 	if err != nil {
 		t.Fatalf("%s failed: error [%s]", testName+"/"+testDbType+"/sqlInitTable", err)
 	}
+	err = InitProductTableSql(testSqlc, testSqlTableProduct)
+	if err != nil {
+		t.Fatalf("%s failed: error [%s]", testName+"/"+testDbType+"/InitProductTableSql", err)
+	}
 }
 
 var teardownTestProductDaoSql = func(t *testing.T, testName string) {
 	if testSqlc != nil {
+		testSqlc.GetDB().Exec(fmt.Sprintf("DROP TABLE %s", testSqlTableProduct))
 		testSqlc.Close()
 		defer func() { testSqlc = nil }()
 	}
@@ -56,7 +62,6 @@ func TestNewProductDaoSql(t *testing.T) {
 		t.Run(testDbType, func(t *testing.T) {
 			teardownTest := setupTest(t, testName, setupTestProductDaoSql, teardownTestProductDaoSql)
 			defer teardownTest(t)
-
 			dao := initProductDaoSql(testSqlc)
 			if dao == nil {
 				t.Fatalf("%s failed: nil", testName+"/"+testDbType+"/initProductDaoSql")
@@ -75,13 +80,7 @@ func TestProductDaoSql_CreateGet(t *testing.T) {
 		t.Run(testDbType, func(t *testing.T) {
 			teardownTest := setupTest(t, testName, setupTestProductDaoSql, teardownTestProductDaoSql)
 			defer teardownTest(t)
-
 			dao := initProductDaoSql(testSqlc)
-			// if sqlc.GetDbFlavor() == prom.FlavorSqlite {
-			// 	henge.TimeLayout = "2006-01-02 15:04:05Z07:00"
-			// } else {
-			// 	henge.TimeLayout = time.RFC3339
-			// }
 			doTestProductDaoCreateGet(t, testName+"/"+testDbType, dao)
 		})
 	}
@@ -97,7 +96,6 @@ func TestProductDaoSql_CreateUpdateGet(t *testing.T) {
 		t.Run(testDbType, func(t *testing.T) {
 			teardownTest := setupTest(t, testName, setupTestProductDaoSql, teardownTestProductDaoSql)
 			defer teardownTest(t)
-
 			dao := initProductDaoSql(testSqlc)
 			doTestProductDaoCreateUpdateGet(t, testName+"/"+testDbType, dao)
 		})
@@ -114,7 +112,6 @@ func TestProductDaoSql_CreateDelete(t *testing.T) {
 		t.Run(testDbType, func(t *testing.T) {
 			teardownTest := setupTest(t, testName, setupTestProductDaoSql, teardownTestProductDaoSql)
 			defer teardownTest(t)
-
 			dao := initProductDaoSql(testSqlc)
 			doTestProductDaoCreateDelete(t, testName+"/"+testDbType, dao)
 		})
@@ -131,7 +128,6 @@ func TestProductDaoSql_GetAll(t *testing.T) {
 		t.Run(testDbType, func(t *testing.T) {
 			teardownTest := setupTest(t, testName, setupTestProductDaoSql, teardownTestProductDaoSql)
 			defer teardownTest(t)
-
 			dao := initProductDaoSql(testSqlc)
 			doTestProductDaoGetAll(t, testName+"/"+testDbType, dao)
 		})
@@ -148,7 +144,6 @@ func TestProductDaoSql_GetN(t *testing.T) {
 		t.Run(testDbType, func(t *testing.T) {
 			teardownTest := setupTest(t, testName, setupTestProductDaoSql, teardownTestProductDaoSql)
 			defer teardownTest(t)
-
 			dao := initProductDaoSql(testSqlc)
 			doTestProductDaoGetN(t, testName+"/"+testDbType, dao)
 		})

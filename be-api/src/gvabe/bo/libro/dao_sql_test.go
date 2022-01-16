@@ -8,7 +8,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/btnguyen2k/henge"
 	"github.com/btnguyen2k/prom"
 
 	_ "github.com/denisenkom/go-mssqldb"
@@ -88,6 +87,7 @@ func sqlGetUrlFromEnv() map[string]sqlDriverAndUrl {
 }
 
 func initSqlConnect(t *testing.T, testName string, dbtype string, info sqlDriverAndUrl) (*prom.SqlConnect, error) {
+	rand.Seed(time.Now().UnixNano())
 	switch dbtype {
 	case "sqlite", "sqlite3":
 		return newSqlConnect(t, testName, info.driver, info.url, testTimeZone, prom.FlavorSqlite)
@@ -108,7 +108,6 @@ func initSqlConnect(t *testing.T, testName string, dbtype string, info sqlDriver
 }
 
 func sqlInitTable(sqlc *prom.SqlConnect, table string) error {
-	rand.Seed(time.Now().UnixNano())
 	var err error
 	if sqlc.GetDbFlavor() == prom.FlavorCosmosDb {
 		_, err = sqlc.GetDB().Exec(fmt.Sprintf("CREATE DATABASE IF NOT EXISTS %s WITH MAXRU=10000", cosmosdbDbName))
@@ -117,16 +116,5 @@ func sqlInitTable(sqlc *prom.SqlConnect, table string) error {
 		}
 	}
 	sqlc.GetDB().Exec(fmt.Sprintf("DROP TABLE %s", table))
-	switch sqlc.GetDbFlavor() {
-	case prom.FlavorCosmosDb:
-		spec := &henge.CosmosdbCollectionSpec{Pk: henge.CosmosdbColId}
-		err = henge.InitCosmosdbCollection(sqlc, table, spec)
-	case prom.FlavorMySql:
-		err = henge.InitMysqlTable(sqlc, table, nil)
-	case prom.FlavorPgSql:
-		err = henge.InitPgsqlTable(sqlc, table, nil)
-	case prom.FlavorSqlite:
-		err = henge.InitSqliteTable(sqlc, table, nil)
-	}
 	return err
 }

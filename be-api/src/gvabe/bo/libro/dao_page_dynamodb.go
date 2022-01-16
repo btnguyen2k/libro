@@ -21,11 +21,11 @@ func NewPageDaoDynamodb(adc *prom.AwsDynamodbConnect, tableName string) PageDao 
 	return dao
 }
 
-// CreateDynamoTableForPages creates AWS DynamoDB table to store document pages.
+// InitPageTableDynamodb creates AWS DynamoDB table to store document pages.
 //   - Necessary table and index (GSI) are created.
 //   - If table/index will be created, RCU=1 and WCU=1 are used.
 //   - If table/index already exist, they will be intact.
-func CreateDynamoTableForPages(adc *prom.AwsDynamodbConnect, tableName string) error {
+func InitPageTableDynamodb(adc *prom.AwsDynamodbConnect, tableName string) error {
 	spec := &henge.DynamodbTablesSpec{MainTableRcu: 1, MainTableWcu: 1}
 	if err := henge.InitDynamodbTables(adc, tableName, spec); err != nil {
 		return err

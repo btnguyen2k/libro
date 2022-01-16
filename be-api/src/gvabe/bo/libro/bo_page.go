@@ -15,7 +15,7 @@ import (
 func NewPage(tagVersion uint64, topic *Topic, title, icon, summary, content string) *Page {
 	id := utils.UniqueId()
 	bo := &Page{
-		UniversalBo: henge.NewUniversalBo(id, tagVersion),
+		UniversalBo: henge.NewUniversalBo(id, tagVersion, henge.UboOpt{TimeLayout: bo.UboTimeLayout, TimestampRounding: bo.UboTimestampRouding}),
 	}
 	position := time.Now().Unix()
 	return bo.
@@ -128,7 +128,7 @@ type Page struct {
 //   }
 func (p *Page) ToMap(postFunc henge.FuncPostUboToMap) map[string]interface{} {
 	result := map[string]interface{}{
-		henge.FieldId: p.GetId(),
+		henge.FieldId:          p.GetId(),
 		henge.FieldTimeCreated: p.GetTimeCreated(),
 		henge.FieldTimeUpdated: p.GetTimeUpdated(),
 		bo.SerKeyFields: map[string]interface{}{

@@ -13,9 +13,13 @@ import (
 )
 
 func TestNewPage(t *testing.T) {
-	name := "TestNewPage"
+	testName := "TestNewPage"
+	teardownTest := setupTest(t, testName, func(t *testing.T, testName string) {
+		bo.UboTimestampRouding = henge.TimestampRoundSettingNone
+	}, nil)
+	defer teardownTest(t)
+
 	tstart := time.Now()
-	// henge.TimestampRounding = henge.TimestampRoundSettingNone
 	_tagVersion := uint64(1337)
 	_prodId := "libro"
 	_name := "Libro"
@@ -29,62 +33,67 @@ func TestNewPage(t *testing.T) {
 	_pos := rand.Intn(10242048)
 	_topic := NewTopic(_tagVersion, _prod, _title, _icon, _summary)
 	if _topic == nil {
-		t.Fatalf("%s failed: nil", name)
+		t.Fatalf("%s failed: nil", testName)
 	}
 	_topic.SetPosition(_pos)
 
 	_content := "page one"
 	page := NewPage(_tagVersion, _topic, _title+"-page", _icon+"-page", _summary+"-page", _content)
 	if page == nil {
-		t.Fatalf("%s failed: nil", name)
+		t.Fatalf("%s failed: nil", testName)
 	}
 	page.SetPosition(_pos + 1)
 
 	_id := page.GetId()
 	if tagVersion := page.GetTagVersion(); tagVersion != _tagVersion {
-		t.Fatalf("%s failed: expected tag-version to be %#v but received %#v", name, _tagVersion, tagVersion)
+		t.Fatalf("%s failed: expected tag-version to be %#v but received %#v", testName, _tagVersion, tagVersion)
 	}
 	if id := page.GetId(); id != _id {
-		t.Fatalf("%s failed: expected id to be %#v but received %#v", name, _id, id)
+		t.Fatalf("%s failed: expected id to be %#v but received %#v", testName, _id, id)
 	}
 	if prodId := page.GetProductId(); prodId != _prod.GetId() {
-		t.Fatalf("%s failed: expected product-id to be %#v but received %#v", name, _prod.GetId(), prodId)
+		t.Fatalf("%s failed: expected product-id to be %#v but received %#v", testName, _prod.GetId(), prodId)
 	}
 	if topicId := page.GetTopicId(); topicId != _topic.GetId() {
-		t.Fatalf("%s failed: expected topic-id to be %#v but received %#v", name, _topic.GetId(), topicId)
+		t.Fatalf("%s failed: expected topic-id to be %#v but received %#v", testName, _topic.GetId(), topicId)
 	}
 	if title := page.GetTitle(); title != _title+"-page" {
-		t.Fatalf("%s failed: expected title to be %#v but received %#v", name, _title+"-page", title)
+		t.Fatalf("%s failed: expected title to be %#v but received %#v", testName, _title+"-page", title)
 	}
 	if icon := page.GetIcon(); icon != _icon+"-page" {
-		t.Fatalf("%s failed: expected icon to be %#v but received %#v", name, _icon+"-page", icon)
+		t.Fatalf("%s failed: expected icon to be %#v but received %#v", testName, _icon+"-page", icon)
 	}
 	if summary := page.GetSummary(); summary != _summary+"-page" {
-		t.Fatalf("%s failed: expected summary to be %#v but received %#v", name, _summary+"-page", summary)
+		t.Fatalf("%s failed: expected summary to be %#v but received %#v", testName, _summary+"-page", summary)
 	}
 	if pos := page.GetPosition(); pos != _pos+1 {
-		t.Fatalf("%s failed: expected position to be %#v but received %#v", name, _pos+1, pos)
+		t.Fatalf("%s failed: expected position to be %#v but received %#v", testName, _pos+1, pos)
 	}
 	if content := page.GetContent(); content != _content {
-		t.Fatalf("%s failed: expected content to be %#v but received %#v", name, _content, content)
+		t.Fatalf("%s failed: expected content to be %#v but received %#v", testName, _content, content)
 	}
 
 	tend := time.Now()
 	if page.GetTimeCreated().Before(tstart) || page.GetTimeCreated().After(tend) {
-		t.Fatalf("%s failed: timestamp-created is invalid\nStart: %s / Created: %s / End: %s", name, tstart, page.GetTimeCreated(), tend)
+		t.Fatalf("%s failed: timestamp-created is invalid\nStart: %s / Created: %s / End: %s", testName, tstart, page.GetTimeCreated(), tend)
 	}
 	if page.GetTimeUpdated().Before(tstart) || page.GetTimeUpdated().After(tend) || page.GetTimeUpdated().Before(page.GetTimeCreated()) {
-		t.Fatalf("%s failed: timestamp-updated is invalid\nStart: %s / Updated: %s / End: %s", name, tstart, page.GetTimeUpdated(), tend)
+		t.Fatalf("%s failed: timestamp-updated is invalid\nStart: %s / Updated: %s / End: %s", testName, tstart, page.GetTimeUpdated(), tend)
 	}
 }
 
 func TestNewPageFromUbo(t *testing.T) {
-	name := "TestNewPageFromUbo"
+	testName := "TestNewPageFromUbo"
+	teardownTest := setupTest(t, testName, func(t *testing.T, testName string) {
+		bo.UboTimestampRouding = henge.TimestampRoundSettingNone
+	}, nil)
+	defer teardownTest(t)
+
 	if NewPageFromUbo(nil) != nil {
-		t.Fatalf("%s failed: NewPageFromUbo(nil) should return nil", name)
+		t.Fatalf("%s failed: NewPageFromUbo(nil) should return nil", testName)
 	}
+
 	tstart := time.Now()
-	// henge.TimestampRounding = henge.TimestampRoundSettingNone
 	_tagVersion := uint64(1337)
 	_id := utils.UniqueId()
 	_prodId := "libro"
@@ -94,7 +103,7 @@ func TestNewPageFromUbo(t *testing.T) {
 	_summary := "page one"
 	_pos := rand.Intn(10242048)
 	_content := "page content"
-	ubo := henge.NewUniversalBo(_id, _tagVersion)
+	ubo := henge.NewUniversalBo(_id, _tagVersion, henge.UboOpt{TimeLayout: bo.UboTimeLayout, TimestampRounding: bo.UboTimestampRouding})
 	ubo.SetExtraAttr(PageFieldProductId, _prodId)
 	ubo.SetExtraAttr(PageFieldTopicId, _topicId)
 	ubo.SetExtraAttr(PageFieldPosition, _pos)
@@ -105,42 +114,42 @@ func TestNewPageFromUbo(t *testing.T) {
 
 	page := NewPageFromUbo(ubo)
 	if page == nil {
-		t.Fatalf("%s failed: nil", name)
+		t.Fatalf("%s failed: nil", testName)
 	}
 	if tagVersion := page.GetTagVersion(); tagVersion != _tagVersion {
-		t.Fatalf("%s failed: expected tag-version to be %#v but received %#v", name, _tagVersion, tagVersion)
+		t.Fatalf("%s failed: expected tag-version to be %#v but received %#v", testName, _tagVersion, tagVersion)
 	}
 	if id := page.GetId(); id != _id {
-		t.Fatalf("%s failed: expected id to be %#v but received %#v", name, _id, id)
+		t.Fatalf("%s failed: expected id to be %#v but received %#v", testName, _id, id)
 	}
 	if prodId := page.GetProductId(); prodId != _prodId {
-		t.Fatalf("%s failed: expected product-id to be %#v but received %#v", name, _prodId, prodId)
+		t.Fatalf("%s failed: expected product-id to be %#v but received %#v", testName, _prodId, prodId)
 	}
 	if topicId := page.GetTopicId(); topicId != _topicId {
-		t.Fatalf("%s failed: expected topic-id to be %#v but received %#v", name, _topicId, topicId)
+		t.Fatalf("%s failed: expected topic-id to be %#v but received %#v", testName, _topicId, topicId)
 	}
 	if title := page.GetTitle(); title != _title {
-		t.Fatalf("%s failed: expected title to be %#v but received %#v", name, _title, title)
+		t.Fatalf("%s failed: expected title to be %#v but received %#v", testName, _title, title)
 	}
 	if icon := page.GetIcon(); icon != _icon {
-		t.Fatalf("%s failed: expected icon to be %#v but received %#v", name, _icon, icon)
+		t.Fatalf("%s failed: expected icon to be %#v but received %#v", testName, _icon, icon)
 	}
 	if summary := page.GetSummary(); summary != _summary {
-		t.Fatalf("%s failed: expected summary to be %#v but received %#v", name, _summary, summary)
+		t.Fatalf("%s failed: expected summary to be %#v but received %#v", testName, _summary, summary)
 	}
 	if pos := page.GetPosition(); pos != _pos {
-		t.Fatalf("%s failed: expected position to be %#v but received %#v", name, _pos, pos)
+		t.Fatalf("%s failed: expected position to be %#v but received %#v", testName, _pos, pos)
 	}
 	if content := page.GetContent(); content != _content {
-		t.Fatalf("%s failed: expected content to be %#v but received %#v", name, _content, content)
+		t.Fatalf("%s failed: expected content to be %#v but received %#v", testName, _content, content)
 	}
 
 	tend := time.Now()
 	if page.GetTimeCreated().Before(tstart) || page.GetTimeCreated().After(tend) {
-		t.Fatalf("%s failed: timestamp-created is invalid\nStart: %s / Created: %s / End: %s", name, tstart, page.GetTimeCreated(), tend)
+		t.Fatalf("%s failed: timestamp-created is invalid\nStart: %s / Created: %s / End: %s", testName, tstart, page.GetTimeCreated(), tend)
 	}
 	if page.GetTimeUpdated().Before(tstart) || page.GetTimeUpdated().After(tend) || page.GetTimeUpdated().Before(page.GetTimeCreated()) {
-		t.Fatalf("%s failed: timestamp-updated is invalid\nStart: %s / Updated: %s / End: %s", name, tstart, page.GetTimeUpdated(), tend)
+		t.Fatalf("%s failed: timestamp-updated is invalid\nStart: %s / Updated: %s / End: %s", testName, tstart, page.GetTimeUpdated(), tend)
 	}
 }
 

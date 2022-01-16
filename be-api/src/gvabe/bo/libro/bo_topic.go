@@ -15,7 +15,7 @@ import (
 func NewTopic(tagVersion uint64, prod *Product, title, icon, summary string) *Topic {
 	id := utils.UniqueId()
 	bo := &Topic{
-		UniversalBo: henge.NewUniversalBo(id, tagVersion),
+		UniversalBo: henge.NewUniversalBo(id, tagVersion, henge.UboOpt{TimeLayout: bo.UboTimeLayout, TimestampRounding: bo.UboTimestampRouding}),
 	}
 	return bo.
 		SetProductId(prod.GetId()).

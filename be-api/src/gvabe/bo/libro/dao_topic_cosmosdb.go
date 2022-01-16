@@ -11,12 +11,12 @@ import (
 func NewTopicDaoCosmosdb(sqlc *prom.SqlConnect, tableName string, txModeOnWrite bool) TopicDao {
 	dao := &BaseTopicDaoImpl{}
 	spec := &henge.CosmosdbDaoSpec{
-		// PkName:        henge.CosmosdbColId,
-		PkName:        TopicColProductId,
+		// PkName:        TopicFieldProductId,
+		PkName:        henge.CosmosdbColId,
 		TxModeOnWrite: txModeOnWrite,
 	}
 	dao.UniversalDao = henge.NewUniversalDaoCosmosdbSql(sqlc, tableName, spec)
 	return dao
 }
 
-/* There is no function CreateCosmosdbTableForTopics, use CreateSqlTableForTopics instead. */
+/* There is no function InitTopicTableCosmosdb, use InitTopicTableSql instead. */

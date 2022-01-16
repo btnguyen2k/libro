@@ -7,7 +7,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/btnguyen2k/henge"
 	"github.com/btnguyen2k/prom"
 )
 
@@ -20,10 +19,10 @@ var testMc *prom.MongoConnect
 
 func mongoInitCollection(mc *prom.MongoConnect, collection string) error {
 	mc.GetCollection(collection).Drop(nil)
-	return henge.InitMongoCollection(mc, collection)
+	return nil
 }
 
-func newMongoConnect(t *testing.T, testName string, _db, _url string) (*prom.MongoConnect, error) {
+func newMongoConnect(t *testing.T, testName string) (*prom.MongoConnect, error) {
 	rand.Seed(time.Now().UnixNano())
 	db := strings.Trim(os.Getenv(envMongoDb), "\"")
 	url := strings.Trim(os.Getenv(envMongoUrl), "\"")

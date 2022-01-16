@@ -15,13 +15,15 @@ func NewPageDaoSql(sqlc *prom.SqlConnect, tableName string, txModeOnWrite bool) 
 	return dao
 }
 
-// CreateSqlTableForPages creates SQL database table to store document pages.
-//   - Necessary table and index are created.
-//   - Application may need to create database before calling this function.
-func CreateSqlTableForPages(sqlc *prom.SqlConnect, tableName string) error {
+// InitPageTableSql is helper function to initialize SQL table to store document pages.
+// This function also creates necessary indexes.
+//
+// Note: Application may need to create database before calling this function.
+func InitPageTableSql(sqlc *prom.SqlConnect, tableName string) error {
 	var err error
 	switch sqlc.GetDbFlavor() {
 	case prom.FlavorCosmosDb:
+		// spec := &henge.CosmosdbCollectionSpec{Pk: PageFieldTopicId}
 		spec := &henge.CosmosdbCollectionSpec{Pk: henge.CosmosdbColId}
 		err = henge.InitCosmosdbCollection(sqlc, tableName, spec)
 	case prom.FlavorMySql:
@@ -35,7 +37,7 @@ func CreateSqlTableForPages(sqlc *prom.SqlConnect, tableName string) error {
 	}
 	if err == nil {
 		switch sqlc.GetDbFlavor() {
-		case prom.FlavorCosmosDb, prom.FlavorMySql, prom.FlavorPgSql, prom.FlavorSqlite:
+		case prom.FlavorMySql, prom.FlavorPgSql, prom.FlavorSqlite:
 			idxName := "idx_" + tableName + "_" + PageColTopicId + "_" + PageColPosition
 			idxCols := PageColTopicId + "," + PageColPosition
 			sql := fmt.Sprintf("CREATE INDEX %s ON %s(%s)", idxName, tableName, idxCols)
