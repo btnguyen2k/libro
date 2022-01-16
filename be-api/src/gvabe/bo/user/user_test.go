@@ -4,7 +4,12 @@ import (
 	"testing"
 
 	"github.com/btnguyen2k/henge"
+	"github.com/btnguyen2k/prom"
 	"main/src/gvabe/bo"
+)
+
+var (
+	testMc *prom.MongoConnect
 )
 
 type TestSetupOrTeardownFunc func(t *testing.T, testName string)
