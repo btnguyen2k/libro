@@ -2,18 +2,16 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 
-// Containers
 const TheContainer = () => import('@/containers/TheContainer')
 
-// Views
-const Dashboard = () => import('@/views/libro/Dashboard')
+const Login = () => import('@/views/gva/pages/Login')
 
+const Dashboard = () => import('@/views/libro/Dashboard')
 const ProductList = () => import('@/views/libro/ProductList')
 const ProductTopicList = () => import('@/views/libro/ProductTopicList')
 const TopicPageList = () => import('@/views/libro/TopicPageList')
 
-// Views - Pages
-const Login = () => import('@/views/gva/pages/Login')
+const MyProfile = () => import('@/views/libro/MyProfile')
 
 Vue.use(Router)
 
@@ -81,6 +79,12 @@ function configRoutes() {
                     name: 'Dashboard',
                     meta: {label: i18n.t('message.dashboard')},
                     component: Dashboard
+                },
+                {
+                    path: 'profile',
+                    name: 'MyProfile',
+                    meta: {label: i18n.t('message.my_profile')},
+                    component: MyProfile
                 },
                 {
                     path: 'products', meta: {label: i18n.t('message.products')},

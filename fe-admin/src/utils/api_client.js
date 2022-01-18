@@ -33,11 +33,6 @@ let apiAdminProductTopic = "/api/admin/product/:product/topic/:topic"
 let apiAdminTopicPages = "/api/admin/topic/:topic/pages"
 let apiAdminTopicPage = "/api/admin/topic/:topic/page/:page"
 
-let apiMyBlog = '/api/myblog'
-let apiMyFeed = '/api/myfeed'
-let apiPost = '/api/post'
-let apiUserVoteForPost = '/api/vote'
-
 let apiSystemInfo = "/api/systemInfo"
 let apiGroupList = "/api/groups"
 let apiGroup = "/api/group"
@@ -131,11 +126,6 @@ export default {
     apiAdminProductTopic,
     apiAdminTopicPages,
     apiAdminTopicPage,
-
-    apiMyBlog,
-    apiMyFeed,
-    apiPost,
-    apiUserVoteForPost,
 
     apiSystemInfo,
     apiGroupList,

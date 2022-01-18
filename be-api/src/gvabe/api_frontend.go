@@ -1,7 +1,6 @@
 package gvabe
 
 import (
-	"log"
 	"strings"
 
 	"github.com/btnguyen2k/consu/reddo"
@@ -17,7 +16,6 @@ func authenticateFeApiCall(ctx *itineris.ApiContext) *itineris.ApiResult {
 
 func _fetchProductForDomain(domain string) (prod *libro.Product, err error) {
 	mapping, err := domainProductMappingDao.Get(domain)
-	log.Printf("\t[DEBUG] - _fetchProductForDomain, domain %s / mapping %#v", domain, mapping)
 	if err != nil {
 		return nil, err
 	}
@@ -35,13 +33,11 @@ func apiFeGetProduct(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *itin
 	}
 
 	domain := _extractParam(params, "domain", reddo.TypeString, "", nil)
-	log.Printf("[DEBUG] - apiFeGetProduct, domain %s", domain)
 	prod, err := _fetchProductForDomain(domain.(string))
 	if err != nil {
 		return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage(err.Error())
 	}
 	if tokens := strings.Split(domain.(string), ":"); prod == nil && len(tokens) > 1 {
-		log.Printf("[DEBUG] - apiFeGetProduct, domain (2nd) %s", tokens[0])
 		// handle case <host>:<port>
 		prod, err = _fetchProductForDomain(tokens[0])
 		if err != nil {
@@ -72,13 +68,11 @@ func apiFeGetTopic(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *itiner
 	}
 
 	domain := _extractParam(params, "domain", reddo.TypeString, "", nil)
-	log.Printf("[DEBUG] - apiFeGetTopic, domain %s", domain)
 	prod, err := _fetchProductForDomain(domain.(string))
 	if err != nil {
 		return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage(err.Error())
 	}
 	if tokens := strings.Split(domain.(string), ":"); prod == nil && len(tokens) > 1 {
-		log.Printf("[DEBUG] - apiFeGetProduct, domain (2nd) %s", tokens[0])
 		// handle case <host>:<port>
 		prod, err = _fetchProductForDomain(tokens[0])
 		if err != nil {
@@ -109,4 +103,23 @@ func apiFeGetTopic(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *itiner
 	topicMap := topic.ToMap(funcTopicToMapTransform)
 	topicMap["pages"] = pageMapList
 	return itineris.NewApiResult(itineris.StatusOk).SetData(topicMap)
+}
+
+// apiFeGetUserProfile handles API call "feGetUserProfile"
+func apiFeGetUserProfile(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *itineris.ApiParams) *itineris.ApiResult {
+	authResult := authenticateFeApiCall(ctx)
+	if authResult != nil {
+		return authResult
+	}
+
+	uid := _extractParam(params, "uid", reddo.TypeString, "", nil)
+	user, err := userDao.Get(uid.(string))
+	if err != nil {
+		return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage(err.Error())
+	}
+	if user == nil {
+		return itineris.NewApiResult(itineris.StatusNotFound).SetMessage("user not found")
+	}
+	userMap := user.ToMap(funcUserToMapTransform)
+	return itineris.NewApiResult(itineris.StatusOk).SetData(userMap)
 }

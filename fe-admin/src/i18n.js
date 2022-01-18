@@ -23,6 +23,7 @@ const messages = {
             cancel: 'Cancel',
             close: 'Close',
 
+            logout: 'Logout',
             login: 'Login',
             login_info: 'Please sign in to continue',
             login_social: 'Login with social account',
@@ -133,6 +134,19 @@ const messages = {
 
             content_editor: "Editor",
             content_preview: "Preview",
+
+            users: "Users",
+            my_profile: "My profile",
+            user_is_admin: "Is administrator",
+            user_is_admin_msg: "Administrator has permission to create other administrator accounts",
+            user_id: "Id",
+            user_id_msg: "User email address as user id, must be unique",
+            user_mask_id: "Mask id",
+            user_mask_id_msg: "User mask-id to not expose user email address, must be unique",
+            user_display_name: "Display name",
+            user_display_name_msg: "Name of user for displaying purpose",
+
+            user_profile_updated_msg: 'User profile "{id}" has updated successfully.'
         }
     },
     vi: {
@@ -155,6 +169,7 @@ const messages = {
             cancel: 'Huỷ',
             close: 'Đóng',
 
+            logout: 'Đăng xuất',
             login: 'Đăng nhập',
             login_info: 'Đăng nhập để tiếp tục',
             login_social: 'Đăng nhập với tài khoản mxh',
@@ -265,6 +280,19 @@ const messages = {
 
             content_editor: "Soạn thảo",
             content_preview: "Xem trước",
+
+            users: "Người dùng",
+            my_profile: "Thông tin cá nhân",
+            user_is_admin: "Quản trị viên",
+            user_is_admin_msg: "Quản trị viên sẽ được quyền tạo thêm tài khoản quản trị viên khác",
+            user_id: "Id",
+            user_id_msg: "Sử dụng địa chỉ email làm Id, phải là duy nhất trên hệ thống",
+            user_mask_id: "Mask id",
+            user_mask_id_msg: "Mask-id sẽ được sử dụng để tránh hiển thị địa chỉ email, phải là duy nhất trên hệ thống",
+            user_display_name: "Tên hiển thị",
+            user_display_name_msg: "Tên của người dùng",
+
+            user_profile_updated_msg: 'Thông tin người dùng "{id}" đã được cập nhật thành công.'
         }
     }
 }

@@ -1026,3 +1026,65 @@ func apiAdminUpdateTopicPage(ctx *itineris.ApiContext, _ *itineris.ApiAuth, para
 
 	return itineris.NewApiResult(itineris.StatusOk)
 }
+
+/*----------------------------------------------------------------------*/
+
+var funcUserToMapTransform = func(m map[string]interface{}) map[string]interface{} {
+	s := semita.NewSemita(m)
+
+	// transform input map
+	result := map[string]interface{}{
+		"id":        m[henge.FieldId],
+		"t_created": m[henge.FieldTimeCreated],
+		"t_updated": m[henge.FieldTimeUpdated],
+	}
+	result["mid"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyFields, user.UserFieldMaskId), reddo.TypeString)
+	result["name"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, user.UserAttrDisplayName), reddo.TypeString)
+	result["is_admin"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, user.UserAttrIsAdmin), reddo.TypeBool)
+
+	// convert "timestamp" to UTC
+	if t, ok := result["t_created"].(time.Time); ok {
+		result["t_created"] = t.In(time.UTC)
+	}
+	if t, ok := result["t_updated"].(time.Time); ok {
+		result["t_updated"] = t.In(time.UTC)
+	}
+
+	return result
+}
+
+// apiAdminUpdateUserProfile handles API call "adminUpdateUserProfile"
+func apiAdminUpdateUserProfile(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *itineris.ApiParams) *itineris.ApiResult {
+	curUser, authResult := authenticateAdminApiCall(ctx)
+	if authResult != nil {
+		return authResult
+	}
+
+	uid := _extractParam(params, "uid", reddo.TypeString, "", nil)
+	user, err := userDao.Get(uid.(string))
+	if err != nil {
+		return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage(err.Error())
+	}
+	if user == nil {
+		return itineris.NewApiResult(itineris.StatusNotFound).SetMessage("user not found")
+	}
+
+	if curUser.GetId() != user.GetId() && !curUser.IsAdmin() {
+		return itineris.NewApiResult(itineris.StatusNoPermission).SetMessage("no permission")
+	}
+
+	displayName := _extractParam(params, "display_name", reddo.TypeString, user.GetMaskId(), nil)
+	user.SetDisplayName(displayName.(string))
+	if curUser.GetId() != user.GetId() && curUser.IsAdmin() {
+		isAdmin := _extractParam(params, "is_admin", reddo.TypeString, false, nil)
+		user.SetAdmin(isAdmin.(bool))
+	}
+
+	result, err := userDao.Update(user)
+	if err != nil || !result {
+		return itineris.NewApiResult(itineris.StatusErrorServer).
+			SetMessage(fmt.Sprintf("cannot update user [%s] (error: %s)", user.GetId(), err))
+	}
+
+	return itineris.NewApiResult(itineris.StatusOk)
+}
