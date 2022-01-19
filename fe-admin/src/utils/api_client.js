@@ -38,6 +38,7 @@ let apiGroupList = "/api/groups"
 let apiGroup = "/api/group"
 let apiUserList = "/api/users"
 let apiUser = "/api/user"
+let apiUserPassword = "/api/userPassword"
 
 function _apiOnSuccess(method, resp, apiUri, callbackSuccessful) {
     if (method == 'GET' && resp.hasOwnProperty("data") && resp.data.status == 403) {
@@ -132,6 +133,7 @@ export default {
     apiGroup,
     apiUserList,
     apiUser,
+    apiUserPassword,
 
     apiDoGet,
     apiDoPatch,

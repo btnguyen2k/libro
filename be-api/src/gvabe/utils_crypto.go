@@ -2,18 +2,15 @@ package gvabe
 
 import (
 	"crypto"
-	"crypto/aes"
-	"crypto/cipher"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/sha256"
 	"crypto/x509"
+	"encoding/base64"
 	"encoding/pem"
 	"errors"
 	"hash"
 	"io"
-	"strconv"
-	"time"
 )
 
 // RsaMode defines RSA encryption modes
@@ -32,6 +29,8 @@ var (
 	ErrInvalidRsaMode  = errors.New("invalid RSA mode or mode not supported")
 )
 
+// RsaChunkEncryptionFunc is a generic function to encrypt a chunk of data using RSA public key.
+//
 // available since template-v0.2.0
 type RsaChunkEncryptionFunc func(hash hash.Hash, random io.Reader, pub *rsa.PublicKey, msg []byte) ([]byte, error)
 
@@ -45,8 +44,10 @@ func _rsaEncryptPKCS1v15(_ hash.Hash, random io.Reader, pub *rsa.PublicKey, msg 
 	return rsa.EncryptPKCS1v15(random, pub, msg)
 }
 
+// RsaEncrypt encrypts a message using RSA public key.
+//
 // available since template-v0.2.0
-func rsaEncrypt(rsaMode RsaMode, data []byte, rsaPubKey *rsa.PublicKey) ([]byte, error) {
+func RsaEncrypt(rsaMode RsaMode, data []byte, rsaPubKey *rsa.PublicKey) ([]byte, error) {
 	if rsaMode == RsaModeAuto {
 		rsaMode = RsaModeOAEP
 	}
@@ -83,8 +84,10 @@ func rsaEncrypt(rsaMode RsaMode, data []byte, rsaPubKey *rsa.PublicKey) ([]byte,
 	return result, nil
 }
 
+// RsaDecrypt decrypts an encrypted message using RSA private key.
+//
 // available since template-v0.2.0
-func rsaDecrypt(rsaMode RsaMode, encdata []byte, rsaPrivKey *rsa.PrivateKey) ([]byte, error) {
+func RsaDecrypt(rsaMode RsaMode, encdata []byte, rsaPrivKey *rsa.PrivateKey) ([]byte, error) {
 	if len(encdata)%rsaPrivKey.Size() != 0 {
 		return nil, rsa.ErrDecryption
 	}
@@ -106,13 +109,26 @@ func rsaDecrypt(rsaMode RsaMode, encdata []byte, rsaPrivKey *rsa.PrivateKey) ([]
 	return result, nil
 }
 
+// RsaDecryptFromBase64 is similar as RsaDecrypt, except that the input encrypted data is base64-encoded.
+func RsaDecryptFromBase64(rsaMode RsaMode, encDataBase64 string, rsaPrivKey *rsa.PrivateKey) ([]byte, error) {
+	encData, err := base64.StdEncoding.DecodeString(encDataBase64)
+	if err != nil || encData == nil {
+		return nil, err
+	}
+	return RsaDecrypt(rsaMode, encData, rsaPrivKey)
+}
+
+// GenRsaKey generates a RSA private key with specified length.
+//
 // available since template-v0.2.0
-func genRsaKey(numBits int) (*rsa.PrivateKey, error) {
+func GenRsaKey(numBits int) (*rsa.PrivateKey, error) {
 	return rsa.GenerateKey(rand.Reader, numBits)
 }
 
+// ParseRsaPublicKeyFromPem parses a RSA public key from PEM string.
+//
 // available since template-v0.2.0
-func parseRsaPublicKeyFromPem(pemStr string) (*rsa.PublicKey, error) {
+func ParseRsaPublicKeyFromPem(pemStr string) (*rsa.PublicKey, error) {
 	block, _ := pem.Decode([]byte(pemStr))
 	if block == nil {
 		return nil, errors.New("failed to parse PEM block")
@@ -134,41 +150,41 @@ func parseRsaPublicKeyFromPem(pemStr string) (*rsa.PublicKey, error) {
 	return nil, errors.New("not RSA public key")
 }
 
-// padRight adds "0" right right of a string until its length reach a specific value.
-func padRight(str string, l int) string {
-	for len(str) < l {
-		str += "0"
-	}
-	return str
-}
+// // padRight adds "0" right right of a string until its length reach a specific value.
+// func padRight(str string, l int) string {
+// 	for len(str) < l {
+// 		str += "0"
+// 	}
+// 	return str
+// }
 
-// aesEncrypt encrypts a block of data using AES/CTR mode.
-//
-// IV is put at the beginning of the cipher data.
-func aesEncrypt(key, data []byte) ([]byte, error) {
-	block, err := aes.NewCipher(key)
-	if err != nil {
-		return nil, err
-	}
-	iv := []byte(padRight(strconv.FormatInt(time.Now().UnixNano(), 16), 16))
-	cipherData := make([]byte, 16+len(data))
-	copy(cipherData, iv)
-	ctr := cipher.NewCTR(block, iv)
-	ctr.XORKeyStream(cipherData[16:], data)
-	return cipherData, nil
-}
+// // aesEncrypt encrypts a block of data using AES/CTR mode.
+// //
+// // IV is put at the beginning of the cipher data.
+// func aesEncrypt(key, data []byte) ([]byte, error) {
+// 	block, err := aes.NewCipher(key)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	iv := []byte(padRight(strconv.FormatInt(time.Now().UnixNano(), 16), 16))
+// 	cipherData := make([]byte, 16+len(data))
+// 	copy(cipherData, iv)
+// 	ctr := cipher.NewCTR(block, iv)
+// 	ctr.XORKeyStream(cipherData[16:], data)
+// 	return cipherData, nil
+// }
 
-// aesDecrypt decrypts a block of encrypted data using AES/CTR mode.
-//
-// Assuming IV is put at the beginning of the cipher data.
-func aesDecrypt(key, encryptedData []byte) ([]byte, error) {
-	block, err := aes.NewCipher(key)
-	if err != nil {
-		return nil, err
-	}
-	iv := encryptedData[0:16]
-	data := make([]byte, len(encryptedData)-16)
-	ctr := cipher.NewCTR(block, iv)
-	ctr.XORKeyStream(data, encryptedData[16:])
-	return data, nil
-}
+// // aesDecrypt decrypts a block of encrypted data using AES/CTR mode.
+// //
+// // Assuming IV is put at the beginning of the cipher data.
+// func aesDecrypt(key, encryptedData []byte) ([]byte, error) {
+// 	block, err := aes.NewCipher(key)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	iv := encryptedData[0:16]
+// 	data := make([]byte, len(encryptedData)-16)
+// 	ctr := cipher.NewCTR(block, iv)
+// 	ctr.XORKeyStream(data, encryptedData[16:])
+// 	return data, nil
+// }

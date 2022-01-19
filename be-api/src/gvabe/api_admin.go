@@ -1088,3 +1088,64 @@ func apiAdminUpdateUserProfile(ctx *itineris.ApiContext, _ *itineris.ApiAuth, pa
 
 	return itineris.NewApiResult(itineris.StatusOk)
 }
+
+// apiAdminUpdateUserPassword handles API call "adminUpdateUserPassword"
+func apiAdminUpdateUserPassword(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *itineris.ApiParams) *itineris.ApiResult {
+	curUser, authResult := authenticateAdminApiCall(ctx)
+	if authResult != nil {
+		return authResult
+	}
+
+	uid := _extractParam(params, "uid", reddo.TypeString, "", nil)
+	user, err := userDao.Get(uid.(string))
+	if err != nil {
+		return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage(err.Error())
+	}
+	if user == nil {
+		return itineris.NewApiResult(itineris.StatusNotFound).SetMessage("user not found")
+	}
+
+	// if curUser.GetId() != user.GetId() && !curUser.IsAdmin() {
+	// 	return itineris.NewApiResult(itineris.StatusNoPermission).SetMessage("no permission")
+	// }
+	if curUser.GetId() != user.GetId() {
+		return itineris.NewApiResult(itineris.StatusNoPermission).SetMessage("no permission")
+	}
+
+	currentPwdEnc := _extractParam(params, "current_pwd", reddo.TypeString, "", nil)
+	currentPwdRaw, err := RsaDecryptFromBase64(RsaModePKCS1v15, currentPwdEnc.(string), rsaPrivKey)
+	if err != nil || currentPwdRaw == nil {
+		return itineris.NewApiResult(itineris.StatusErrorClient).
+			SetMessage(fmt.Sprintf("cannot decrypt data (error: %s)", err))
+	}
+
+	newPwdEnc := _extractParam(params, "new_pwd", reddo.TypeString, "", nil)
+	newPwdRaw, err := RsaDecryptFromBase64(RsaModePKCS1v15, newPwdEnc.(string), rsaPrivKey)
+	if err != nil || newPwdRaw == nil {
+		return itineris.NewApiResult(itineris.StatusErrorClient).
+			SetMessage(fmt.Sprintf("cannot decrypt data (error: %s)", err))
+	}
+
+	confirmedPwdEnc := _extractParam(params, "confirmed_pwd", reddo.TypeString, "", nil)
+	confirmedPwdRaw, err := RsaDecryptFromBase64(RsaModePKCS1v15, confirmedPwdEnc.(string), rsaPrivKey)
+	if err != nil || confirmedPwdRaw == nil {
+		return itineris.NewApiResult(itineris.StatusErrorClient).
+			SetMessage(fmt.Sprintf("cannot decrypt data (error: %s)", err))
+	}
+
+	if !verifyPassword(user, string(currentPwdRaw)) {
+		return itineris.NewApiResult(itineris.StatusErrorClient).SetMessage("current password mismatched")
+	}
+	if strings.TrimSpace(string(newPwdRaw)) != strings.TrimSpace(string(confirmedPwdRaw)) {
+		return itineris.NewApiResult(itineris.StatusErrorClient).SetMessage("new password does not match the confirmed one")
+	}
+
+	user.SetPassword(encryptPassword(user.GetId(), string(newPwdRaw)))
+	result, err := userDao.Update(user)
+	if err != nil || !result {
+		return itineris.NewApiResult(itineris.StatusErrorServer).
+			SetMessage(fmt.Sprintf("cannot update user [%s] (error: %s)", user.GetId(), err))
+	}
+
+	return itineris.NewApiResult(itineris.StatusOk)
+}

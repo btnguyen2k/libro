@@ -25,6 +25,7 @@ func initApiHandlers(router *itineris.ApiRouter) {
 	router.SetHandler("feGetTopic", apiFeGetTopic)
 	router.SetHandler("feGetUserProfile", apiFeGetUserProfile)
 	router.SetHandler("adminUpdateUserProfile", apiAdminUpdateUserProfile)
+	router.SetHandler("adminUpdateUserPassword", apiAdminUpdateUserPassword)
 
 	// admin APIs
 	router.SetHandler("adminGetStats", apiAdminGetStats)

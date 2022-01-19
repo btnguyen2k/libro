@@ -145,8 +145,16 @@ const messages = {
             user_mask_id_msg: "User mask-id to not expose user email address, must be unique",
             user_display_name: "Display name",
             user_display_name_msg: "Name of user for displaying purpose",
+            user_password: "Password",
+            user_current_password: "Current password",
+            user_current_password_msg: "Change password: enter current password and the new one",
+            user_new_password: "New password",
+            user_new_password_msg: "New password",
+            user_confirmed_password: "Confirmed password",
+            user_confirmed_password_msg: "Enter new password again to confirm",
 
-            user_profile_updated_msg: 'User profile "{id}" has updated successfully.'
+            user_profile_updated_msg: 'User profile "{id}" has been updated successfully.',
+            user_password_updated_msg: 'Password of user "{id}" has been updated successfully.',
         }
     },
     vi: {
@@ -291,8 +299,16 @@ const messages = {
             user_mask_id_msg: "Mask-id sẽ được sử dụng để tránh hiển thị địa chỉ email, phải là duy nhất trên hệ thống",
             user_display_name: "Tên hiển thị",
             user_display_name_msg: "Tên của người dùng",
+            user_password: "Mật mã",
+            user_current_password: "Mật mã hiện tại",
+            user_current_password_msg: "Để đổi mật mã: nhập mật mã hiện tại và mật mã mới",
+            user_new_password: "Mật mã mới",
+            user_new_password_msg: "Mật mã mới",
+            user_confirmed_password: "Xác nhận lại mật mã",
+            user_confirmed_password_msg: "Nhập mật mã mới lần nữa để xác nhận",
 
-            user_profile_updated_msg: 'Thông tin người dùng "{id}" đã được cập nhật thành công.'
+            user_profile_updated_msg: 'Thông tin người dùng "{id}" đã được cập nhật thành công.',
+            user_password_updated_msg: 'Mật mã người dùng "{id}" đã được cập nhật thành công.',
         }
     }
 }

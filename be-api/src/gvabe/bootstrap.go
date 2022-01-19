@@ -79,7 +79,7 @@ func initRsaKeys() {
 	rsaPrivKeyFile := goapi.AppConfig.GetString("gvabe.keys.rsa_privkey_file")
 	if rsaPrivKeyFile == "" {
 		log.Println("[WARN] No RSA private key file configured at [gvabe.keys.rsa_privkey_file], generating one...")
-		privKey, err := genRsaKey(2048)
+		privKey, err := GenRsaKey(2048)
 		if err != nil {
 			panic(err)
 		}

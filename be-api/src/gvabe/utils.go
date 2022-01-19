@@ -16,6 +16,7 @@ import (
 	"github.com/btnguyen2k/consu/semita"
 	"github.com/shirou/gopsutil/load"
 	"github.com/shirou/gopsutil/mem"
+	"main/src/gvabe/bo/user"
 )
 
 var DEBUG = false
@@ -38,8 +39,12 @@ const (
 	tblMappingDomainProduct = "m2o_domain_prod"
 )
 
+func verifyPassword(user *user.User, inputPwd string) bool {
+	return encryptPassword(user.GetId(), strings.TrimSpace(inputPwd)) == user.GetPassword()
+}
+
 func encryptPassword(salt, rawPassword string) string {
-	out := sha1.Sum([]byte(salt + "." + rawPassword))
+	out := sha1.Sum([]byte(strings.TrimSpace(salt) + "." + strings.TrimSpace(rawPassword)))
 	return strings.ToLower(hex.EncodeToString(out[:]))
 }
 
@@ -67,12 +72,12 @@ func zlibCompress(data []byte) []byte {
 // available since template-v0.2.0
 func zipAndEncrypt(data []byte) ([]byte, error) {
 	zip := zlibCompress(data)
-	return rsaEncrypt(RsaModeAuto, zip, rsaPubKey)
+	return RsaEncrypt(RsaModeAuto, zip, rsaPubKey)
 }
 
 // // available since template-v0.2.0
 // func decryptAndUnzip(encdata []byte) ([]byte, error) {
-// 	if zip, err := rsaDecrypt(RsaModeAuto, encdata, rsaPrivKey); err != nil {
+// 	if zip, err := RsaDecrypt(RsaModeAuto, encdata, rsaPrivKey); err != nil {
 // 		return nil, err
 // 	} else {
 // 		return zlibDecompress(zip)

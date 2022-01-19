@@ -131,7 +131,7 @@ func goFetchExterInfo(sleepSeconds int) {
 			log.Printf("[ERROR] goFetchExterInfo - Error calling Exter api: 0/%s", err)
 		} else if resp.Status == 200 {
 			pubKeyPem := resp.GetString("data.rsa_public_key")
-			pubKey, err := parseRsaPublicKeyFromPem(pubKeyPem)
+			pubKey, err := ParseRsaPublicKeyFromPem(pubKeyPem)
 			if err != nil {
 				log.Printf("[ERROR] goFetchExterInfo - Cannot extract Exter RSA public key: %e / %v", err, resp.raw)
 			} else {
