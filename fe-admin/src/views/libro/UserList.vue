@@ -3,54 +3,42 @@
     <CCol sm="12">
       <CCard accent-color="info">
         <CCardHeader>
-          <strong>{{ $t('message.products') }}</strong>
+          <strong>{{ $t('message.users') }}</strong>
           <div v-if="errorMsg==''" class="card-header-actions">
-            <CButton class="btn-sm btn-primary" @click="clickAddProduct">
-              <CIcon name="cil-library-add" class="align-top"/>
-              {{ $t('message.add_product') }}
+            <CButton class="btn-sm btn-primary" @click="clickAddUser" v-if="isAdmin">
+              <CIcon name="cil-user-plus" class="align-top"/>
+              {{ $t('message.add_user') }}
             </CButton>
           </div>
         </CCardHeader>
         <CCardBody>
           <CAlert v-if="myFlashMsg" color="success" closeButton>{{ myFlashMsg }}</CAlert>
-          <CAlert v-if="waitLoadProductList" color="info">{{ $t('message.wait') }}</CAlert>
+          <CAlert v-if="waitLoadUserList" color="info">{{ $t('message.wait') }}</CAlert>
           <CAlert v-if="errorMsg" color="danger">{{ errorMsg }}</CAlert>
-          <CDataTable v-if="errorMsg==''" :items="prodList" :fields="[
-              {key:'is_published',label:''},
-              {key:'name',label:$t('message.product_name')},
-              {key:'domains',label:$t('message.product_domains')},
-              {key:'actions',label:$t('message.actions'),_style:'text-align: center'}
+          <CDataTable v-if="errorMsg==''" :items="userList" :fields="[
+              {key:'is_admin', label:''},
+              {key:'id', label:$t('message.user_id')},
+              {key:'name', label:$t('message.user_display_name')},
+              {key:'actions', label:$t('message.actions'),_style:'text-align: center'}
             ]">
-            <template #is_published="{item}">
+            <template #is_admin="{item}">
               <td class="col-1">
-                <CIcon :name="`${item.is_published?'cil-check':'cil-check-alt'}`"
-                       :style="`color: ${item.is_published?'green':'grey'}`"/>
-              </td>
-            </template>
-            <template #name="{item}">
-              <td class="col-5">
-                {{ item.name }}
-                <br />
-                <span style="font-size: smaller">{{ item.desc }}</span>
-              </td>
-            </template>
-            <template #domains="{item}">
-              <td class="col-4">
-                {{ item.domains }}
+                <CIcon :name="`${item.is_admin?'cil-check':'cil-check-alt'}`" :style="`color: ${item.is_admin?'green':'grey'}`"/>
               </td>
             </template>
             <template #actions="{item}">
               <td style="white-space: nowrap; text-align: center">
-                <CLink @click="clickProductTopic(item.id)" class="btn btn-sm btn-info m-1">
-                  <CIcon name="cil-list-rich" v-c-tooltip.hover="$t('message.topics')"/>
-                </CLink>
-                <CLink @click="clickEditProduct(item.id)" class="btn btn-sm btn-primary m-1">
+                <CLink v-if="isAdmin" @click="clickEditProduct(item.id)" class="btn btn-sm btn-primary m-1">
+                  <CIcon name="cil-pencil" v-c-tooltip.hover="$t('message.action_edit')"/>
+                </CLink><CLink v-else class="btn btn-sm btn-secondary m-1" disabled>
                   <CIcon name="cil-pencil" v-c-tooltip.hover="$t('message.action_edit')"/>
                 </CLink>
 
-                <CLink @click="clickDeleteProduct(item.id)" class="btn btn-sm btn-danger m-1">
+                <CLink v-if="isAdmin" @click="clickDeleteProduct(item.id)" class="btn btn-sm btn-danger m-1">
                   <CIcon name="cil-trash" v-c-tooltip.hover="$t('message.action_delete')"/>
-                </CLink>
+                </CLink><CLink v-else class="btn btn-sm btn-secondary m-1" disabled>
+                <CIcon name="cil-trash" v-c-tooltip.hover="$t('message.action_delete')"/>
+              </CLink>
               </td>
             </template>
           </CDataTable>
@@ -304,13 +292,14 @@
 
 <script>
 import clientUtils from "@/utils/api_client"
+import utils from "@/utils/app_utils"
 
 const emptyForm = {id: "", name: "", desc: "", is_published: false, domains: "", contacts: {email:"", website:"", github:"", facebook: "", linkedin: "", slack: "", twitter: ""}}
 
 export default {
-  name: 'ProductList',
+  name: 'UserList',
   mounted() {
-    this.loadProductList()
+    this.loadUserList()
   },
   data() {
     return {
@@ -337,35 +326,40 @@ export default {
 
       errorMsg: '',
       myFlashMsg: this.flashMsg,
-      waitLoadProductList: false,
-      prodList: [],
-      prodMap: {},
+      waitLoadUserList: false,
+      userList: [],
+      userMap: {},
+      isAdmin: false,
     }
   },
   props: ["flashMsg"],
   methods: {
-    loadProductList() {
+    loadUserList() {
       const vue = this
-      vue.waitLoadProductList = true
-      clientUtils.apiDoGet(clientUtils.apiAdminProducts,
+      vue.waitLoadUserList = true
+      clientUtils.apiDoGet(clientUtils.apiAdminUsers,
           (apiRes) => {
             if (apiRes.status == 200) {
-              vue.prodList = apiRes.data
-              vue.prodMap = {}
-              for (let i = vue.prodList.length - 1; i >= 0; i--) {
-                vue.prodMap[vue.prodList[i].id] = vue.prodList[i]
+              let session = utils.loadLoginSession()
+              vue.userList = apiRes.data
+              vue.userMap = {}
+              for (let i = vue.userList.length - 1; i >= 0; i--) {
+                vue.userMap[vue.userList[i].id] = vue.userList[i]
+                if (vue.userList[i].id == session.uid && vue.userList[i].is_admin) {
+                  vue.isAdmin = true
+                }
               }
             } else {
               vue.errorMsg = apiRes.status + ": " + apiRes.message
             }
-            vue.waitLoadProductList = false
+            vue.waitLoadUserList = false
           },
           (err) => {
             vue.errorMsg = err
-            vue.waitLoadProductList = false
+            vue.waitLoadUserList = false
           })
     },
-    clickAddProduct() {
+    clickAddUser() {
       this.formAdd = {...emptyForm}
       this.modalAddErr = ''
       this.modalAddShow = true
@@ -394,7 +388,7 @@ export default {
             if (apiRes.status == 200 || apiRes.status == 201) {
               vue.modalAddShow = false
               vue.myFlashMsg =  apiRes.status==200?vue.$i18n.t('message.product_added_msg', {name: data.name}):apiRes.message
-              vue.loadProductList()
+              vue.loadUserList()
             } else {
               vue.modalAddErr = apiRes.status + ": " + apiRes.message
             }
@@ -406,11 +400,8 @@ export default {
           }
       )
     },
-    clickProductTopic(id) {
-      this.$router.push({name: "ProductTopicList", params: {pid: id}})
-    },
     clickEditProduct(id) {
-      this.formEdit = {...this.prodMap[id]}
+      this.formEdit = {...this.userMap[id]}
       this.modalEditFlash = ''
       this.modalEditErr = ''
       this.modalEditShow = true
@@ -446,7 +437,7 @@ export default {
               vue.modalEditErr = apiRes.status + ": " + apiRes.message
             } else {
               vue.modalEditShow = false
-              vue.loadProductList()
+              vue.loadUserList()
               vue.myFlashMsg = vue.$i18n.t('message.product_updated_msg', {name: vue.formEdit.name})
             }
             vue.waitEditProduct = false
@@ -476,7 +467,7 @@ export default {
                 vue.formEdit.domains = apiRes.data
               }
               vue.waitEditProduct = false
-              vue.loadProductList()
+              vue.loadUserList()
             },
             (err) => {
               vue.waitEditProduct = false
@@ -506,7 +497,7 @@ export default {
               vue.formEdit.domains = apiRes.data
             }
             vue.waitEditProduct = false
-            vue.loadProductList()
+            vue.loadUserList()
           },
           (err) => {
             vue.waitEditProduct = false
@@ -515,7 +506,7 @@ export default {
       )
     },
     clickDeleteProduct(id) {
-      this.prodToDelete = this.prodMap[id]
+      this.prodToDelete = this.userMap[id]
       this.modalDeleteErr = ''
       this.modalDeleteShow = true
       this.myFlashMsg = ''
@@ -531,7 +522,7 @@ export default {
               vue.modalDeleteErr = apiRes.status + ": " + apiRes.message
             } else {
               vue.modalDeleteShow = false
-              vue.loadProductList()
+              vue.loadUserList()
               vue.myFlashMsg = vue.$i18n.t('message.product_deleted_msg', {name: vue.prodToDelete.name})
             }
             vue.waitDeleteProduct = false

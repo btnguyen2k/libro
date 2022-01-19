@@ -1053,6 +1053,96 @@ var funcUserToMapTransform = func(m map[string]interface{}) map[string]interface
 	return result
 }
 
+// apiAdminGetUserList handles API call "adminGetUserList"
+func apiAdminGetUserList(ctx *itineris.ApiContext, _ *itineris.ApiAuth, _ *itineris.ApiParams) *itineris.ApiResult {
+	_, authResult := authenticateAdminApiCall(ctx)
+	if authResult != nil {
+		return authResult
+	}
+
+	userList, err := userDao.GetAll(nil, nil)
+	if err != nil {
+		return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage(err.Error())
+	}
+	data := make([]map[string]interface{}, 0)
+	for _, user := range userList {
+		data = append(data, user.ToMap(funcUserToMapTransform))
+	}
+	return itineris.NewApiResult(itineris.StatusOk).SetData(data)
+}
+
+// apiAdminAddUser handles API call "adminAddUser"
+func apiAdminAddUser(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *itineris.ApiParams) *itineris.ApiResult {
+	_, authResult := authenticateAdminApiCall(ctx)
+	if authResult != nil {
+		return authResult
+	}
+
+	id := _extractParam(params, "id", reddo.TypeString, utils.UniqueIdSmall(), nil)
+	prod, err := productDao.Get(id.(string))
+	if err != nil {
+		return itineris.NewApiResult(itineris.StatusErrorServer).
+			SetMessage(fmt.Sprintf("error getting product [%s] (error: %s)", id, err))
+	}
+	if prod != nil {
+		return itineris.NewApiResult(itineris.StatusErrorClient).
+			SetMessage(fmt.Sprintf("product [%s] already existed", id))
+	}
+	id = strings.ToLower(id.(string))
+
+	// extract params
+	isPublished := _extractParam(params, "is_published", reddo.TypeBool, false, nil)
+	name := _extractParam(params, "name", reddo.TypeString, "", nil)
+	if name == "" {
+		return itineris.NewApiResult(itineris.StatusErrorClient).SetMessage("name is empty")
+	}
+	desc := _extractParam(params, "desc", reddo.TypeString, "", nil)
+	domains := _extractParam(params, "domains", reddo.TypeString, "", nil)
+	domains = strings.ToLower(domains.(string))
+
+	domainList := regexp.MustCompile(`[,\s]+`).Split(domains.(string), -1)
+	for _, domain := range domainList {
+		mapping, err := domainProductMappingDao.Get(domain)
+		if err != nil {
+			return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage(err.Error())
+		}
+		if mapping != nil {
+			return itineris.NewApiResult(itineris.StatusNoPermission).SetMessage(fmt.Sprintf("domain %s has been used", domains))
+		}
+	}
+
+	contactsMap := map[string]string{
+		"email":    _extractParam(params, "contacts.email", reddo.TypeString, "", nil).(string),
+		"website":  _extractParam(params, "contacts.website", reddo.TypeString, "", nil).(string),
+		"github":   _extractParam(params, "contacts.github", reddo.TypeString, "", nil).(string),
+		"facebook": _extractParam(params, "contacts.facebook", reddo.TypeString, "", nil).(string),
+		"linkedin": _extractParam(params, "contacts.linkedin", reddo.TypeString, "", nil).(string),
+		"slack":    _extractParam(params, "contacts.slack", reddo.TypeString, "", nil).(string),
+		"twitter":  _extractParam(params, "contacts.twitter", reddo.TypeString, "", nil).(string),
+	}
+
+	// create product
+	prod = libro.NewProduct(goapi.AppVersionNumber, utils.UniqueIdSmall(), name.(string), desc.(string), isPublished.(bool))
+	prod.SetId(id.(string))
+	prod.SetContacts(contactsMap)
+	result, err := productDao.Create(prod)
+	if err != nil || !result {
+		return itineris.NewApiResult(itineris.StatusErrorServer).
+			SetMessage(fmt.Sprintf("cannot create product %s (error: %s)", name, err))
+	}
+
+	// map domains
+	for _, domain := range domainList {
+		result, err := domainProductMappingDao.Set(domain, prod.GetId())
+		if err != nil || !result {
+			return itineris.NewApiResult(201).
+				SetMessage(fmt.Sprintf("Product %s created, but cannot map domain %s to product (error: %s)", name, domain, err))
+		}
+	}
+
+	return itineris.NewApiResult(itineris.StatusOk)
+}
+
 // apiAdminUpdateUserProfile handles API call "adminUpdateUserProfile"
 func apiAdminUpdateUserProfile(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *itineris.ApiParams) *itineris.ApiResult {
 	curUser, authResult := authenticateAdminApiCall(ctx)

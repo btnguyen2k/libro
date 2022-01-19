@@ -3,15 +3,16 @@ import Vue from 'vue'
 import Router from 'vue-router'
 
 const TheContainer = () => import('@/containers/TheContainer')
-
 const Login = () => import('@/views/gva/pages/Login')
-
 const Dashboard = () => import('@/views/libro/Dashboard')
+
+const MyProfile = () => import('@/views/libro/MyProfile')
+
 const ProductList = () => import('@/views/libro/ProductList')
 const ProductTopicList = () => import('@/views/libro/ProductTopicList')
 const TopicPageList = () => import('@/views/libro/TopicPageList')
 
-const MyProfile = () => import('@/views/libro/MyProfile')
+const UserList = () => import('@/views/libro/UserList')
 
 Vue.use(Router)
 
@@ -116,6 +117,26 @@ function configRoutes() {
                             props: true, //[props=true] to pass flashMsg
                         },
                     ]
+                },
+                {
+                    path: 'users', meta: {label: i18n.t('message.users')},
+                    name: 'UserList',
+                    component: UserList,
+                    props: true, //[props=true] to pass flashMsg
+                    // component: {
+                    //     render(c) {
+                    //         return c('router-view')
+                    //     }
+                    // },
+                    // children: [
+                    //     {
+                    //         path: '',
+                    //         meta: {label: i18n.t('message.users')},
+                    //         name: 'UserList',
+                    //         component: ProductList,
+                    //         props: true, //[props=true] to pass flashMsg
+                    //     },
+                    // ]
                 },
             ]
         },

@@ -46,6 +46,8 @@ func initApiHandlers(router *itineris.ApiRouter) {
 	router.SetHandler("adminDeleteTopicPage", apiAdminDeleteTopicPage)
 	router.SetHandler("adminModifyTopicPage", apiAdminModifyTopicPage)
 	router.SetHandler("adminUpdateTopicPage", apiAdminUpdateTopicPage)
+	router.SetHandler("adminGetUserList", apiAdminGetUserList)
+	router.SetHandler("adminAddUser", apiAdminAddUser)
 }
 
 /*------------------------------ shared variables and functions ------------------------------*/

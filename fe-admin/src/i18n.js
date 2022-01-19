@@ -161,6 +161,9 @@ const messages = {
 
             user_profile_updated_msg: 'User profile "{id}" has been updated successfully.',
             user_password_updated_msg: 'Password of user "{id}" has been updated successfully.',
+
+            add_user: "Add new user",
+            user_added_msg: 'User "{id}" has been added successfully.',
         }
     },
     vi: {
@@ -321,6 +324,9 @@ const messages = {
 
             user_profile_updated_msg: 'Thông tin người dùng "{id}" đã được cập nhật thành công.',
             user_password_updated_msg: 'Mật mã người dùng "{id}" đã được cập nhật thành công.',
+
+            add_user: "Thêm tài khoản người dùng",
+            user_added_msg: 'Người dùng "{id}" đã được thêm vào hệ thống.',
         }
     }
 }
