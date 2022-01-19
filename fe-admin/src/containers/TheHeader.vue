@@ -32,28 +32,19 @@
           {{ $t('message.users') }}
         </CHeaderNavLink>
       </CHeaderNavItem>
-<!--      <CHeaderNavItem class="px-3">-->
-<!--        <CHeaderNavLink :to="{name:'CreatePost'}">-->
-<!--          {{ $t('message.create_blog_post') }}-->
-<!--        </CHeaderNavLink>-->
-<!--      </CHeaderNavItem>-->
     </CHeaderNav>
     <CHeaderNav class="mr-4">
-<!--      <CHeaderNavItem class="d-md-down-none mx-2">-->
-<!--        <CHeaderNavLink>-->
-<!--          <CIcon name="cil-bell"/>-->
-<!--        </CHeaderNavLink>-->
-<!--      </CHeaderNavItem>-->
-<!--      <CHeaderNavItem class="d-md-down-none mx-2">-->
-<!--        <CHeaderNavLink>-->
-<!--          <CIcon name="cil-list"/>-->
-<!--        </CHeaderNavLink>-->
-<!--      </CHeaderNavItem>-->
-<!--      <CHeaderNavItem class="d-md-down-none mx-2">-->
-<!--        <CHeaderNavLink>-->
-<!--          <CIcon name="cil-envelope-open"/>-->
-<!--        </CHeaderNavLink>-->
-<!--      </CHeaderNavItem>-->
+      <CDropdown inNav class="c-header-nav-items" placement="bottom-end" add-menu-classes="pt-0">
+        <template #toggler>
+          <CHeaderNavLink>
+            <CIcon name="cil-flag-alt"/>
+          </CHeaderNavLink>
+        </template>
+        <CDropdownItem v-for="(locale, _) in $i18n.availableLocales" @click="doSwitchLanguage(locale)">
+          <CIcon :name="$i18n.messages[locale]._flag"/>
+          <span class="px-2">{{ $i18n.messages[locale]._name }}</span>
+        </CDropdownItem>
+      </CDropdown>
       <TheHeaderDropdownAccnt/>
     </CHeaderNav>
     <CSubheader class="px-3">
@@ -75,6 +66,11 @@ export default {
   },
   components: {
     TheHeaderDropdownAccnt
+  },
+  methods: {
+    doSwitchLanguage(locale) {
+      this.$i18n.locale = locale
+    },
   }
 }
 </script>

@@ -4,6 +4,9 @@ import VueI18n from 'vue-i18n'
 
 const messages = {
     en: {
+        _name: 'English',
+        _flag: 'cif-gb',
+
         message: {
             actions: 'Actions',
             action_create: 'Create',
@@ -16,6 +19,9 @@ const messages = {
 
             error: 'Error',
             info: 'Information',
+            settings: 'Settings',
+            account: 'Account',
+            language: 'Language',
 
             yes: 'Yes',
             no: 'No',
@@ -158,6 +164,9 @@ const messages = {
         }
     },
     vi: {
+        _name: 'Tiếng Việt',
+        _flag: 'cif-vn',
+
         message: {
             actions: 'Hành động',
             action_create: 'Tạo',
@@ -170,6 +179,9 @@ const messages = {
 
             error: 'Có lỗi',
             info: 'Thông tin',
+            settings: 'Cài đặt',
+            account: 'Tài khoản',
+            language: 'Ngôn ngữ',
 
             yes: 'Có',
             no: 'Không',

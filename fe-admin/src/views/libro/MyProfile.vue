@@ -105,6 +105,7 @@ import forge from 'node-forge'
 export default {
   name: 'MyProfile',
   mounted() {
+    console.log(this.$i18n)
     let vue = this
     vue.waitLoadUserProfile = true
     clientUtils.apiDoGet(clientUtils.apiInfo,
