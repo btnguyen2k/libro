@@ -23,6 +23,8 @@ const messages = {
             account: 'Account',
             language: 'Language',
 
+            error_field_mandatory: 'Field value is mandatory.',
+
             yes: 'Yes',
             no: 'No',
             ok: 'Ok',
@@ -155,12 +157,13 @@ const messages = {
             user_current_password: "Current password",
             user_current_password_msg: "Change password: enter current password and the new one",
             user_new_password: "New password",
-            user_new_password_msg: "New password",
+            user_new_password_msg: "Enter new password. If empty, user can only login using social network account",
             user_confirmed_password: "Confirmed password",
             user_confirmed_password_msg: "Enter new password again to confirm",
 
             user_profile_updated_msg: 'User profile "{id}" has been updated successfully.',
             user_password_updated_msg: 'Password of user "{id}" has been updated successfully.',
+            error_confirmed_password_mismatch: "Password does not match the confirmed one.",
 
             add_user: "Add new user",
             user_added_msg: 'User "{id}" has been added successfully.',
@@ -191,6 +194,8 @@ const messages = {
             ok: 'Đồng ý',
             cancel: 'Huỷ',
             close: 'Đóng',
+
+            error_field_mandatory: 'Trường dữ liệu không được bỏ trống, vui lòng nhập thông tin.',
 
             logout: 'Đăng xuất',
             login: 'Đăng nhập',
@@ -318,9 +323,10 @@ const messages = {
             user_current_password: "Mật mã hiện tại",
             user_current_password_msg: "Để đổi mật mã: nhập mật mã hiện tại và mật mã mới",
             user_new_password: "Mật mã mới",
-            user_new_password_msg: "Mật mã mới",
+            user_new_password_msg: "Nhập mật mã mới. Nếu rỗng, người dùng chỉ có thể đăng nhập thông qua tài khoản mxh",
             user_confirmed_password: "Xác nhận lại mật mã",
             user_confirmed_password_msg: "Nhập mật mã mới lần nữa để xác nhận",
+            error_confirmed_password_mismatch: "Mật mã không khớp nhau",
 
             user_profile_updated_msg: 'Thông tin người dùng "{id}" đã được cập nhật thành công.',
             user_password_updated_msg: 'Mật mã người dùng "{id}" đã được cập nhật thành công.',

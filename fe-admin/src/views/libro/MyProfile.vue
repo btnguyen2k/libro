@@ -110,7 +110,7 @@ export default {
     clientUtils.apiDoGet(clientUtils.apiInfo,
         (apiRes) => {
           if (apiRes.status != 200) {
-            vue.errorMsg = "apiRes.message"
+            vue.errorMsg = apiRes.message
             vue.waitLoadUserProfile = false
           } else {
             vue.publicKey = forge.pki.publicKeyFromPem(apiRes.data.rsa_public_key)
@@ -127,7 +127,7 @@ export default {
       errorMsg: '',
       waitLoadUserProfile: false,
       userProfile: {},
-      publicKey: '',
+      publicKey: Object,
 
       errorMsgProfile: '',
       myFlashMsgProfile: this.flashMsg,
