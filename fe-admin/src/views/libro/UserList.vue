@@ -34,7 +34,7 @@
                   <CIcon name="cil-pencil" v-c-tooltip.hover="$t('message.action_edit')"/>
                 </CLink>
 
-                <CLink v-if="isAdmin && item.id!=currentUserId" @click="clickDeleteProduct(item.id)" class="btn btn-sm btn-danger m-1">
+                <CLink v-if="isAdmin && item.id!=currentUserId" @click="clickDeleteUser(item.id)" class="btn btn-sm btn-danger m-1">
                   <CIcon name="cil-trash" v-c-tooltip.hover="$t('message.action_delete')"/>
                 </CLink><CLink v-else class="btn btn-sm btn-secondary m-1" disabled>
                 <CIcon name="cil-trash" v-c-tooltip.hover="$t('message.action_delete')"/>
@@ -149,43 +149,27 @@
       </CModal>
     </CForm>
 
-<!--    &lt;!&ndash; pop-up form to confirm unmapping domain &ndash;&gt;-->
-<!--    <CModal :title="$t('message.product_unmap_domain')" color="danger" :centered="true" :show.sync="modalUnmapShow">-->
-<!--      {{ modalUnmapMessage }}-->
-<!--      <template #footer>-->
-<!--        <CButton @click="doUnmapDomain(modalUnmapData)" color="danger" style="width: 96px">-->
-<!--          <CIcon name="cil-trash" class="align-top"/>-->
-<!--          {{ $t('message.ok') }}-->
-<!--        </CButton>-->
-<!--        <CButton @click="modalUnmapShow = false" color="secondary" class="ml-2" style="width: 96px">-->
-<!--          <CIcon name="cil-arrow-circle-left" class="align-top"/>-->
-<!--          {{ $t('message.cancel') }}-->
-<!--        </CButton>-->
-<!--      </template>-->
-<!--    </CModal>-->
-
-<!--    &lt;!&ndash; pop-up dialog to confirm deleting an existing product &ndash;&gt;-->
-<!--    <CModal color="danger" :title="$t('message.delete_product')" :centered="true" :show.sync="modalDeleteShow" :close-on-backdrop="false">-->
-<!--      <CAlert color="warning">-->
-<!--        <CIcon name="cil-warning" size="lg" />-->
-<!--        {{ $t('message.delete_product_msg', {numTopics: prodToDelete['num_topics']}) }}-->
-<!--      </CAlert>-->
-<!--      <CAlert v-if="waitDeleteProduct" color="info">{{ $t('message.wait') }}</CAlert>-->
-<!--      <CAlert v-if="modalDeleteErr" color="danger">{{ modalDeleteErr }}</CAlert>-->
-<!--      <CInput type="text" :label="$t('message.product_id')" v-model="prodToDelete.id" horizontal plaintext />-->
-<!--      <CInput type="text" :label="$t('message.product_name')" v-model="prodToDelete.name" horizontal plaintext/>-->
-<!--      <CTextarea rows="2" type="text" :label="$t('message.product_desc')" v-model="prodToDelete.desc" horizontal plaintext/>-->
-<!--      <template #footer>-->
-<!--        <CButton v-if="!waitDeleteProduct" type="button" color="danger" class="m-2" style="width: 96px" @click="doDeleteProduct">-->
-<!--          <CIcon name="cil-trash" class="align-top"/>-->
-<!--          {{ $t('message.action_delete') }}-->
-<!--        </CButton>-->
-<!--        <CButton type="button" color="secondary" style="width: 96px" @click="modalDeleteShow = false">-->
-<!--          <CIcon name="cil-arrow-circle-left" class="align-top"/>-->
-<!--          {{ $t('message.cancel') }}-->
-<!--        </CButton>-->
-<!--      </template>-->
-<!--    </CModal>-->
+    <!-- pop-up dialog to confirm deleting an existing user -->
+    <CModal size="lg" color="danger" :title="$t('message.delete_user')" :centered="true" :show.sync="modalDeleteShow" :close-on-backdrop="false">
+      <CAlert color="warning">
+        <CIcon name="cil-warning" size="lg" />
+        {{ $t('message.delete_user_msg', {id: userToDelete.id}) }}
+      </CAlert>
+      <CAlert v-if="waitDeleteUser" color="info">{{ $t('message.wait') }}</CAlert>
+      <CAlert v-if="modalDeleteErr" color="danger">{{ modalDeleteErr }}</CAlert>
+      <CInput type="text" :label="$t('message.user_id')" v-model="userToDelete.id" horizontal plaintext />
+      <CInput type="text" :label="$t('message.user_display_name')" v-model="userToDelete.name" horizontal plaintext/>
+      <template #footer>
+        <CButton v-if="!waitDeleteUser" type="button" color="danger" class="m-2" style="width: 96px" @click="doDeleteUser">
+          <CIcon name="cil-trash" class="align-top"/>
+          {{ $t('message.action_delete') }}
+        </CButton>
+        <CButton type="button" color="secondary" style="width: 96px" @click="modalDeleteShow = false">
+          <CIcon name="cil-arrow-circle-left" class="align-top"/>
+          {{ $t('message.cancel') }}
+        </CButton>
+      </template>
+    </CModal>
   </CRow>
 </template>
 
@@ -230,8 +214,8 @@ export default {
 
       modalDeleteShow: false,
       modalDeleteErr: '',
-      waitDeleteProduct: false,
-      prodToDelete: {...emptyForm},
+      waitDeleteUser: false,
+      userToDelete: {...emptyForm},
 
       errorMsg: '',
       myFlashMsg: this.flashMsg,
@@ -338,31 +322,31 @@ export default {
           }
       )
     },
-    clickDeleteProduct(id) {
-      this.prodToDelete = this.userMap[id]
+    clickDeleteUser(id) {
+      this.userToDelete = this.userMap[id]
       this.modalDeleteErr = ''
       this.modalDeleteShow = true
       this.myFlashMsg = ''
     },
-    doDeleteProduct() {
+    doDeleteUser() {
       this.modalDeleteErr = ''
       let vue = this
-      vue.waitDeleteProduct = true
+      vue.waitDeleteUser = true
       clientUtils.apiDoDelete(
-          clientUtils.apiAdminProduct + "/" + vue.prodToDelete.id,
+          clientUtils.apiAdminUser + "/" + vue.userToDelete.id,
           (apiRes) => {
             if (apiRes.status != 200) {
               vue.modalDeleteErr = apiRes.status + ": " + apiRes.message
             } else {
               vue.modalDeleteShow = false
               vue.loadUserList()
-              vue.myFlashMsg = vue.$i18n.t('message.product_deleted_msg', {name: vue.prodToDelete.name})
+              vue.myFlashMsg = vue.$i18n.t('message.user_deleted_msg', {id: vue.userToDelete.id})
             }
-            vue.waitDeleteProduct = false
+            vue.waitDeleteUser = false
           },
           (err) => {
             vue.modalDeleteErr = err
-            vue.waitDeleteProduct = false
+            vue.waitDeleteUser = false
           }
       )
     },

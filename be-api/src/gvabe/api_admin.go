@@ -1055,7 +1055,7 @@ var funcUserToMapTransform = func(m map[string]interface{}) map[string]interface
 
 // apiAdminGetUserList handles API call "adminGetUserList"
 func apiAdminGetUserList(ctx *itineris.ApiContext, _ *itineris.ApiAuth, _ *itineris.ApiParams) *itineris.ApiResult {
-	_, authResult := authenticateAdminApiCall(ctx)
+	curUser, authResult := authenticateAdminApiCall(ctx)
 	if authResult != nil {
 		return authResult
 	}
@@ -1066,35 +1066,37 @@ func apiAdminGetUserList(ctx *itineris.ApiContext, _ *itineris.ApiAuth, _ *itine
 	}
 	data := make([]map[string]interface{}, 0)
 	for _, user := range userList {
-		data = append(data, user.ToMap(funcUserToMapTransform))
+		if curUser.IsAdmin() || curUser.GetId() == user.GetId() {
+			// admin can see all user accounts, otherwise can only see myself
+			data = append(data, user.ToMap(funcUserToMapTransform))
+		}
 	}
 	return itineris.NewApiResult(itineris.StatusOk).SetData(data)
 }
 
 // apiAdminAddUser handles API call "adminAddUser"
 func apiAdminAddUser(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *itineris.ApiParams) *itineris.ApiResult {
-	currentUser, authResult := authenticateAdminApiCall(ctx)
+	curUser, authResult := authenticateAdminApiCall(ctx)
 	if authResult != nil {
 		return authResult
 	}
 
-	if !currentUser.IsAdmin() {
-		return itineris.NewApiResult(itineris.StatusNoPermission).
-			SetMessage(fmt.Sprintf("creating new currentUser account is denied"))
+	if !curUser.IsAdmin() {
+		// only admin can create new user account
+		return itineris.NewApiResult(itineris.StatusNoPermission).SetMessage(fmt.Sprintf("creating new user account is denied"))
 	}
 
 	id := _extractParam(params, "id", reddo.TypeString, "", nil)
 	id = strings.ToLower(id.(string))
 	if id == "" {
-		return itineris.NewApiResult(itineris.StatusErrorClient).SetMessage("currentUser id is empty")
+		return itineris.NewApiResult(itineris.StatusErrorClient).SetMessage("user-id is empty")
 	}
 	newUser, err := userDao.Get(id.(string))
 	if err != nil {
-		return itineris.NewApiResult(itineris.StatusErrorServer).
-			SetMessage(fmt.Sprintf("error getting currentUser [%s] (error: %s)", id, err))
+		return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage(fmt.Sprintf("error getting user [%s] (error: %s)", id, err))
 	}
 	if newUser != nil {
-		return itineris.NewApiResult(itineris.StatusErrorClient).SetMessage(fmt.Sprintf("currentUser [%s] already existed", id))
+		return itineris.NewApiResult(itineris.StatusErrorClient).SetMessage(fmt.Sprintf("user [%s] already existed", id))
 	}
 
 	isAdmin := _extractParam(params, "is_admin", reddo.TypeBool, false, nil)
@@ -1250,6 +1252,36 @@ func apiAdminUpdateUserProfile(ctx *itineris.ApiContext, _ *itineris.ApiAuth, pa
 	if err != nil || !result {
 		return itineris.NewApiResult(itineris.StatusErrorServer).
 			SetMessage(fmt.Sprintf("cannot update user [%s] (error: %s)", user.GetId(), err))
+	}
+
+	return itineris.NewApiResult(itineris.StatusOk)
+}
+
+// apiAdminDeleteUserProfile handles API call "adminDeleteUserProfile"
+func apiAdminDeleteUserProfile(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *itineris.ApiParams) *itineris.ApiResult {
+	curUser, authResult := authenticateAdminApiCall(ctx)
+	if authResult != nil {
+		return authResult
+	}
+
+	uid := _extractParam(params, "uid", reddo.TypeString, "", nil)
+	user, err := userDao.Get(uid.(string))
+	if err != nil {
+		return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage(err.Error())
+	}
+	if user == nil {
+		return itineris.NewApiResult(itineris.StatusNotFound).SetMessage("user not found")
+	}
+
+	if curUser.GetId() == user.GetId() || !curUser.IsAdmin() {
+		// can not delete your own account, or you are not admin
+		return itineris.NewApiResult(itineris.StatusNoPermission).SetMessage("no permission")
+	}
+
+	result, err := userDao.Delete(user)
+	if err != nil || !result {
+		return itineris.NewApiResult(itineris.StatusErrorServer).
+			SetMessage(fmt.Sprintf("cannot delete user [%s] (error: %s)", user.GetId(), err))
 	}
 
 	return itineris.NewApiResult(itineris.StatusOk)

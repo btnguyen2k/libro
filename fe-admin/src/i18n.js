@@ -168,6 +168,10 @@ const messages = {
 
             add_user: "Add new user",
             user_added_msg: 'User "{id}" has been added successfully.',
+
+            delete_user: "Delete user account",
+            delete_user_msg: 'Are you sure you wish to remove user account "{id}"?',
+            user_deleted_msg: 'User "{id}" has been deleted successfully.',
         }
     },
     vi: {
@@ -335,6 +339,10 @@ const messages = {
 
             add_user: "Thêm tài khoản người dùng",
             user_added_msg: 'Người dùng "{id}" đã được thêm vào hệ thống.',
+
+            delete_user: "Xoá tài khoản người dùng",
+            delete_user_msg: 'Bạn có chắc muốn xoá tài khoản "{id}" khỏi hệ thống?',
+            user_deleted_msg: 'Tài khoản người dùng "{id}" đã được xoá khỏi hệ thống.',
         }
     }
 }

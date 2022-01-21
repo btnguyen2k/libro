@@ -49,6 +49,7 @@ func initApiHandlers(router *itineris.ApiRouter) {
 	router.SetHandler("adminUpdateMyProfile", apiAdminUpdateMyProfile)
 	router.SetHandler("adminUpdateMyPassword", apiAdminUpdateMyPassword)
 	router.SetHandler("adminUpdateUserProfile", apiAdminUpdateUserProfile)
+	router.SetHandler("adminDeleteUserProfile", apiAdminDeleteUserProfile)
 }
 
 /*------------------------------ shared variables and functions ------------------------------*/
