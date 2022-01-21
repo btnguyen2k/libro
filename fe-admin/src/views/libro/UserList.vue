@@ -28,13 +28,13 @@
             </template>
             <template #actions="{item}">
               <td style="white-space: nowrap; text-align: center">
-                <CLink v-if="isAdmin" @click="clickEditProduct(item.id)" class="btn btn-sm btn-primary m-1">
+                <CLink v-if="isAdmin && item.id!=currentUserId" @click="clickEditUser(item.id)" class="btn btn-sm btn-primary m-1">
                   <CIcon name="cil-pencil" v-c-tooltip.hover="$t('message.action_edit')"/>
                 </CLink><CLink v-else class="btn btn-sm btn-secondary m-1" disabled>
                   <CIcon name="cil-pencil" v-c-tooltip.hover="$t('message.action_edit')"/>
                 </CLink>
 
-                <CLink v-if="isAdmin" @click="clickDeleteProduct(item.id)" class="btn btn-sm btn-danger m-1">
+                <CLink v-if="isAdmin && item.id!=currentUserId" @click="clickDeleteProduct(item.id)" class="btn btn-sm btn-danger m-1">
                   <CIcon name="cil-trash" v-c-tooltip.hover="$t('message.action_delete')"/>
                 </CLink><CLink v-else class="btn btn-sm btn-secondary m-1" disabled>
                 <CIcon name="cil-trash" v-c-tooltip.hover="$t('message.action_delete')"/>
@@ -109,111 +109,45 @@
         </CModal>
       </CForm>
 
-<!--    &lt;!&ndash; pop-up form to update existing product &ndash;&gt;-->
-<!--    <CForm @submit.prevent="doEditProduct">-->
-<!--      <CModal size="lg" :title="$t('message.edit_product')" :centered="true" :show.sync="modalEditShow" :close-on-backdrop="false">-->
-<!--        <CAlert v-if="waitEditProduct" color="info">{{ $t('message.wait') }}</CAlert>-->
-<!--        <CAlert v-if="modalEditErr" color="danger">{{ modalEditErr }}</CAlert>-->
-<!--        <CAlert v-if="modalEditFlash" color="success" closeButton>{{ modalEditFlash }}</CAlert>-->
-<!--        <CTabs ref="formEditProductTabs" v-if="!waitEditProduct">-->
-<!--          <CTab ref="formEditProductTabInfo" active>-->
-<!--            <template slot="title">-->
-<!--              {{ $t('message.product_info') }}-->
-<!--            </template>-->
-<!--            <div class="form-group form-row mt-2">-->
-<!--              <CCol :sm="{offset:3,size:9}" class="form-inline">-->
-<!--                <CInputCheckbox inline :label="$t('message.product_is_published')" :checked.sync="formEdit.is_published"/>-->
-<!--                <small>({{ $t('message.product_is_published_msg') }})</small>-->
-<!--              </CCol>-->
-<!--            </div>-->
-<!--            <CInput-->
-<!--                type="text"-->
-<!--                v-model="formEdit.id"-->
-<!--                :label="$t('message.product_id')"-->
-<!--                :placeholder="$t('message.product_id_msg')"-->
-<!--                v-c-tooltip.hover="$t('message.product_id_msg')"-->
-<!--                horizontal-->
-<!--                disabled-->
-<!--            />-->
-<!--            <CInput-->
-<!--                type="text"-->
-<!--                v-model="formEdit.name"-->
-<!--                :label="$t('message.product_name')"-->
-<!--                :placeholder="$t('message.product_name_msg')"-->
-<!--                v-c-tooltip.hover="$t('message.product_name_msg')"-->
-<!--                horizontal-->
-<!--                required-->
-<!--                was-validated-->
-<!--            />-->
-<!--            <CTextarea-->
-<!--                rows="2"-->
-<!--                type="text"-->
-<!--                v-model="formEdit.desc"-->
-<!--                :label="$t('message.product_desc')"-->
-<!--                :placeholder="$t('message.product_desc_msg')"-->
-<!--                v-c-tooltip.hover="$t('message.product_desc_msg')"-->
-<!--                horizontal-->
-<!--                required-->
-<!--                was-validated-->
-<!--            />-->
-<!--            <div class="form-group form-row">-->
-<!--              <CCol sm="3">-->
-<!--                {{ $t('message.product_domains') }}-->
-<!--              </CCol>-->
-<!--              <CCol sm="9">-->
-<!--                <CInput type="text" v-c-tooltip.hover="$t('message.product_map_domain_msg')" v-model="domainToMapEdit">-->
-<!--                  <template #append>-->
-<!--                    <CButton type="button" color="primary" @click="doMapDomain"><ficon :title="$t('message.product_map_domain')" :icon="['fas','link']"/></CButton>-->
-<!--                  </template>-->
-<!--                </CInput>-->
-<!--                <CDropdown v-for="(domain, _) in formEdit.domains" size="sm"-->
-<!--                           :toggler-text="domain" color="info" class="mb-1 mr-1 d-inline"-->
-<!--                           :label="$t('message.product_domains')">-->
-<!--                  <CDropdownItem @click="clickUnmapDomain(domain)"><ficon fixedWidth :icon="['fas', 'unlink']"/> {{ $t('message.product_unmap_domain') }}</CDropdownItem>-->
-<!--                </CDropdown>-->
-<!--              </CCol>-->
-<!--            </div>-->
-<!--          </CTab>-->
-<!--          <CTab>-->
-<!--            <template slot="title">-->
-<!--              {{ $t('message.product_contacts') }}-->
-<!--            </template>-->
-<!--            <CInput class="mt-2" type="text" v-model="formEdit.contacts.email" :placeholder="$t('message.product_email')" v-c-tooltip.hover="$t('message.product_email_msg')">-->
-<!--              <template #prepend-content><CIcon name="cil-envelope-closed"/></template>-->
-<!--            </CInput>-->
-<!--            <CInput type="text" v-model="formEdit.contacts.website" :placeholder="$t('message.product_website')" v-c-tooltip.hover="$t('message.product_website_msg')">-->
-<!--              <template #prepend-content><CIcon name="cil-globe-alt"/></template>-->
-<!--            </CInput>-->
-<!--            <CInput type="text" v-model="formEdit.contacts.github" :placeholder="$t('message.product_github')" v-c-tooltip.hover="$t('message.product_github_msg')">-->
-<!--              <template #prepend-content><CIcon name="cib-github"/></template>-->
-<!--            </CInput>-->
-<!--            <CInput type="text" v-model="formEdit.contacts.facebook" :placeholder="$t('message.product_facebook')" v-c-tooltip.hover="$t('message.product_facebook_msg')">-->
-<!--              <template #prepend-content><CIcon name="cib-facebook"/></template>-->
-<!--            </CInput>-->
-<!--            <CInput type="text" v-model="formEdit.contacts.linkedin" :placeholder="$t('message.product_linkedin')" v-c-tooltip.hover="$t('message.product_linkedin_msg')">-->
-<!--              <template #prepend-content><CIcon name="cib-linkedin"/></template>-->
-<!--            </CInput>-->
-<!--            <CInput type="text" v-model="formEdit.contacts.slack" :placeholder="$t('message.product_slack')" v-c-tooltip.hover="$t('message.product_slack_msg')">-->
-<!--              <template #prepend-content><CIcon name="cib-slack"/></template>-->
-<!--            </CInput>-->
-<!--            <CInput type="text" v-model="formEdit.contacts.twitter" :placeholder="$t('message.product_twitter')" v-c-tooltip.hover="$t('message.product_twitter_msg')">-->
-<!--              <template #prepend-content><CIcon name="cib-twitter"/></template>-->
-<!--            </CInput>-->
-<!--          </CTab>-->
-<!--        </CTabs>-->
-<!--        <template #footer>-->
-<!--          <button type="submit" ref="btnSubmitEditProduct" style="display:none;" />-->
-<!--          <CButton v-if="!waitEditProduct" type="button" @click="doEditProductClick" color="primary" class="m-2" style="width: 96px">-->
-<!--            <CIcon name="cil-save" class="align-top"/>-->
-<!--            {{ $t('message.action_save') }}-->
-<!--          </CButton>-->
-<!--          <CButton type="button" color="secondary" style="width: 96px" @click="modalEditShow = false">-->
-<!--            <CIcon name="cil-arrow-circle-left" class="align-top"/>-->
-<!--            {{ $t('message.cancel') }}-->
-<!--          </CButton>-->
-<!--        </template>-->
-<!--      </CModal>-->
-<!--    </CForm>-->
+    <!-- pop-up form to update existing user -->
+    <CForm @submit.prevent="doEditUser">
+      <CModal size="lg" :title="$t('message.edit_user_profile')" :centered="true" :show.sync="modalEditShow" :close-on-backdrop="false">
+        <CAlert v-if="waitEditUser" color="info">{{ $t('message.wait') }}</CAlert>
+        <CAlert v-if="modalEditErr" color="danger">{{ modalEditErr }}</CAlert>
+        <div class="form-group form-row mt-2">
+          <CCol :sm="{offset:3,size:9}" class="form-inline">
+            <CInputCheckbox inline :label="$t('message.user_is_admin')" :checked.sync="formEdit.is_admin"/>
+            <small>({{ $t('message.user_is_admin_msg') }})</small>
+          </CCol>
+        </div>
+        <CInput
+            type="text"
+            v-model="formEdit.id"
+            :label="$t('message.user_id')"
+            :placeholder="$t('message.user_id_msg')"
+            v-c-tooltip.hover="$t('message.user_id_msg')"
+            horizontal disabled
+        />
+        <CInput
+            type="text"
+            v-model="formEdit.name"
+            :label="$t('message.user_display_name')"
+            :placeholder="$t('message.user_display_name_msg')"
+            v-c-tooltip.hover="$t('message.user_display_name_msg')"
+            horizontal
+        />
+        <template #footer>
+          <CButton v-if="!waitEditUser" type="button" @click="doEditUser" color="primary" class="m-2" style="width: 96px">
+            <CIcon name="cil-save" class="align-top"/>
+            {{ $t('message.action_save') }}
+          </CButton>
+          <CButton type="button" color="secondary" style="width: 96px" @click="modalEditShow = false">
+            <CIcon name="cil-arrow-circle-left" class="align-top"/>
+            {{ $t('message.cancel') }}
+          </CButton>
+        </template>
+      </CModal>
+    </CForm>
 
 <!--    &lt;!&ndash; pop-up form to confirm unmapping domain &ndash;&gt;-->
 <!--    <CModal :title="$t('message.product_unmap_domain')" color="danger" :centered="true" :show.sync="modalUnmapShow">-->
@@ -291,14 +225,8 @@ export default {
 
       modalEditShow: false,
       modalEditErr: '',
-      modalEditFlash: '',
       formEdit: {...emptyForm},
-      waitEditProduct: false,
-      domainToMapEdit: '',
-
-      modalUnmapShow: false,
-      modalUnmapMessage: '',
-      modalUnmapData: '',
+      waitEditUser: false,
 
       modalDeleteShow: false,
       modalDeleteErr: '',
@@ -312,6 +240,7 @@ export default {
       userMap: {},
       isAdmin: false,
       publicKey: Object,
+      currentUserId: '',
     }
   },
   props: ["flashMsg"],
@@ -326,6 +255,7 @@ export default {
           (apiRes) => {
             if (apiRes.status == 200) {
               let session = utils.loadLoginSession()
+              vue.currentUserId = session.uid
               vue.userList = apiRes.data
               vue.userMap = {}
               for (let i = vue.userList.length - 1; i >= 0; i--) {
@@ -376,51 +306,35 @@ export default {
           }
       )
     },
-    clickEditProduct(id) {
+    clickEditUser(id) {
       this.formEdit = {...this.userMap[id]}
       this.modalEditFlash = ''
       this.modalEditErr = ''
       this.modalEditShow = true
       this.domainToMapEdit = ''
-      this.waitEditProduct = false
+      this.waitEditUser = false
       this.myFlashMsg = ''
     },
-    doEditProductClick() {
-      // this workaround is to force switching to Product Info tab for input validation
-      // before actually sending Edit Product request to the backend
-      const tabIndex = this.$refs.formEditProductTabs.activeTabIndex
-      if (tabIndex != this.$refs.formEditProductTabInfo.index) {
-        this.$refs.formEditProductTabs.changeTabTo(this.$refs.formEditProductTabInfo.index)
-        setTimeout(()=>{this.$refs.btnSubmitEditProduct.click()},125)
-      } else {
-        this.$refs.btnSubmitEditProduct.click()
-      }
-    },
-    doEditProduct(e) {
+    doEditUser(e) {
       e.preventDefault()
-      this.modalEditFlash = ''
       this.modalEditErr = ''
-      if (this.domainToMapEdit.trim() != '') {
-        this.doMapDomain()
-        return
-      }
       let vue = this
       let data = {...vue.formEdit}
-      vue.waitEditProduct = true
-      clientUtils.apiDoPut(clientUtils.apiAdminProduct + "/" + vue.formEdit.id, data,
+      vue.waitEditUser = true
+      clientUtils.apiDoPut(clientUtils.apiAdminUser + "/" + vue.formEdit.id, data,
           (apiRes) => {
             if (apiRes.status != 200) {
               vue.modalEditErr = apiRes.status + ": " + apiRes.message
             } else {
               vue.modalEditShow = false
               vue.loadUserList()
-              vue.myFlashMsg = vue.$i18n.t('message.product_updated_msg', {name: vue.formEdit.name})
+              vue.myFlashMsg = vue.$i18n.t('message.user_profile_updated_msg', {id: vue.formEdit.id})
             }
-            vue.waitEditProduct = false
+            vue.waitEditUser = false
           },
           (err) => {
             vue.modalEditErr = err
-            vue.waitEditProduct = false
+            vue.waitEditUser = false
           }
       )
     },

@@ -171,7 +171,7 @@ export default {
       this.resetMsg()
       let vue = this
       let session = utils.loadLoginSession()
-      let formData = {"display_name": vue.userProfile.name}
+      let formData = {"name": vue.userProfile.name}
       clientUtils.apiDoPut(clientUtils.apiUser+"/"+session.uid, formData,
           (apiRes) => {
             if (apiRes.status != 200) {

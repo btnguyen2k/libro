@@ -24,8 +24,6 @@ func initApiHandlers(router *itineris.ApiRouter) {
 	router.SetHandler("feGetProduct", apiFeGetProduct)
 	router.SetHandler("feGetTopic", apiFeGetTopic)
 	router.SetHandler("feGetUserProfile", apiFeGetUserProfile)
-	router.SetHandler("adminUpdateUserProfile", apiAdminUpdateUserProfile)
-	router.SetHandler("adminUpdateUserPassword", apiAdminUpdateUserPassword)
 
 	// admin APIs
 	router.SetHandler("adminGetStats", apiAdminGetStats)
@@ -48,6 +46,9 @@ func initApiHandlers(router *itineris.ApiRouter) {
 	router.SetHandler("adminUpdateTopicPage", apiAdminUpdateTopicPage)
 	router.SetHandler("adminGetUserList", apiAdminGetUserList)
 	router.SetHandler("adminAddUser", apiAdminAddUser)
+	router.SetHandler("adminUpdateMyProfile", apiAdminUpdateMyProfile)
+	router.SetHandler("adminUpdateMyPassword", apiAdminUpdateMyPassword)
+	router.SetHandler("adminUpdateUserProfile", apiAdminUpdateUserProfile)
 }
 
 /*------------------------------ shared variables and functions ------------------------------*/

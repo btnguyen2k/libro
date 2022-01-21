@@ -160,10 +160,11 @@ const messages = {
             user_new_password_msg: "Enter new password. If empty, user can only login using social network account",
             user_confirmed_password: "Confirmed password",
             user_confirmed_password_msg: "Enter new password again to confirm",
+            error_confirmed_password_mismatch: "Password does not match the confirmed one.",
 
+            edit_user_profile: "Edit user profile",
             user_profile_updated_msg: 'User profile "{id}" has been updated successfully.',
             user_password_updated_msg: 'Password of user "{id}" has been updated successfully.',
-            error_confirmed_password_mismatch: "Password does not match the confirmed one.",
 
             add_user: "Add new user",
             user_added_msg: 'User "{id}" has been added successfully.',
@@ -328,6 +329,7 @@ const messages = {
             user_confirmed_password_msg: "Nhập mật mã mới lần nữa để xác nhận",
             error_confirmed_password_mismatch: "Mật mã không khớp nhau",
 
+            edit_user_profile: "Thay đổi thông tin",
             user_profile_updated_msg: 'Thông tin người dùng "{id}" đã được cập nhật thành công.',
             user_password_updated_msg: 'Mật mã người dùng "{id}" đã được cập nhật thành công.',
 

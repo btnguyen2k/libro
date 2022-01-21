@@ -34,11 +34,9 @@ let apiAdminTopicPages = "/api/admin/topic/:topic/pages"
 let apiAdminTopicPage = "/api/admin/topic/:topic/page/:page"
 
 let apiAdminUsers = "/api/admin/users"
+let apiAdminUser = "/api/admin/user"
 
 let apiSystemInfo = "/api/systemInfo"
-// let apiGroupList = "/api/groups"
-// let apiGroup = "/api/group"
-// let apiUserList = "/api/users"
 let apiUser = "/api/user"
 let apiUserPassword = "/api/userPassword"
 
@@ -131,6 +129,7 @@ export default {
     apiAdminTopicPage,
 
     apiAdminUsers,
+    apiAdminUser,
 
     apiSystemInfo,
     // apiGroupList,

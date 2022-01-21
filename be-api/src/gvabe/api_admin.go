@@ -1097,10 +1097,9 @@ func apiAdminAddUser(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *itin
 		return itineris.NewApiResult(itineris.StatusErrorClient).SetMessage(fmt.Sprintf("currentUser [%s] already existed", id))
 	}
 
+	isAdmin := _extractParam(params, "is_admin", reddo.TypeBool, false, nil)
 	maskId := strings.ToLower(utils.UniqueId())
 	name := _extractParam(params, "name", reddo.TypeString, maskId, nil)
-	fmt.Println(maskId)
-	fmt.Println(name)
 
 	newPwdEnc := _extractParam(params, "new_pwd", reddo.TypeString, "", nil)
 	newPwdRaw, err := RsaDecryptFromBase64(RsaModePKCS1v15, newPwdEnc.(string), rsaPrivKey)
@@ -1119,11 +1118,104 @@ func apiAdminAddUser(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *itin
 	}
 
 	newUser = user.NewUser(goapi.AppVersionNumber, id.(string), maskId)
-	newUser.SetDisplayName(name.(string)).SetPassword(encryptPassword(newUser.GetId(), strings.TrimSpace(string(newPwdRaw))))
+	newUser.
+		SetAdmin(isAdmin.(bool)).
+		SetDisplayName(name.(string)).
+		SetPassword(encryptPassword(newUser.GetId(), strings.TrimSpace(string(newPwdRaw))))
 	result, err := userDao.Create(newUser)
 	if err != nil || !result {
 		return itineris.NewApiResult(itineris.StatusErrorServer).
 			SetMessage(fmt.Sprintf("cannot create user account %s (error: %s)", id, err))
+	}
+
+	return itineris.NewApiResult(itineris.StatusOk)
+}
+
+// apiAdminUpdateMyProfile handles API call "adminUpdateMyProfile"
+func apiAdminUpdateMyProfile(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *itineris.ApiParams) *itineris.ApiResult {
+	curUser, authResult := authenticateAdminApiCall(ctx)
+	if authResult != nil {
+		return authResult
+	}
+
+	uid := _extractParam(params, "uid", reddo.TypeString, "", nil)
+	user, err := userDao.Get(uid.(string))
+	if err != nil {
+		return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage(err.Error())
+	}
+	if user == nil {
+		return itineris.NewApiResult(itineris.StatusNotFound).SetMessage("user not found")
+	}
+
+	if curUser.GetId() != user.GetId() {
+		// can only update profile of the currently logged-in user
+		return itineris.NewApiResult(itineris.StatusNoPermission).SetMessage("no permission")
+	}
+
+	// for now, only display-name can be changed
+	displayName := _extractParam(params, "name", reddo.TypeString, user.GetMaskId(), nil)
+	user.SetDisplayName(displayName.(string))
+
+	result, err := userDao.Update(user)
+	if err != nil || !result {
+		return itineris.NewApiResult(itineris.StatusErrorServer).
+			SetMessage(fmt.Sprintf("cannot update user [%s] (error: %s)", user.GetId(), err))
+	}
+
+	return itineris.NewApiResult(itineris.StatusOk)
+}
+
+// apiAdminUpdateMyPassword handles API call "adminUpdateMyPassword"
+func apiAdminUpdateMyPassword(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *itineris.ApiParams) *itineris.ApiResult {
+	curUser, authResult := authenticateAdminApiCall(ctx)
+	if authResult != nil {
+		return authResult
+	}
+
+	uid := _extractParam(params, "uid", reddo.TypeString, "", nil)
+	user, err := userDao.Get(uid.(string))
+	if err != nil {
+		return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage(err.Error())
+	}
+	if user == nil {
+		return itineris.NewApiResult(itineris.StatusNotFound).SetMessage("user not found")
+	}
+
+	if curUser.GetId() != user.GetId() {
+		// can only change password of the currently logged-in user
+		return itineris.NewApiResult(itineris.StatusNoPermission).SetMessage("no permission")
+	}
+
+	currentPwdEnc := _extractParam(params, "current_pwd", reddo.TypeString, "", nil)
+	currentPwdRaw, err := RsaDecryptFromBase64(RsaModePKCS1v15, currentPwdEnc.(string), rsaPrivKey)
+	if err != nil || currentPwdRaw == nil {
+		return itineris.NewApiResult(itineris.StatusErrorClient).
+			SetMessage(fmt.Sprintf("cannot decrypt data (error: %s)", err))
+	}
+	newPwdEnc := _extractParam(params, "new_pwd", reddo.TypeString, "", nil)
+	newPwdRaw, err := RsaDecryptFromBase64(RsaModePKCS1v15, newPwdEnc.(string), rsaPrivKey)
+	if err != nil || newPwdRaw == nil {
+		return itineris.NewApiResult(itineris.StatusErrorClient).
+			SetMessage(fmt.Sprintf("cannot decrypt data (error: %s)", err))
+	}
+	confirmedPwdEnc := _extractParam(params, "confirmed_pwd", reddo.TypeString, "", nil)
+	confirmedPwdRaw, err := RsaDecryptFromBase64(RsaModePKCS1v15, confirmedPwdEnc.(string), rsaPrivKey)
+	if err != nil || confirmedPwdRaw == nil {
+		return itineris.NewApiResult(itineris.StatusErrorClient).
+			SetMessage(fmt.Sprintf("cannot decrypt data (error: %s)", err))
+	}
+	if !verifyPassword(user, string(currentPwdRaw)) {
+		return itineris.NewApiResult(itineris.StatusErrorClient).SetMessage("current password mismatched")
+	}
+	if strings.TrimSpace(string(newPwdRaw)) != strings.TrimSpace(string(confirmedPwdRaw)) {
+		return itineris.NewApiResult(itineris.StatusErrorClient).SetMessage("new password does not match the confirmed one")
+	}
+
+	user.SetPassword(encryptPassword(user.GetId(), string(newPwdRaw)))
+	result, err := userDao.Update(user)
+	if err != nil || !result {
+		return itineris.NewApiResult(itineris.StatusErrorServer).
+			SetMessage(fmt.Sprintf("cannot update user [%s] (error: %s)", user.GetId(), err))
 	}
 
 	return itineris.NewApiResult(itineris.StatusOk)
@@ -1145,78 +1237,15 @@ func apiAdminUpdateUserProfile(ctx *itineris.ApiContext, _ *itineris.ApiAuth, pa
 		return itineris.NewApiResult(itineris.StatusNotFound).SetMessage("user not found")
 	}
 
-	if curUser.GetId() != user.GetId() && !curUser.IsAdmin() {
+	if curUser.GetId() == user.GetId() {
+		// can not update your own profile via this API
 		return itineris.NewApiResult(itineris.StatusNoPermission).SetMessage("no permission")
 	}
 
-	displayName := _extractParam(params, "display_name", reddo.TypeString, user.GetMaskId(), nil)
-	user.SetDisplayName(displayName.(string))
-	if curUser.GetId() != user.GetId() && curUser.IsAdmin() {
-		isAdmin := _extractParam(params, "is_admin", reddo.TypeString, false, nil)
-		user.SetAdmin(isAdmin.(bool))
-	}
+	isAdmin := _extractParam(params, "is_admin", reddo.TypeBool, false, nil)
+	displayName := _extractParam(params, "name", reddo.TypeString, user.GetMaskId(), nil)
+	user.SetDisplayName(displayName.(string)).SetAdmin(isAdmin.(bool))
 
-	result, err := userDao.Update(user)
-	if err != nil || !result {
-		return itineris.NewApiResult(itineris.StatusErrorServer).
-			SetMessage(fmt.Sprintf("cannot update user [%s] (error: %s)", user.GetId(), err))
-	}
-
-	return itineris.NewApiResult(itineris.StatusOk)
-}
-
-// apiAdminUpdateUserPassword handles API call "adminUpdateUserPassword"
-func apiAdminUpdateUserPassword(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *itineris.ApiParams) *itineris.ApiResult {
-	curUser, authResult := authenticateAdminApiCall(ctx)
-	if authResult != nil {
-		return authResult
-	}
-
-	uid := _extractParam(params, "uid", reddo.TypeString, "", nil)
-	user, err := userDao.Get(uid.(string))
-	if err != nil {
-		return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage(err.Error())
-	}
-	if user == nil {
-		return itineris.NewApiResult(itineris.StatusNotFound).SetMessage("user not found")
-	}
-
-	// if curUser.GetId() != user.GetId() && !curUser.IsAdmin() {
-	// 	return itineris.NewApiResult(itineris.StatusNoPermission).SetMessage("no permission")
-	// }
-	if curUser.GetId() != user.GetId() {
-		return itineris.NewApiResult(itineris.StatusNoPermission).SetMessage("no permission")
-	}
-
-	currentPwdEnc := _extractParam(params, "current_pwd", reddo.TypeString, "", nil)
-	currentPwdRaw, err := RsaDecryptFromBase64(RsaModePKCS1v15, currentPwdEnc.(string), rsaPrivKey)
-	if err != nil || currentPwdRaw == nil {
-		return itineris.NewApiResult(itineris.StatusErrorClient).
-			SetMessage(fmt.Sprintf("cannot decrypt data (error: %s)", err))
-	}
-
-	newPwdEnc := _extractParam(params, "new_pwd", reddo.TypeString, "", nil)
-	newPwdRaw, err := RsaDecryptFromBase64(RsaModePKCS1v15, newPwdEnc.(string), rsaPrivKey)
-	if err != nil || newPwdRaw == nil {
-		return itineris.NewApiResult(itineris.StatusErrorClient).
-			SetMessage(fmt.Sprintf("cannot decrypt data (error: %s)", err))
-	}
-
-	confirmedPwdEnc := _extractParam(params, "confirmed_pwd", reddo.TypeString, "", nil)
-	confirmedPwdRaw, err := RsaDecryptFromBase64(RsaModePKCS1v15, confirmedPwdEnc.(string), rsaPrivKey)
-	if err != nil || confirmedPwdRaw == nil {
-		return itineris.NewApiResult(itineris.StatusErrorClient).
-			SetMessage(fmt.Sprintf("cannot decrypt data (error: %s)", err))
-	}
-
-	if !verifyPassword(user, string(currentPwdRaw)) {
-		return itineris.NewApiResult(itineris.StatusErrorClient).SetMessage("current password mismatched")
-	}
-	if strings.TrimSpace(string(newPwdRaw)) != strings.TrimSpace(string(confirmedPwdRaw)) {
-		return itineris.NewApiResult(itineris.StatusErrorClient).SetMessage("new password does not match the confirmed one")
-	}
-
-	user.SetPassword(encryptPassword(user.GetId(), string(newPwdRaw)))
 	result, err := userDao.Update(user)
 	if err != nil || !result {
 		return itineris.NewApiResult(itineris.StatusErrorServer).
