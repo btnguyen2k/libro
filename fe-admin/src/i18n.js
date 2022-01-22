@@ -6,6 +6,7 @@ const messages = {
     en: {
         _name: 'English',
         _flag: 'cif-gb',
+        _demo_msg: "This is instance is for demo purpose only. Data might be reset without notice.<br/>Login with default account <strong>admin@local/s3cr3t</strong> or using your <u>social account</u> via \"Login with social account\" link (the application <u>will not</u> know or store your social account credential).",
 
         message: {
             actions: 'Actions',
@@ -35,9 +36,6 @@ const messages = {
             login: 'Login',
             login_info: 'Please sign in to continue',
             login_social: 'Login with social account',
-            username: 'Username',
-            password: 'Password',
-            demo_msg: "This is instance is for demo purpose only. Login with default account <strong>admin@local/s3cr3t</strong>.<br/>Or you can login with your <u>social account</u> via \"Login with social account\" link (your social account credential <u>will not</u> be stored on the server).",
             wait: 'Please wait...',
             error_parse_login_token: 'Error parsing login-token',
             home: 'Home',
@@ -147,8 +145,8 @@ const messages = {
             my_profile: "My profile",
             user_is_admin: "Is administrator",
             user_is_admin_msg: "Administrator has permission to create other administrator accounts",
-            user_id: "Id",
-            user_id_msg: "User email address as user id, must be unique",
+            user_id: "Login id",
+            user_id_msg: "User email address as login id, must be unique",
             user_mask_id: "Mask id",
             user_mask_id_msg: "User mask-id to not expose user email address, must be unique",
             user_display_name: "Display name",
@@ -177,6 +175,7 @@ const messages = {
     vi: {
         _name: 'Tiếng Việt',
         _flag: 'cif-vn',
+        _demo_msg: 'Bản triển khai này dành do mục đích trải nghiệm. Dữ liệu có thể được xoá và cài đặt lại nguyên gốc bất cứ lúc nào mà không cần báo trước.<br/>Đăng nhập với tài khoản <strong>admin@local/s3cr3t</strong>, hoặc sử dụng <i>tài khoản mxh</i> bằng cách nhấn vào đường dẫn "Đăng nhập với tài khoản mxh" (máy chủ sẽ không biết và cũng không lưu trữ thông tin đăng nhập tài khoản mxh của bạn).',
 
         message: {
             actions: 'Hành động',
@@ -206,9 +205,6 @@ const messages = {
             login: 'Đăng nhập',
             login_info: 'Đăng nhập để tiếp tục',
             login_social: 'Đăng nhập với tài khoản mxh',
-            username: 'Tên đăng nhập',
-            password: 'Mật mã',
-            demo_msg: 'Bản triển khai này dành do mục đích thử nghiệm. Đăng nhập với tài khoản <strong>admin@local/s3cr3t</strong>.<br/>Hoặc đăng nhập với <i>tài khoản mxh</i> (nhấn vào đường dẫn "Đăng nhập với tài khoản mxh").',
             wait: 'Vui lòng giờ giây lát...',
             error_parse_login_token: 'Có lỗi khi xử lý login-token',
             home: 'Trang nhà',
@@ -318,8 +314,8 @@ const messages = {
             my_profile: "Thông tin cá nhân",
             user_is_admin: "Quản trị viên",
             user_is_admin_msg: "Quản trị viên sẽ được quyền tạo thêm tài khoản quản trị viên khác",
-            user_id: "Id",
-            user_id_msg: "Sử dụng địa chỉ email làm Id, phải là duy nhất trên hệ thống",
+            user_id: "Tên đăng nhập",
+            user_id_msg: "Sử dụng địa chỉ email làm Tên đăng nhập, phải là duy nhất trên hệ thống",
             user_mask_id: "Mask id",
             user_mask_id_msg: "Mask-id sẽ được sử dụng để tránh hiển thị địa chỉ email, phải là duy nhất trên hệ thống",
             user_display_name: "Tên hiển thị",

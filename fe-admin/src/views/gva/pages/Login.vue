@@ -11,23 +11,19 @@
                   <h1>{{ $t('message.login') }}</h1>
                   <p v-if="errorMsg!=''" class="alert alert-danger">{{ errorMsg }}</p>
                   <p v-if="infoMsg!=''" class="text-muted">{{ infoMsg }}</p>
-                  <CInput :placeholder="$t('message.username')" autocomplete="username email" name="username"
-                          id="username"
-                          v-model="form.username">
+                  <CInput :placeholder="$t('message.user_id')" autocomplete="username email" name="username" id="username" v-model="form.username">
                     <template #prepend-content>
                       <CIcon name="cil-user"/>
                     </template>
                   </CInput>
-                  <CInput :placeholder="$t('message.password')" type="password" autocomplete="current-password"
-                          name="password"
-                          id="password" v-model="form.password">
+                  <CInput :placeholder="$t('message.user_password')" type="password" autocomplete="current-password" name="password" id="password" v-model="form.password">
                     <template #prepend-content>
                       <CIcon name="cil-lock-locked"/>
                     </template>
                   </CInput>
                   <CRow>
                     <CCol col="4" class="text-left">
-                      <CButton color="primary" class="px-4" type="submit">{{ $t('message.login') }}</CButton>
+                      <CButton color="primary" class="px-4" type="submit" style="width: 128px">{{ $t('message.login') }}</CButton>
                     </CCol>
                     <CCol col="8" class="text-right">
                       <CButton color="link" class="px-2" @click="doClickLoginSocial">{{
@@ -36,20 +32,14 @@
                       </CButton>
                     </CCol>
                   </CRow>
-                  <CSelect
-                      horizontal
-                      class="py-2"
-                      label="Language"
-                      :value.sync="$i18n.locale"
-                      :options="[{value:'en',label:'English'},{value:'vi',label:'Tiếng Việt'}]"
-                  />
+                  <CSelect horizontal class="py-2" :label="$t('message.language')" :value.sync="$i18n.locale" :options="languageOptions"/>
                 </CForm>
               </CCardBody>
             </CCard>
-            <CCard color="primary" text-color="white" class="py-5 d-md-down-none" body-wrapper>
+            <CCard color="primary" text-color="white" class="py-5 d-md-down-none" body-wrapper v-if="devMode">
               <CCardBody>
                 <h2>Demo</h2>
-                <p v-html="$t('message.demo_msg')"></p>
+                <p v-html="$t('_demo_msg')"></p>
               </CCardBody>
             </CCard>
           </CCardGroup>
@@ -79,6 +69,7 @@ export default {
             this.exterAppId = apiRes.data.exter.app_id
             this.exterBaseUrl = apiRes.data.exter.base_url
             this.infoMsgSwitch = 2
+            this.devMode = apiRes.data.dev_mode ? true : false
           }
         },
         (err) => {
@@ -95,20 +86,28 @@ export default {
       }
       return this.$i18n.t('message.login_info')
     },
-    parseLoginTokenErrMsg() {
-      return this.$i18n.t('message.error_parse_login_token')
-    },
     returnUrl() {
       return this.$route.query.returnUrl ? this.$route.query.returnUrl : ''
+    },
+    languageOptions() {
+      let result = []
+      this.$i18n.availableLocales.forEach(locale => {
+        result.push({value: locale, label: this.$i18n.messages[locale]._name})
+      })
+      return result
+    },
+    form() {
+      return {username: this.devMode?"admin@local":"", password: this.devMode?"s3cr3t":""}
     },
   },
   data() {
     return {
+      devMode: false,
       exterAppId: String,
       exterBaseUrl: String,
       errorMsg: "",
       infoMsgSwitch: 0,
-      form: {username: "", password: ""},
+      // form: {username: this.devMode?"admin@local":"", password: this.devMode?"s3cr3t":""},
     }
   },
   methods: {
@@ -135,7 +134,7 @@ export default {
             } else {
               const jwt = utils.parseJwt(apiResp.data)
               if (!jwt) {
-                this.errorMsg = this.parseLoginTokenErrMsg
+                this.errorMsg = this.$i18n.t('message.error_parse_login_token')
               } else {
                 utils.saveLoginSession({uid: jwt.payloadObj.uid, name: jwt.payloadObj.name, token: apiResp.data})
                 let rUrl = this.returnUrl
@@ -148,7 +147,6 @@ export default {
             }
           },
           (err) => {
-            console.error('Error: ', err)
             this.errorMsg = err
           }
       )
