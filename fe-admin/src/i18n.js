@@ -6,7 +6,11 @@ const messages = {
     en: {
         _name: 'English',
         _flag: 'cif-gb',
-        _demo_msg: "This is instance is for demo purpose only. Data might be reset without notice.<br/>Login with default account <strong>admin@local/s3cr3t</strong> or using your <u>social account</u> via \"Login with social account\" link (the application <u>will not</u> know or store your social account credential).",
+        _demo_msg: 'This is instance is for demo purpose only. Data might be reset without notice.' +
+            '<br/>Login with default account <strong>admin@local/s3cr3t</strong> ' +
+            'or using your <u>social account</u> via "Login with social account" link ' +
+            '(the application <u>will not</u> know or store your social account credential).' +
+            '<br/><br/>You can also access the frontend via <a href="/doc/" style="color: yellowgreen">this link</a>.',
 
         message: {
             actions: 'Actions',
@@ -175,7 +179,11 @@ const messages = {
     vi: {
         _name: 'Tiếng Việt',
         _flag: 'cif-vn',
-        _demo_msg: 'Bản triển khai này dành do mục đích trải nghiệm. Dữ liệu có thể được xoá và cài đặt lại nguyên gốc bất cứ lúc nào mà không cần báo trước.<br/>Đăng nhập với tài khoản <strong>admin@local/s3cr3t</strong>, hoặc sử dụng <i>tài khoản mxh</i> bằng cách nhấn vào đường dẫn "Đăng nhập với tài khoản mxh" (máy chủ sẽ không biết và cũng không lưu trữ thông tin đăng nhập tài khoản mxh của bạn).',
+        _demo_msg: 'Bản triển khai này dành do mục đích trải nghiệm. Dữ liệu có thể được xoá và cài đặt lại nguyên gốc bất cứ lúc nào mà không cần báo trước.' +
+            '<br/>Đăng nhập với tài khoản <strong>admin@local/s3cr3t</strong>, ' +
+            'hoặc sử dụng <i>tài khoản mxh</i> bằng cách nhấn vào đường dẫn "Đăng nhập với tài khoản mxh" ' +
+            '(máy chủ sẽ không biết và cũng không lưu trữ thông tin đăng nhập tài khoản mxh của bạn).' +
+            '<br/><br/>Bạn có thể truy cập vào trang frontend bằng <a href="/doc/" style="color: yellowgreen">đường dẫn này</a>.',
 
         message: {
             actions: 'Hành động',

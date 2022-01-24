@@ -1213,6 +1213,13 @@ func apiAdminUpdateMyPassword(ctx *itineris.ApiContext, _ *itineris.ApiAuth, par
 		return itineris.NewApiResult(itineris.StatusErrorClient).SetMessage("new password does not match the confirmed one")
 	}
 
+	if DEVMODE {
+		// prevent changing password of the default user account in DEVMODE
+		initAdminUserId := goapi.AppConfig.GetString("gvabe.init.admin_user_id")
+		if initAdminUserId == user.GetId() {
+			newPwdRaw = []byte(goapi.AppConfig.GetString("gvabe.init.admin_user_pwd"))
+		}
+	}
 	user.SetPassword(encryptPassword(user.GetId(), string(newPwdRaw)))
 	result, err := userDao.Update(user)
 	if err != nil || !result {

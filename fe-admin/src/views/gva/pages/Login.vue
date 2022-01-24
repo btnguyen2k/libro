@@ -25,7 +25,7 @@
                     <CCol col="4" class="text-left">
                       <CButton color="primary" class="px-4" type="submit" style="width: 128px">{{ $t('message.login') }}</CButton>
                     </CCol>
-                    <CCol col="8" class="text-right">
+                    <CCol col="8" class="text-right" v-if="exterAppId">
                       <CButton color="link" class="px-2" @click="doClickLoginSocial">{{
                           $t('message.login_social')
                         }}
