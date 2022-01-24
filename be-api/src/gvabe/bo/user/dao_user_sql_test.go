@@ -2,13 +2,11 @@ package user
 
 import (
 	"fmt"
-	"math/rand"
 	"os"
 	"strings"
 	"testing"
 	"time"
 
-	"github.com/btnguyen2k/henge"
 	"github.com/btnguyen2k/prom"
 
 	_ "github.com/denisenkom/go-mssqldb"
@@ -24,7 +22,6 @@ const (
 )
 
 func sqlInitTable(sqlc *prom.SqlConnect, table string) error {
-	rand.Seed(time.Now().UnixNano())
 	var err error
 	if sqlc.GetDbFlavor() == prom.FlavorCosmosDb {
 		_, err = sqlc.GetDB().Exec(fmt.Sprintf("CREATE DATABASE IF NOT EXISTS %s WITH MAXRU=10000", cosmosdbDbName))
@@ -33,17 +30,6 @@ func sqlInitTable(sqlc *prom.SqlConnect, table string) error {
 		}
 	}
 	sqlc.GetDB().Exec(fmt.Sprintf("DROP TABLE %s", table))
-	switch sqlc.GetDbFlavor() {
-	case prom.FlavorCosmosDb:
-		spec := &henge.CosmosdbCollectionSpec{Pk: henge.CosmosdbColId, Uk: [][]string{{"/" + UserColMaskUid}}}
-		err = henge.InitCosmosdbCollection(sqlc, table, spec)
-	case prom.FlavorMySql:
-		err = henge.InitMysqlTable(sqlc, table, map[string]string{UserColMaskUid: "VARCHAR(32)"})
-	case prom.FlavorPgSql:
-		err = henge.InitPgsqlTable(sqlc, table, map[string]string{UserColMaskUid: "VARCHAR(32)"})
-	case prom.FlavorSqlite:
-		err = henge.InitSqliteTable(sqlc, table, map[string]string{UserColMaskUid: "VARCHAR(32)"})
-	}
 	return err
 }
 
@@ -137,164 +123,128 @@ func initSqlConnect(t *testing.T, testName string, dbtype string, info sqlDriver
 	return nil, nil
 }
 
+var setupTestTopicDaoSql = func(t *testing.T, testName string) {
+	var err error
+	testSqlc, err = initSqlConnect(t, testName, testDbType, testDbInfo)
+	if err != nil {
+		t.Fatalf("%s failed: error [%s]", testName+"/"+testDbType+"/initSqlConnect", err)
+	} else if testSqlc == nil {
+		t.Fatalf("%s failed: nil", testName+"/"+testDbType+"/initSqlConnect")
+	}
+	err = sqlInitTable(testSqlc, testSqlTable)
+	if err != nil {
+		t.Fatalf("%s failed: error [%s]", testName+"/"+testDbType+"/sqlInitTable", err)
+	}
+	err = InitUserTableSql(testSqlc, testSqlTable)
+	if err != nil {
+		t.Fatalf("%s failed: error [%s]", testName+"/"+testDbType+"/InitUserTableSql", err)
+	}
+}
+
+var teardownTestTopicDaoSql = func(t *testing.T, testName string) {
+	if testSqlc != nil {
+		testSqlc.GetDB().Exec(fmt.Sprintf("DROP TABLE %s", testSqlTable))
+		testSqlc.Close()
+		defer func() { testSqlc = nil }()
+	}
+}
+
 /*----------------------------------------------------------------------*/
 
 func TestNewUserDaoSql(t *testing.T) {
-	name := "TestNewUserDaoSql"
+	testName := "TestNewUserDaoSql"
 	urlMap := sqlGetUrlFromEnv()
 	if len(urlMap) == 0 {
-		t.Skipf("%s skipped", name)
+		t.Skipf("%s skipped", testName)
 	}
-	for dbtype, info := range urlMap {
-		sqlc, err := initSqlConnect(t, name, dbtype, info)
-		if err != nil {
-			t.Fatalf("%s failed: error [%s]", name+"/"+dbtype, err)
-		} else if sqlc == nil {
-			t.Fatalf("%s failed: nil", name+"/"+dbtype)
-		}
-		err = sqlInitTable(sqlc, testSqlTable)
-		if err != nil {
-			t.Fatalf("%s failed: error [%s]", name+"/sqlInitTable/"+dbtype, err)
-		}
-		dao := initDaoSql(sqlc)
-		if dao == nil {
-			t.Fatalf("%s failed: nil", name+"/initDaoSql")
-		}
-		sqlc.Close()
+	for testDbType, testDbInfo = range urlMap {
+		t.Run(testDbType, func(t *testing.T) {
+			teardownTest := setupTest(t, testName, setupTestTopicDaoSql, teardownTestTopicDaoSql)
+			defer teardownTest(t)
+			dao := initDaoSql(testSqlc)
+			if dao == nil {
+				t.Fatalf("%s failed: nil", testName+"/initDaoSql")
+			}
+		})
 	}
 }
 
 func TestUserDaoSql_CreateGet(t *testing.T) {
-	name := "TestUserDaoSql_CreateGet"
+	testName := "TestUserDaoSql_CreateGet"
 	urlMap := sqlGetUrlFromEnv()
 	if len(urlMap) == 0 {
-		t.Skipf("%s skipped", name)
+		t.Skipf("%s skipped", testName)
 	}
-	for dbtype, info := range urlMap {
-		sqlc, err := initSqlConnect(t, name, dbtype, info)
-		if err != nil {
-			t.Fatalf("%s failed: error [%s]", name+"/"+dbtype, err)
-		} else if sqlc == nil {
-			t.Fatalf("%s failed: nil", name+"/"+dbtype)
-		}
-		err = sqlInitTable(sqlc, testSqlTable)
-		if err != nil {
-			t.Fatalf("%s failed: error [%s]", name+"/sqlInitTable/"+dbtype, err)
-		}
-		dao := initDaoSql(sqlc)
-		if dao == nil {
-			t.Fatalf("%s failed: nil", name)
-		}
-		if sqlc.GetDbFlavor() == prom.FlavorSqlite {
-			henge.TimeLayout = "2006-01-02 15:04:05Z07:00"
-		} else {
-			henge.TimeLayout = time.RFC3339
-		}
-		doTestUserDaoCreateGet(t, name, dao)
-		sqlc.Close()
+	for testDbType, testDbInfo = range urlMap {
+		t.Run(testDbType, func(t *testing.T) {
+			teardownTest := setupTest(t, testName, setupTestTopicDaoSql, teardownTestTopicDaoSql)
+			defer teardownTest(t)
+			dao := initDaoSql(testSqlc)
+			doTestUserDaoCreateGet(t, testName, dao)
+		})
 	}
 }
 
 func TestUserDaoSql_CreateUpdateGet(t *testing.T) {
-	name := "TestUserDaoSql_CreateUpdateGet"
+	testName := "TestUserDaoSql_CreateUpdateGet"
 	urlMap := sqlGetUrlFromEnv()
 	if len(urlMap) == 0 {
-		t.Skipf("%s skipped", name)
+		t.Skipf("%s skipped", testName)
 	}
-	for dbtype, info := range urlMap {
-		sqlc, err := initSqlConnect(t, name, dbtype, info)
-		if err != nil {
-			t.Fatalf("%s failed: error [%s]", name+"/"+dbtype, err)
-		} else if sqlc == nil {
-			t.Fatalf("%s failed: nil", name+"/"+dbtype)
-		}
-		err = sqlInitTable(sqlc, testSqlTable)
-		if err != nil {
-			t.Fatalf("%s failed: error [%s]", name+"/sqlInitTable/"+dbtype, err)
-		}
-		dao := initDaoSql(sqlc)
-		if dao == nil {
-			t.Fatalf("%s failed: nil", name)
-		}
-		doTestUserDaoCreateUpdateGet(t, name, dao)
-		sqlc.Close()
+	for testDbType, testDbInfo = range urlMap {
+		t.Run(testDbType, func(t *testing.T) {
+			teardownTest := setupTest(t, testName, setupTestTopicDaoSql, teardownTestTopicDaoSql)
+			defer teardownTest(t)
+			dao := initDaoSql(testSqlc)
+			doTestUserDaoCreateUpdateGet(t, testName, dao)
+		})
 	}
 }
 
 func TestUserDaoSql_CreateDelete(t *testing.T) {
-	name := "TestUserDaoSql_CreateDelete"
+	testName := "TestUserDaoSql_CreateDelete"
 	urlMap := sqlGetUrlFromEnv()
 	if len(urlMap) == 0 {
-		t.Skipf("%s skipped", name)
+		t.Skipf("%s skipped", testName)
 	}
-	for dbtype, info := range urlMap {
-		sqlc, err := initSqlConnect(t, name, dbtype, info)
-		if err != nil {
-			t.Fatalf("%s failed: error [%s]", name+"/"+dbtype, err)
-		} else if sqlc == nil {
-			t.Fatalf("%s failed: nil", name+"/"+dbtype)
-		}
-		err = sqlInitTable(sqlc, testSqlTable)
-		if err != nil {
-			t.Fatalf("%s failed: error [%s]", name+"/sqlInitTable/"+dbtype, err)
-		}
-		dao := initDaoSql(sqlc)
-		if dao == nil {
-			t.Fatalf("%s failed: nil", name)
-		}
-		doTestUserDaoCreateDelete(t, name, dao)
-		sqlc.Close()
+	for testDbType, testDbInfo = range urlMap {
+		t.Run(testDbType, func(t *testing.T) {
+			teardownTest := setupTest(t, testName, setupTestTopicDaoSql, teardownTestTopicDaoSql)
+			defer teardownTest(t)
+			dao := initDaoSql(testSqlc)
+			doTestUserDaoCreateDelete(t, testName, dao)
+		})
 	}
 }
 
 func TestUserDaoSql_GetAll(t *testing.T) {
-	name := "TestUserDaoSql_GetAll"
+	testName := "TestUserDaoSql_GetAll"
 	urlMap := sqlGetUrlFromEnv()
 	if len(urlMap) == 0 {
-		t.Skipf("%s skipped", name)
+		t.Skipf("%s skipped", testName)
 	}
-	for dbtype, info := range urlMap {
-		sqlc, err := initSqlConnect(t, name, dbtype, info)
-		if err != nil {
-			t.Fatalf("%s failed: error [%s]", name+"/"+dbtype, err)
-		} else if sqlc == nil {
-			t.Fatalf("%s failed: nil", name+"/"+dbtype)
-		}
-		err = sqlInitTable(sqlc, testSqlTable)
-		if err != nil {
-			t.Fatalf("%s failed: error [%s]", name+"/sqlInitTable/"+dbtype, err)
-		}
-		dao := initDaoSql(sqlc)
-		if dao == nil {
-			t.Fatalf("%s failed: nil", name)
-		}
-		doTestUserDaoGetAll(t, name, dao)
-		sqlc.Close()
+	for testDbType, testDbInfo = range urlMap {
+		t.Run(testDbType, func(t *testing.T) {
+			teardownTest := setupTest(t, testName, setupTestTopicDaoSql, teardownTestTopicDaoSql)
+			defer teardownTest(t)
+			dao := initDaoSql(testSqlc)
+			doTestUserDaoGetAll(t, testName, dao)
+		})
 	}
 }
 
 func TestUserDaoSql_GetN(t *testing.T) {
-	name := "TestUserDaoSql_GetN"
+	testName := "TestUserDaoSql_GetN"
 	urlMap := sqlGetUrlFromEnv()
 	if len(urlMap) == 0 {
-		t.Skipf("%s skipped", name)
+		t.Skipf("%s skipped", testName)
 	}
-	for dbtype, info := range urlMap {
-		sqlc, err := initSqlConnect(t, name, dbtype, info)
-		if err != nil {
-			t.Fatalf("%s failed: error [%s]", name+"/"+dbtype, err)
-		} else if sqlc == nil {
-			t.Fatalf("%s failed: nil", name+"/"+dbtype)
-		}
-		err = sqlInitTable(sqlc, testSqlTable)
-		if err != nil {
-			t.Fatalf("%s failed: error [%s]", name+"/sqlInitTable/"+dbtype, err)
-		}
-		dao := initDaoSql(sqlc)
-		if dao == nil {
-			t.Fatalf("%s failed: nil", name)
-		}
-		doTestUserDaoGetN(t, name, dao)
-		sqlc.Close()
+	for testDbType, testDbInfo = range urlMap {
+		t.Run(testDbType, func(t *testing.T) {
+			teardownTest := setupTest(t, testName, setupTestTopicDaoSql, teardownTestTopicDaoSql)
+			defer teardownTest(t)
+			dao := initDaoSql(testSqlc)
+			doTestUserDaoGetN(t, testName, dao)
+		})
 	}
 }

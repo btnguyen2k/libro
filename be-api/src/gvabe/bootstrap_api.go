@@ -13,35 +13,43 @@ import (
 Setup API handlers: application register its api-handlers by calling router.SetHandler(apiName, apiHandlerFunc)
   - api-handler function must have the following signature: func (itineris.ApiContext, itineris.ApiAuth, itineris.ApiParams) *itineris.ApiResult
 */
-// TODO change this function to implement application's business logic
 func initApiHandlers(router *itineris.ApiRouter) {
+	// pubic APIs
 	router.SetHandler("info", apiInfo)
 	router.SetHandler("login", apiLogin)
 	router.SetHandler("verifyLoginToken", apiVerifyLoginToken)
 	router.SetHandler("systemInfo", apiSystemInfo)
 
-	router.SetHandler("adminGetStats", apiAdminGetStats)
+	// frontend APIs
+	router.SetHandler("feGetProduct", apiFeGetProduct)
+	router.SetHandler("feGetTopic", apiFeGetTopic)
+	router.SetHandler("feGetUserProfile", apiFeGetUserProfile)
 
+	// admin APIs
+	router.SetHandler("adminGetStats", apiAdminGetStats)
 	router.SetHandler("adminGetProductList", apiAdminGetProductList)
 	router.SetHandler("adminAddProduct", apiAdminAddProduct)
 	router.SetHandler("adminGetProduct", apiAdminGetProduct)
 	router.SetHandler("adminUpdateProduct", apiAdminUpdateProduct)
 	router.SetHandler("adminDeleteProduct", apiAdminDeleteProduct)
-
 	router.SetHandler("adminMapDomain", apiAdminMapDomain)
 	router.SetHandler("adminUnmapDomain", apiAdminUnmapDomain)
-
 	router.SetHandler("adminGetProductTopics", apiAdminGetProductTopics)
 	router.SetHandler("adminAddProductTopic", apiAdminAddProductTopic)
 	router.SetHandler("adminDeleteProductTopic", apiAdminDeleteProductTopic)
 	router.SetHandler("adminModifyProductTopic", apiAdminModifyProductTopic)
 	router.SetHandler("adminUpdateProductTopic", apiAdminUpdateProductTopic)
-
 	router.SetHandler("adminGetTopicPages", apiAdminGetTopicPages)
 	router.SetHandler("adminAddTopicPage", apiAdminAddTopicPage)
 	router.SetHandler("adminDeleteTopicPage", apiAdminDeleteTopicPage)
 	router.SetHandler("adminModifyTopicPage", apiAdminModifyTopicPage)
 	router.SetHandler("adminUpdateTopicPage", apiAdminUpdateTopicPage)
+	router.SetHandler("adminGetUserList", apiAdminGetUserList)
+	router.SetHandler("adminAddUser", apiAdminAddUser)
+	router.SetHandler("adminUpdateMyProfile", apiAdminUpdateMyProfile)
+	router.SetHandler("adminUpdateMyPassword", apiAdminUpdateMyPassword)
+	router.SetHandler("adminUpdateUserProfile", apiAdminUpdateUserProfile)
+	router.SetHandler("adminDeleteUserProfile", apiAdminDeleteUserProfile)
 }
 
 /*------------------------------ shared variables and functions ------------------------------*/
@@ -56,6 +64,8 @@ var (
 		"getApp":           false,
 		"verifyLoginToken": true,
 		"loginChannelList": true,
+		"feGetProduct":     false,
+		"feGetTopic":       false,
 	}
 )
 

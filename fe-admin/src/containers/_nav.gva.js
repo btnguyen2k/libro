@@ -18,6 +18,13 @@ export default [
                 icon: 'cil-applications',
                 exact: false, //[extract=false] to make this item "active" on child-action (create/edit/delete)
             },
+            {
+                _name: 'CSidebarNavItem',
+                name: i18n.t('message.users'),
+                to: {name: 'UserList'},
+                icon: 'cil-group',
+                exact: false, //[extract=false] to make this item "active" on child-action (create/edit/delete)
+            },
         ]
     }
 ]

@@ -3,20 +3,21 @@ package goapi
 import (
 	"encoding/json"
 	"fmt"
-	hocon "github.com/go-akka/configuration"
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
-	"google.golang.org/grpc"
 	"io/ioutil"
 	"log"
-	pb "main/grpc"
-	"main/src/itineris"
-	"main/src/utils"
 	"net"
 	"net/http"
 	"os"
 	"regexp"
 	"time"
+
+	hocon "github.com/go-akka/configuration"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
+	"google.golang.org/grpc"
+	pb "main/grpc"
+	"main/src/itineris"
+	"main/src/utils"
 )
 
 const (
@@ -26,8 +27,8 @@ const (
 var (
 	AppVersion       string
 	AppVersionNumber uint64
-	AppConfig *hocon.Config
-	ApiRouter *itineris.ApiRouter
+	AppConfig        *hocon.Config
+	ApiRouter        *itineris.ApiRouter
 )
 
 /*
@@ -124,25 +125,15 @@ func initEchoServer() {
 		}))
 	}
 
-	const fePath = "/app"
 	const feDir = "./frontend"
-	e.Static(fePath, feDir)
-	e.GET("/", func(c echo.Context) error {
-		return c.Redirect(http.StatusFound, fePath+"/")
-	})
-	e.GET(fePath+"/", func(c echo.Context) error {
-		if fcontent, err := ioutil.ReadFile(feDir + "/index.html"); err != nil {
-			if os.IsNotExist(err) {
-				return c.HTML(http.StatusNotFound, "Not found: "+fePath+"/index.html")
-			} else {
-				return err
-			}
-		} else {
-			return c.HTMLBlob(http.StatusOK, fcontent)
-		}
-	})
+	const feAdminPath = "/admin"
+	e.Static(feAdminPath, feDir+feAdminPath)
+	const feDocPath = "/doc"
+	const feTemplate = "coderdocs" // TODO for now Libro provide only 1 frontend template
+	e.Static(feDocPath, feDir+"/tpl_"+feTemplate)
+
 	e.GET("/manifest.json", func(c echo.Context) error {
-		if fcontent, err := ioutil.ReadFile(feDir + "/manifest.json"); err != nil {
+		if fcontent, err := ioutil.ReadFile(feDir + feAdminPath + "/manifest.json"); err != nil {
 			if os.IsNotExist(err) {
 				return c.HTML(http.StatusNotFound, "Not found: manifest.json")
 			} else {
@@ -151,6 +142,20 @@ func initEchoServer() {
 		} else {
 			return c.JSONBlob(http.StatusOK, fcontent)
 		}
+	})
+	e.GET("/favicon.ico", func(c echo.Context) error {
+		if fcontent, err := ioutil.ReadFile(feDir + feAdminPath + "/favicon.ico"); err != nil {
+			if os.IsNotExist(err) {
+				return c.HTML(http.StatusNotFound, "Not found: favicon.ico")
+			} else {
+				return err
+			}
+		} else {
+			return c.Blob(http.StatusOK, "image/x-icon", fcontent)
+		}
+	})
+	e.GET("/", func(c echo.Context) error {
+		return c.Redirect(http.StatusPermanentRedirect, feDocPath)
 	})
 
 	// register API http endpoints

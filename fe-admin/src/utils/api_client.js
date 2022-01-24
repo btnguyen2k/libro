@@ -11,7 +11,7 @@ import utils from "@/utils/app_utils"
 import router from "@/router"
 
 const apiClient = Axios.create({
-    baseURL: appConfig.APP_CONFIG.api_client.bo_api_base_url,
+    baseURL: appConfig.APP_CONFIG.api_client.be_api_base_url,
     timeout: 10000,
 });
 
@@ -33,16 +33,12 @@ let apiAdminProductTopic = "/api/admin/product/:product/topic/:topic"
 let apiAdminTopicPages = "/api/admin/topic/:topic/pages"
 let apiAdminTopicPage = "/api/admin/topic/:topic/page/:page"
 
-let apiMyBlog = '/api/myblog'
-let apiMyFeed = '/api/myfeed'
-let apiPost = '/api/post'
-let apiUserVoteForPost = '/api/vote'
+let apiAdminUsers = "/api/admin/users"
+let apiAdminUser = "/api/admin/user"
 
 let apiSystemInfo = "/api/systemInfo"
-let apiGroupList = "/api/groups"
-let apiGroup = "/api/group"
-let apiUserList = "/api/users"
 let apiUser = "/api/user"
+let apiUserPassword = "/api/userPassword"
 
 function _apiOnSuccess(method, resp, apiUri, callbackSuccessful) {
     if (method == 'GET' && resp.hasOwnProperty("data") && resp.data.status == 403) {
@@ -132,16 +128,15 @@ export default {
     apiAdminTopicPages,
     apiAdminTopicPage,
 
-    apiMyBlog,
-    apiMyFeed,
-    apiPost,
-    apiUserVoteForPost,
+    apiAdminUsers,
+    apiAdminUser,
 
     apiSystemInfo,
-    apiGroupList,
-    apiGroup,
-    apiUserList,
+    // apiGroupList,
+    // apiGroup,
+    // apiUserList,
     apiUser,
+    apiUserPassword,
 
     apiDoGet,
     apiDoPatch,

@@ -87,6 +87,20 @@ function markdownRender(markdownInput, sanitize) {
     return sanitize ? latexHtml : DOMPurify.sanitize(latexHtml, {ADD_ATTR: ['target']})
 }
 
+function iconize(iconName) {
+    if (!iconName) {
+        return ['fas', 'square'] // the default icon
+    }
+    if (iconName.startsWith("fas-") || iconName.startsWith("far-") || iconName.startsWith("fab-")) {
+        return [iconName.slice(0,3), iconName.slice(4)]
+    }
+    if (iconName.startsWith("fa-")) {
+        return [iconName.slice(0,2), iconName.slice(3)]
+    }
+    return iconName
+}
+
 export {
-    markdownRender
+    markdownRender,
+    iconize,
 }

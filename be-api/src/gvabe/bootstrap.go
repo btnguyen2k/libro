@@ -13,21 +13,19 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"os"
 	"strings"
 
 	"main/src/goapi"
-	"main/src/gvabe/bo/product"
-	"main/src/gvabe/bo/doc"
+	"main/src/gvabe/bo/libro"
 	"main/src/gvabe/bo/user"
 	"main/src/respicite"
 )
 
 var (
 	userDao    user.UserDao
-	productDao product.ProductDao
-	topicDao   doc.TopicDao
-	pageDao                 doc.PageDao
+	productDao libro.ProductDao
+	topicDao                libro.TopicDao
+	pageDao                 libro.PageDao
 	domainProductMappingDao respicite.M2oDao
 )
 
@@ -46,9 +44,9 @@ Bootstrapper usually does the following:
   - other initializing work (e.g. creating DAO, initializing database, etc)
 */
 func (b *MyBootstrapper) Bootstrap() error {
-	if os.Getenv("DEBUG") != "" {
-		DEBUG = true
-	}
+	DEBUG = goapi.AppConfig.GetBoolean("libro.debug", false)
+	DEVMODE = goapi.AppConfig.GetBoolean("libro.devmode", false)
+
 	go startUpdateSystemInfo()
 
 	initRsaKeys()
@@ -81,7 +79,7 @@ func initRsaKeys() {
 	rsaPrivKeyFile := goapi.AppConfig.GetString("gvabe.keys.rsa_privkey_file")
 	if rsaPrivKeyFile == "" {
 		log.Println("[WARN] No RSA private key file configured at [gvabe.keys.rsa_privkey_file], generating one...")
-		privKey, err := genRsaKey(2048)
+		privKey, err := GenRsaKey(2048)
 		if err != nil {
 			panic(err)
 		}

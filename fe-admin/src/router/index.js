@@ -2,24 +2,17 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 
-// Containers
 const TheContainer = () => import('@/containers/TheContainer')
-
-// Views
+const Login = () => import('@/views/gva/pages/Login')
 const Dashboard = () => import('@/views/libro/Dashboard')
 
+const MyProfile = () => import('@/views/libro/MyProfile')
+
 const ProductList = () => import('@/views/libro/ProductList')
-const AddProduct = () => import('@/views/libro/AddProduct')
-const EditProduct = () => import('@/views/libro/EditProduct')
-const DeleteProduct = () => import('@/views/libro/DeleteProduct')
 const ProductTopicList = () => import('@/views/libro/ProductTopicList')
 const TopicPageList = () => import('@/views/libro/TopicPageList')
 
-// Views - Pages
-const Login = () => import('@/views/gva/pages/Login')
-const Page404 = () => import('@/views/pages/Page404')
-const Page500 = () => import('@/views/pages/Page500')
-const Register = () => import('@/views/pages/Register')
+const UserList = () => import('@/views/libro/UserList')
 
 Vue.use(Router)
 
@@ -89,6 +82,12 @@ function configRoutes() {
                     component: Dashboard
                 },
                 {
+                    path: 'profile',
+                    name: 'MyProfile',
+                    meta: {label: i18n.t('message.my_profile')},
+                    component: MyProfile
+                },
+                {
                     path: 'products', meta: {label: i18n.t('message.products')},
                     component: {
                         render(c) {
@@ -104,36 +103,40 @@ function configRoutes() {
                             props: true, //[props=true] to pass flashMsg
                         },
                         {
-                            path: '_add',
-                            meta: {label: i18n.t('message.add_product')},
-                            name: 'AddProduct',
-                            component: AddProduct,
-                        },
-                        {
-                            path: '_edit/:id',
-                            meta: {label: i18n.t('message.edit_product')},
-                            name: 'EditProduct',
-                            component: EditProduct,
-                        },
-                        {
-                            path: '_delete/:id',
-                            meta: {label: i18n.t('message.delete_product')},
-                            name: 'DeleteProduct',
-                            component: DeleteProduct,
-                        },
-                        {
                             path: '_topics/:pid',
                             meta: {label: i18n.t('message.topics')},
                             name: 'ProductTopicList',
                             component: ProductTopicList,
+                            props: true, //[props=true] to pass flashMsg
                         },
                         {
                             path: '_pages/:pid/:tid',
                             meta: {label: i18n.t('message.pages')},
                             name: 'TopicPageList',
                             component: TopicPageList,
+                            props: true, //[props=true] to pass flashMsg
                         },
                     ]
+                },
+                {
+                    path: 'users', meta: {label: i18n.t('message.users')},
+                    name: 'UserList',
+                    component: UserList,
+                    props: true, //[props=true] to pass flashMsg
+                    // component: {
+                    //     render(c) {
+                    //         return c('router-view')
+                    //     }
+                    // },
+                    // children: [
+                    //     {
+                    //         path: '',
+                    //         meta: {label: i18n.t('message.users')},
+                    //         name: 'UserList',
+                    //         component: ProductList,
+                    //         props: true, //[props=true] to pass flashMsg
+                    //     },
+                    // ]
                 },
             ]
         },
@@ -149,19 +152,10 @@ function configRoutes() {
             },
             children: [
                 {
-                    path: '404', name: 'Page404', component: Page404
-                },
-                {
-                    path: '500', name: 'Page500', component: Page500
-                },
-                {
                     path: 'login', name: 'Login', component: Login,
                     props: (route) => ({returnUrl: route.query.returnUrl}),
                     params: (route) => ({returnUrl: route.query.returnUrl}),
                 },
-                {
-                    path: 'register', name: 'Register', component: Register
-                }
             ]
         }
     ]

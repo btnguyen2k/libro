@@ -40,6 +40,8 @@ func apiInfo(_ *itineris.ApiContext, _ *itineris.ApiAuth, _ *itineris.ApiParams)
 			"base_url": exterBaseUrl,
 		},
 		"rsa_public_key": string(publicPEM),
+		"debug_mode": DEBUG,
+		"dev_mode": DEVMODE,
 		// "memory": map[string]interface{}{
 		// 	"alloc":     m.Alloc,
 		// 	"alloc_str": strconv.FormatFloat(float64(m.Alloc)/1024.0/1024.0, 'f', 1, 64) + " MiB",

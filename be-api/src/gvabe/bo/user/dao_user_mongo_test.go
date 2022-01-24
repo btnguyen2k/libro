@@ -1,13 +1,10 @@
 package user
 
 import (
-	"math/rand"
 	"os"
 	"strings"
 	"testing"
-	"time"
 
-	"github.com/btnguyen2k/henge"
 	"github.com/btnguyen2k/prom"
 )
 
@@ -16,14 +13,13 @@ const (
 )
 
 func mongoInitCollection(mc *prom.MongoConnect, collection string) error {
-	rand.Seed(time.Now().UnixNano())
 	mc.GetCollection(collection).Drop(nil)
-	return henge.InitMongoCollection(mc, collection)
+	return nil
 }
 
-func newMongoConnect(t *testing.T, testName string, db, url string) (*prom.MongoConnect, error) {
-	db = strings.Trim(db, "\"")
-	url = strings.Trim(url, "\"")
+func newMongoConnect(t *testing.T, testName string) (*prom.MongoConnect, error) {
+	db := strings.Trim(os.Getenv("MONGO_DB"), "\"")
+	url := strings.Trim(os.Getenv("MONGO_URL"), "\"")
 	if db == "" || url == "" {
 		t.Skipf("%s skipped", testName)
 	}
@@ -34,125 +30,80 @@ func initDaoMongo(mc *prom.MongoConnect) UserDao {
 	return NewUserDaoMongo(mc, testMongoCollection, strings.Index(mc.GetUrl(), "replicaSet=") >= 0)
 }
 
-const (
-	envMongoDb  = "MONGO_DB"
-	envMongoUrl = "MONGO_URL"
-)
+var setupTestDaoMongo = func(t *testing.T, testName string) {
+	var err error
+	testMc, err = newMongoConnect(t, testName)
+	if err != nil {
+		t.Fatalf("%s failed: error [%s]", testName, err)
+	} else if testMc == nil {
+		t.Fatalf("%s failed: nil", testName)
+	}
+
+	err = mongoInitCollection(testMc, testMongoCollection)
+	if err != nil {
+		t.Fatalf("%s failed: error [%s]", testName+"/mongoInitCollection", err)
+	}
+	err = InitUserTableMongo(testMc, testMongoCollection)
+	if err != nil {
+		t.Fatalf("%s failed: error [%s]", testName+"/"+testDbType+"/InitUserTableMongo", err)
+	}
+}
+
+var teardownTestDaoMongo = func(t *testing.T, testName string) {
+	if testMc != nil {
+		testMc.Close(nil)
+		defer func() { testMc = nil }()
+	}
+}
 
 /*----------------------------------------------------------------------*/
 
 func TestNewUserDaoMongo(t *testing.T) {
-	name := "TestNewUserDaoMongo"
-	db := os.Getenv(envMongoDb)
-	url := os.Getenv(envMongoUrl)
-	mc, err := newMongoConnect(t, name, db, url)
-	if err != nil {
-		t.Fatalf("%s failed: error [%s]", name, err)
-	} else if mc == nil {
-		t.Fatalf("%s failed: nil", name)
-	}
-	err = mongoInitCollection(mc, testMongoCollection)
-	if err != nil {
-		t.Fatalf("%s failed: error [%s]", name+"/mongoInitCollection", err)
-	}
-	dao := initDaoMongo(mc)
+	testName := "TestNewUserDaoMongo"
+	teardownTest := setupTest(t, testName, setupTestDaoMongo, teardownTestDaoMongo)
+	defer teardownTest(t)
+	dao := initDaoMongo(testMc)
 	if dao == nil {
-		t.Fatalf("%s failed: nil", name+"/initDaoMongo")
+		t.Fatalf("%s failed: nil", testName+"/initDaoMongo")
 	}
-	mc.Close(nil)
 }
 
 func TestUserDaoMongo_CreateGet(t *testing.T) {
-	name := "TestUserDaoMongo_CreateGet"
-	db := os.Getenv(envMongoDb)
-	url := os.Getenv(envMongoUrl)
-	mc, err := newMongoConnect(t, name, db, url)
-	if err != nil {
-		t.Fatalf("%s failed: error [%s]", name, err)
-	} else if mc == nil {
-		t.Fatalf("%s failed: nil", name)
-	}
-	err = mongoInitCollection(mc, testMongoCollection)
-	if err != nil {
-		t.Fatalf("%s failed: error [%s]", name+"/mongoInitCollection", err)
-	}
-	dao := initDaoMongo(mc)
-	doTestUserDaoCreateGet(t, name, dao)
-	mc.Close(nil)
+	testName := "TestUserDaoMongo_CreateGet"
+	teardownTest := setupTest(t, testName, setupTestDaoMongo, teardownTestDaoMongo)
+	defer teardownTest(t)
+	dao := initDaoMongo(testMc)
+	doTestUserDaoCreateGet(t, testName, dao)
 }
 
 func TestUserDaoMongo_CreateUpdateGet(t *testing.T) {
-	name := "TestUserDaoMongo_CreateGet"
-	db := os.Getenv(envMongoDb)
-	url := os.Getenv(envMongoUrl)
-	mc, err := newMongoConnect(t, name, db, url)
-	if err != nil {
-		t.Fatalf("%s failed: error [%s]", name, err)
-	} else if mc == nil {
-		t.Fatalf("%s failed: nil", name)
-	}
-	err = mongoInitCollection(mc, testMongoCollection)
-	if err != nil {
-		t.Fatalf("%s failed: error [%s]", name+"/mongoInitCollection", err)
-	}
-	dao := initDaoMongo(mc)
-	doTestUserDaoCreateUpdateGet(t, name, dao)
-	mc.Close(nil)
+	testName := "TestUserDaoMongo_CreateGet"
+	teardownTest := setupTest(t, testName, setupTestDaoMongo, teardownTestDaoMongo)
+	defer teardownTest(t)
+	dao := initDaoMongo(testMc)
+	doTestUserDaoCreateUpdateGet(t, testName, dao)
 }
 
 func TestUserDaoMongo_CreateDelete(t *testing.T) {
-	name := "TestUserDaoMongo_CreateDelete"
-	db := os.Getenv(envMongoDb)
-	url := os.Getenv(envMongoUrl)
-	mc, err := newMongoConnect(t, name, db, url)
-	if err != nil {
-		t.Fatalf("%s failed: error [%s]", name, err)
-	} else if mc == nil {
-		t.Fatalf("%s failed: nil", name)
-	}
-	err = mongoInitCollection(mc, testMongoCollection)
-	if err != nil {
-		t.Fatalf("%s failed: error [%s]", name+"/mongoInitCollection", err)
-	}
-	dao := initDaoMongo(mc)
-	doTestUserDaoCreateDelete(t, name, dao)
-	mc.Close(nil)
+	testName := "TestUserDaoMongo_CreateDelete"
+	teardownTest := setupTest(t, testName, setupTestDaoMongo, teardownTestDaoMongo)
+	defer teardownTest(t)
+	dao := initDaoMongo(testMc)
+	doTestUserDaoCreateDelete(t, testName, dao)
 }
 
 func TestUserDaoMongo_GetAll(t *testing.T) {
-	name := "TestUserDaoMongo_GetAll"
-	db := os.Getenv(envMongoDb)
-	url := os.Getenv(envMongoUrl)
-	mc, err := newMongoConnect(t, name, db, url)
-	if err != nil {
-		t.Fatalf("%s failed: error [%s]", name, err)
-	} else if mc == nil {
-		t.Fatalf("%s failed: nil", name)
-	}
-	err = mongoInitCollection(mc, testMongoCollection)
-	if err != nil {
-		t.Fatalf("%s failed: error [%s]", name+"/mongoInitCollection", err)
-	}
-	dao := initDaoMongo(mc)
-	doTestUserDaoGetAll(t, name, dao)
-	mc.Close(nil)
+	testName := "TestUserDaoMongo_GetAll"
+	teardownTest := setupTest(t, testName, setupTestDaoMongo, teardownTestDaoMongo)
+	defer teardownTest(t)
+	dao := initDaoMongo(testMc)
+	doTestUserDaoGetAll(t, testName, dao)
 }
 
 func TestUserDaoMongo_GetN(t *testing.T) {
-	name := "TestUserDaoMongo_GetN"
-	db := os.Getenv(envMongoDb)
-	url := os.Getenv(envMongoUrl)
-	mc, err := newMongoConnect(t, name, db, url)
-	if err != nil {
-		t.Fatalf("%s failed: error [%s]", name, err)
-	} else if mc == nil {
-		t.Fatalf("%s failed: nil", name)
-	}
-	err = mongoInitCollection(mc, testMongoCollection)
-	if err != nil {
-		t.Fatalf("%s failed: error [%s]", name+"/mongoInitCollection", err)
-	}
-	dao := initDaoMongo(mc)
-	doTestUserDaoGetN(t, name, dao)
-	mc.Close(nil)
+	testName := "TestUserDaoMongo_GetN"
+	teardownTest := setupTest(t, testName, setupTestDaoMongo, teardownTestDaoMongo)
+	defer teardownTest(t)
+	dao := initDaoMongo(testMc)
+	doTestUserDaoGetN(t, testName, dao)
 }

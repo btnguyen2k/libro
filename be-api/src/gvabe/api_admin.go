@@ -12,15 +12,14 @@ import (
 	"github.com/btnguyen2k/henge"
 	"main/src/goapi"
 	"main/src/gvabe/bo"
-	"main/src/gvabe/bo/doc"
-	"main/src/gvabe/bo/product"
+	"main/src/gvabe/bo/libro"
 	"main/src/gvabe/bo/user"
 	"main/src/itineris"
 	"main/src/respicite"
 	"main/src/utils"
 )
 
-func authenticateApiCall(ctx *itineris.ApiContext) (*user.User, *itineris.ApiResult) {
+func authenticateAdminApiCall(ctx *itineris.ApiContext) (*user.User, *itineris.ApiResult) {
 	_, user, err := _currentUserFromContext(ctx)
 	if err != nil {
 		return nil, itineris.NewApiResult(itineris.StatusErrorServer).SetMessage(err.Error())
@@ -35,7 +34,7 @@ func authenticateApiCall(ctx *itineris.ApiContext) (*user.User, *itineris.ApiRes
 
 // apiAdminGetStats handles API call "adminGetStats"
 func apiAdminGetStats(ctx *itineris.ApiContext, _ *itineris.ApiAuth, _ *itineris.ApiParams) *itineris.ApiResult {
-	_, authResult := authenticateApiCall(ctx)
+	_, authResult := authenticateAdminApiCall(ctx)
 	if authResult != nil {
 		return authResult
 	}
@@ -73,16 +72,21 @@ var funcProductToMapTransform = func(m map[string]interface{}) map[string]interf
 	result := map[string]interface{}{
 		"id":        m[henge.FieldId],
 		"t_created": m[henge.FieldTimeCreated],
+		"t_updated": m[henge.FieldTimeUpdated],
 		"domains":   make([]string, 0),
 	}
-	result["is_published"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, product.ProdAttrIsPublished), reddo.TypeBool)
-	result["name"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, product.ProdAttrName), reddo.TypeString)
-	result["desc"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, product.ProdAttrDesc), reddo.TypeString)
-	result["num_topics"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, product.ProdAttrNumTopics), reddo.TypeInt)
+	result["is_published"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, libro.ProdAttrIsPublished), reddo.TypeBool)
+	result["name"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, libro.ProdAttrName), reddo.TypeString)
+	result["desc"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, libro.ProdAttrDesc), reddo.TypeString)
+	result["num_topics"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, libro.ProdAttrNumTopics), reddo.TypeInt)
+	result["contacts"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, libro.ProdAttrContacts), libro.TypContactsMap)
 
-	// convert "creation timestamp" to UTC
+	// convert "timestamp" to UTC
 	if t, ok := result["t_created"].(time.Time); ok {
 		result["t_created"] = t.In(time.UTC)
+	}
+	if t, ok := result["t_updated"].(time.Time); ok {
+		result["t_updated"] = t.In(time.UTC)
 	}
 
 	// populate "domains" field
@@ -100,7 +104,7 @@ var funcProductToMapTransform = func(m map[string]interface{}) map[string]interf
 
 // apiAdminGetProductList handles API call "adminGetProductList"
 func apiAdminGetProductList(ctx *itineris.ApiContext, _ *itineris.ApiAuth, _ *itineris.ApiParams) *itineris.ApiResult {
-	_, authResult := authenticateApiCall(ctx)
+	_, authResult := authenticateAdminApiCall(ctx)
 	if authResult != nil {
 		return authResult
 	}
@@ -118,10 +122,22 @@ func apiAdminGetProductList(ctx *itineris.ApiContext, _ *itineris.ApiAuth, _ *it
 
 // apiAdminAddProduct handles API call "adminAddProduct"
 func apiAdminAddProduct(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *itineris.ApiParams) *itineris.ApiResult {
-	_, authResult := authenticateApiCall(ctx)
+	_, authResult := authenticateAdminApiCall(ctx)
 	if authResult != nil {
 		return authResult
 	}
+
+	id := _extractParam(params, "id", reddo.TypeString, utils.UniqueIdSmall(), nil)
+	prod, err := productDao.Get(id.(string))
+	if err != nil {
+		return itineris.NewApiResult(itineris.StatusErrorServer).
+			SetMessage(fmt.Sprintf("error getting product [%s] (error: %s)", id, err))
+	}
+	if prod != nil {
+		return itineris.NewApiResult(itineris.StatusErrorClient).
+			SetMessage(fmt.Sprintf("product [%s] already existed", id))
+	}
+	id = strings.ToLower(id.(string))
 
 	// extract params
 	isPublished := _extractParam(params, "is_published", reddo.TypeBool, false, nil)
@@ -129,7 +145,7 @@ func apiAdminAddProduct(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *i
 	if name == "" {
 		return itineris.NewApiResult(itineris.StatusErrorClient).SetMessage("name is empty")
 	}
-	desc := _extractParam(params, "description", reddo.TypeString, "", nil)
+	desc := _extractParam(params, "desc", reddo.TypeString, "", nil)
 	domains := _extractParam(params, "domains", reddo.TypeString, "", nil)
 	domains = strings.ToLower(domains.(string))
 
@@ -144,9 +160,21 @@ func apiAdminAddProduct(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *i
 		}
 	}
 
+	contactsMap := map[string]string{
+		"email":    _extractParam(params, "contacts.email", reddo.TypeString, "", nil).(string),
+		"website":  _extractParam(params, "contacts.website", reddo.TypeString, "", nil).(string),
+		"github":   _extractParam(params, "contacts.github", reddo.TypeString, "", nil).(string),
+		"facebook": _extractParam(params, "contacts.facebook", reddo.TypeString, "", nil).(string),
+		"linkedin": _extractParam(params, "contacts.linkedin", reddo.TypeString, "", nil).(string),
+		"slack":    _extractParam(params, "contacts.slack", reddo.TypeString, "", nil).(string),
+		"twitter":  _extractParam(params, "contacts.twitter", reddo.TypeString, "", nil).(string),
+	}
+
 	// create product
-	product := product.NewProduct(goapi.AppVersionNumber, utils.UniqueIdSmall(), name.(string), desc.(string), isPublished.(bool))
-	result, err := productDao.Create(product)
+	prod = libro.NewProduct(goapi.AppVersionNumber, utils.UniqueIdSmall(), name.(string), desc.(string), isPublished.(bool))
+	prod.SetId(id.(string))
+	prod.SetContacts(contactsMap)
+	result, err := productDao.Create(prod)
 	if err != nil || !result {
 		return itineris.NewApiResult(itineris.StatusErrorServer).
 			SetMessage(fmt.Sprintf("cannot create product %s (error: %s)", name, err))
@@ -154,7 +182,7 @@ func apiAdminAddProduct(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *i
 
 	// map domains
 	for _, domain := range domainList {
-		result, err := domainProductMappingDao.Set(domain, product.GetId())
+		result, err := domainProductMappingDao.Set(domain, prod.GetId())
 		if err != nil || !result {
 			return itineris.NewApiResult(201).
 				SetMessage(fmt.Sprintf("Product %s created, but cannot map domain %s to product (error: %s)", name, domain, err))
@@ -166,7 +194,7 @@ func apiAdminAddProduct(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *i
 
 // apiAdminGetProduct handles API call "adminGetProduct"
 func apiAdminGetProduct(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *itineris.ApiParams) *itineris.ApiResult {
-	_, authResult := authenticateApiCall(ctx)
+	_, authResult := authenticateAdminApiCall(ctx)
 	if authResult != nil {
 		return authResult
 	}
@@ -184,17 +212,17 @@ func apiAdminGetProduct(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *i
 
 // apiAdminUpdateProduct handles API call "adminUpdateProduct"
 func apiAdminUpdateProduct(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *itineris.ApiParams) *itineris.ApiResult {
-	_, authResult := authenticateApiCall(ctx)
+	_, authResult := authenticateAdminApiCall(ctx)
 	if authResult != nil {
 		return authResult
 	}
 
 	id := _extractParam(params, "id", reddo.TypeString, "", nil)
-	product, err := productDao.Get(id.(string))
+	prod, err := productDao.Get(id.(string))
 	if err != nil {
 		return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage(err.Error())
 	}
-	if product == nil {
+	if prod == nil {
 		return itineris.NewApiResult(itineris.StatusNotFound).SetMessage("product not found")
 	}
 
@@ -204,14 +232,25 @@ func apiAdminUpdateProduct(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params
 	if name == "" {
 		return itineris.NewApiResult(itineris.StatusErrorClient).SetMessage("name is empty")
 	}
-	desc := _extractParam(params, "description", reddo.TypeString, "", nil)
+	desc := _extractParam(params, "desc", reddo.TypeString, "", nil)
+
+	contactsMap := map[string]string{
+		"email":    _extractParam(params, "contacts.email", reddo.TypeString, "", nil).(string),
+		"website":  _extractParam(params, "contacts.website", reddo.TypeString, "", nil).(string),
+		"github":   _extractParam(params, "contacts.github", reddo.TypeString, "", nil).(string),
+		"facebook": _extractParam(params, "contacts.facebook", reddo.TypeString, "", nil).(string),
+		"linkedin": _extractParam(params, "contacts.linkedin", reddo.TypeString, "", nil).(string),
+		"slack":    _extractParam(params, "contacts.slack", reddo.TypeString, "", nil).(string),
+		"twitter":  _extractParam(params, "contacts.twitter", reddo.TypeString, "", nil).(string),
+	}
 
 	// update product
-	product.SetPublished(isPublished.(bool)).SetName(name.(string)).SetDescription(desc.(string))
-	result, err := productDao.Update(product)
+	prod.SetPublished(isPublished.(bool)).SetName(name.(string)).SetDescription(desc.(string))
+	prod.SetContacts(contactsMap)
+	result, err := productDao.Update(prod)
 	if err != nil || !result {
 		return itineris.NewApiResult(itineris.StatusErrorServer).
-			SetMessage(fmt.Sprintf("cannot update product [%s/%s] (error: %s)", product.GetId(), product.GetName(), err))
+			SetMessage(fmt.Sprintf("cannot update product [%s/%s] (error: %s)", prod.GetId(), prod.GetName(), err))
 	}
 
 	return itineris.NewApiResult(itineris.StatusOk)
@@ -219,39 +258,59 @@ func apiAdminUpdateProduct(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params
 
 // apiAdminDeleteProduct handles API call "adminDeleteProduct"
 func apiAdminDeleteProduct(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *itineris.ApiParams) *itineris.ApiResult {
-	_, authResult := authenticateApiCall(ctx)
+	_, authResult := authenticateAdminApiCall(ctx)
 	if authResult != nil {
 		return authResult
 	}
 
 	id := _extractParam(params, "id", reddo.TypeString, "", nil)
-	product, err := productDao.Get(id.(string))
+	prod, err := productDao.Get(id.(string))
 	if err != nil {
 		return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage(err.Error())
 	}
-	if product == nil {
+	if prod == nil {
 		return itineris.NewApiResult(itineris.StatusNotFound).SetMessage("product not found")
 	}
 
-	domainProductMappings, err := domainProductMappingDao.Rget(product.GetId())
+	_, err = productDao.Delete(prod)
 	if err != nil {
 		return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage(err.Error())
-	}
-	for _, mapping := range domainProductMappings {
-		_, err := domainProductMappingDao.Remove(mapping.Src, mapping.Dest)
-		if err != nil {
-			msg := fmt.Sprintf("error while unmapping domain %s (product has not been deleted): %s", mapping.Src, err)
-			return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage(msg)
-		}
 	}
 
-	_, err = productDao.Delete(product)
-	if err != nil {
-		return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage(err.Error())
-	}
-	// if !ok {
-	// 	return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage("cannot delete product")
-	// }
+	// TODO: post-production-deletion clean-up via event-driven manner
+	go func(prod *libro.Product) {
+		// unmap domains
+		if domainProductMappings, err := domainProductMappingDao.Rget(prod.GetId()); err != nil {
+			log.Printf("[WARN] Post-delete product [%s] - Error getting mapped domain names: %e", prod.GetId(), err)
+		} else {
+			for _, mapping := range domainProductMappings {
+				if _, err := domainProductMappingDao.Remove(mapping.Src, mapping.Dest); err != nil {
+					log.Printf("[WARN] Post-delete product [%s] - Error unmapping domain names [%s]: %e", prod.GetId(), mapping.Src, err)
+				}
+			}
+		}
+
+		// delete topics and pages
+		if topics, err := topicDao.GetAll(prod, nil, nil); err != nil {
+			log.Printf("[WARN] Post-delete product [%s] - Error getting all topics for product: %e", prod.GetId(), err)
+		} else {
+			for _, topic := range topics {
+				if pages, err := pageDao.GetAll(topic, nil, nil); err != nil {
+					log.Printf("[WARN] Post-delete product [%s] - Error getting all pages for topic [%s]: %e", prod.GetId(), topic.GetId(), err)
+				} else {
+					for _, page := range pages {
+						if _, err = pageDao.Delete(page); err != nil {
+							log.Printf("[WARN] Post-delete product [%s] - Error deleting page [%s]: %e", prod.GetId(), page.GetId(), err)
+						}
+					}
+				}
+				if _, err = topicDao.Delete(topic); err != nil {
+					log.Printf("[WARN] Post-delete product [%s] - Error deleting topic [%s]: %e", prod.GetId(), topic.GetId(), err)
+				}
+			}
+		}
+	}(prod)
+
 	return itineris.NewApiResult(itineris.StatusOk)
 }
 
@@ -259,7 +318,7 @@ func apiAdminDeleteProduct(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params
 
 // apiAdminMapDomain handles API call "adminMapDomain"
 func apiAdminMapDomain(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *itineris.ApiParams) *itineris.ApiResult {
-	_, authResult := authenticateApiCall(ctx)
+	_, authResult := authenticateAdminApiCall(ctx)
 	if authResult != nil {
 		return authResult
 	}
@@ -304,7 +363,7 @@ func apiAdminMapDomain(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *it
 
 // apiAdminUnmapDomain handles API call "adminUnmapDomain"
 func apiAdminUnmapDomain(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *itineris.ApiParams) *itineris.ApiResult {
-	_, authResult := authenticateApiCall(ctx)
+	_, authResult := authenticateAdminApiCall(ctx)
 	if authResult != nil {
 		return authResult
 	}
@@ -350,17 +409,21 @@ var funcTopicToMapTransform = func(m map[string]interface{}) map[string]interfac
 	result := map[string]interface{}{
 		"id":        m[henge.FieldId],
 		"t_created": m[henge.FieldTimeCreated],
+		"t_updated": m[henge.FieldTimeUpdated],
 	}
-	result["product_id"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyFields, doc.TopicFieldProductId), reddo.TypeString)
-	result["pos"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyFields, doc.TopicFieldPosition), reddo.TypeInt)
-	result["title"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, doc.TopicAttrTitle), reddo.TypeString)
-	result["icon"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, doc.TopicAttrIcon), reddo.TypeString)
-	result["summary"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, doc.TopicAttrSummary), reddo.TypeString)
-	result["num_pages"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, doc.TopicAttrNumPages), reddo.TypeInt)
+	result["product_id"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyFields, libro.TopicFieldProductId), reddo.TypeString)
+	result["pos"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyFields, libro.TopicFieldPosition), reddo.TypeInt)
+	result["title"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, libro.TopicAttrTitle), reddo.TypeString)
+	result["icon"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, libro.TopicAttrIcon), reddo.TypeString)
+	result["summary"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, libro.TopicAttrSummary), reddo.TypeString)
+	result["num_pages"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, libro.TopicAttrNumPages), reddo.TypeInt)
 
-	// convert "creation timestamp" to UTC
+	// convert "timestamp" to UTC
 	if t, ok := result["t_created"].(time.Time); ok {
 		result["t_created"] = t.In(time.UTC)
+	}
+	if t, ok := result["t_updated"].(time.Time); ok {
+		result["t_updated"] = t.In(time.UTC)
 	}
 
 	return result
@@ -368,7 +431,7 @@ var funcTopicToMapTransform = func(m map[string]interface{}) map[string]interfac
 
 // apiAdminGetProductTopics handles API call "adminGetProductTopics"
 func apiAdminGetProductTopics(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *itineris.ApiParams) *itineris.ApiResult {
-	_, authResult := authenticateApiCall(ctx)
+	_, authResult := authenticateAdminApiCall(ctx)
 	if authResult != nil {
 		return authResult
 	}
@@ -395,7 +458,7 @@ func apiAdminGetProductTopics(ctx *itineris.ApiContext, _ *itineris.ApiAuth, par
 
 // apiAdminAddProductTopic handles API call "adminAddProductTopic"
 func apiAdminAddProductTopic(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *itineris.ApiParams) *itineris.ApiResult {
-	_, authResult := authenticateApiCall(ctx)
+	_, authResult := authenticateAdminApiCall(ctx)
 	if authResult != nil {
 		return authResult
 	}
@@ -432,7 +495,7 @@ func apiAdminAddProductTopic(ctx *itineris.ApiContext, _ *itineris.ApiAuth, para
 		return itineris.NewApiResult(itineris.StatusErrorClient).SetMessage("title is empty")
 	}
 
-	topic = doc.NewTopic(goapi.AppVersionNumber, product, title.(string), icon.(string), summary.(string))
+	topic = libro.NewTopic(goapi.AppVersionNumber, product, title.(string), icon.(string), summary.(string))
 	topic.SetId(id.(string))
 	result, err := topicDao.Create(topic)
 	if err != nil || !result {
@@ -441,7 +504,7 @@ func apiAdminAddProductTopic(ctx *itineris.ApiContext, _ *itineris.ApiAuth, para
 	}
 
 	// TODO: update product's stats via event-driven manner
-	go func(topic *doc.Topic) {
+	go func(topic *libro.Topic) {
 		prod, err := productDao.Get(topic.GetProductId())
 		if err != nil {
 			log.Printf("[WARN] Post-add topic [%s] - Error getting product [%s]: %e", topic.GetId(), topic.GetProductId(), err)
@@ -465,7 +528,7 @@ func apiAdminAddProductTopic(ctx *itineris.ApiContext, _ *itineris.ApiAuth, para
 
 // apiAdminDeleteProductTopic handles API call "adminDeleteProductTopic"
 func apiAdminDeleteProductTopic(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *itineris.ApiParams) *itineris.ApiResult {
-	_, authResult := authenticateApiCall(ctx)
+	_, authResult := authenticateAdminApiCall(ctx)
 	if authResult != nil {
 		return authResult
 	}
@@ -498,7 +561,7 @@ func apiAdminDeleteProductTopic(ctx *itineris.ApiContext, _ *itineris.ApiAuth, p
 	}
 
 	// TODO: delete pages & update product's stats via event-driven manner
-	go func(topic *doc.Topic) {
+	go func(topic *libro.Topic) {
 		prod, err := productDao.Get(topic.GetProductId())
 		if err != nil {
 			log.Printf("[WARN] Post-delete topic [%s] - Error getting product [%s]: %e", topic.GetId(), topic.GetProductId(), err)
@@ -534,7 +597,7 @@ func apiAdminDeleteProductTopic(ctx *itineris.ApiContext, _ *itineris.ApiAuth, p
 
 // apiAdminModifyProductTopic handles API call "adminModifyProductTopic"
 func apiAdminModifyProductTopic(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *itineris.ApiParams) *itineris.ApiResult {
-	_, authResult := authenticateApiCall(ctx)
+	_, authResult := authenticateAdminApiCall(ctx)
 	if authResult != nil {
 		return authResult
 	}
@@ -613,7 +676,7 @@ func apiAdminModifyProductTopic(ctx *itineris.ApiContext, _ *itineris.ApiAuth, p
 
 // apiAdminUpdateProductTopic handles API call "adminUpdateProductTopic"
 func apiAdminUpdateProductTopic(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *itineris.ApiParams) *itineris.ApiResult {
-	_, authResult := authenticateApiCall(ctx)
+	_, authResult := authenticateAdminApiCall(ctx)
 	if authResult != nil {
 		return authResult
 	}
@@ -668,18 +731,22 @@ var funcPageToMapTransform = func(m map[string]interface{}) map[string]interface
 	result := map[string]interface{}{
 		"id":        m[henge.FieldId],
 		"t_created": m[henge.FieldTimeCreated],
+		"t_updated": m[henge.FieldTimeUpdated],
 	}
-	result["product_id"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyFields, doc.PageFieldProductId), reddo.TypeString)
-	result["topic_id"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyFields, doc.PageFieldTopicId), reddo.TypeString)
-	result["pos"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyFields, doc.PageFieldPosition), reddo.TypeInt)
-	result["title"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, doc.PageAttrTitle), reddo.TypeString)
-	result["icon"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, doc.PageAttrIcon), reddo.TypeString)
-	result["summary"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, doc.PageAttrSummary), reddo.TypeString)
-	result["content"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, doc.PageAttrContent), reddo.TypeString)
+	result["product_id"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyFields, libro.PageFieldProductId), reddo.TypeString)
+	result["topic_id"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyFields, libro.PageFieldTopicId), reddo.TypeString)
+	result["pos"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyFields, libro.PageFieldPosition), reddo.TypeInt)
+	result["title"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, libro.PageAttrTitle), reddo.TypeString)
+	result["icon"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, libro.PageAttrIcon), reddo.TypeString)
+	result["summary"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, libro.PageAttrSummary), reddo.TypeString)
+	result["content"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, libro.PageAttrContent), reddo.TypeString)
 
-	// convert "creation timestamp" to UTC
+	// convert "timestamp" to UTC
 	if t, ok := result["t_created"].(time.Time); ok {
 		result["t_created"] = t.In(time.UTC)
+	}
+	if t, ok := result["t_updated"].(time.Time); ok {
+		result["t_updated"] = t.In(time.UTC)
 	}
 
 	return result
@@ -687,7 +754,7 @@ var funcPageToMapTransform = func(m map[string]interface{}) map[string]interface
 
 // apiAdminGetTopicPages handles API call "adminGetTopicPages"
 func apiAdminGetTopicPages(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *itineris.ApiParams) *itineris.ApiResult {
-	_, authResult := authenticateApiCall(ctx)
+	_, authResult := authenticateAdminApiCall(ctx)
 	if authResult != nil {
 		return authResult
 	}
@@ -714,7 +781,7 @@ func apiAdminGetTopicPages(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params
 
 // apiAdminAddTopicPage handles API call "adminAddTopicPage"
 func apiAdminAddTopicPage(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *itineris.ApiParams) *itineris.ApiResult {
-	_, authResult := authenticateApiCall(ctx)
+	_, authResult := authenticateAdminApiCall(ctx)
 	if authResult != nil {
 		return authResult
 	}
@@ -750,7 +817,7 @@ func apiAdminAddTopicPage(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params 
 		return itineris.NewApiResult(itineris.StatusErrorClient).SetMessage("title is empty")
 	}
 
-	page = doc.NewPage(goapi.AppVersionNumber, topic, title.(string), icon.(string), summary.(string), content.(string))
+	page = libro.NewPage(goapi.AppVersionNumber, topic, title.(string), icon.(string), summary.(string), content.(string))
 	page.SetId(id.(string))
 	result, err := pageDao.Create(page)
 	if err != nil || !result {
@@ -759,7 +826,7 @@ func apiAdminAddTopicPage(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params 
 	}
 
 	// TODO: update topic's stats via event-driven manner
-	go func(page *doc.Page) {
+	go func(page *libro.Page) {
 		topic, err := topicDao.Get(page.GetTopicId())
 		if err != nil {
 			log.Printf("[WARN] Post-add page [%s] - Error getting topic [%s]: %e", page.GetId(), page.GetTopicId(), err)
@@ -783,7 +850,7 @@ func apiAdminAddTopicPage(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params 
 
 // apiAdminDeleteTopicPage handles API call "adminDeleteTopicPage"
 func apiAdminDeleteTopicPage(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *itineris.ApiParams) *itineris.ApiResult {
-	_, authResult := authenticateApiCall(ctx)
+	_, authResult := authenticateAdminApiCall(ctx)
 	if authResult != nil {
 		return authResult
 	}
@@ -814,7 +881,7 @@ func apiAdminDeleteTopicPage(ctx *itineris.ApiContext, _ *itineris.ApiAuth, para
 	}
 
 	// TODO: update topic's stats via event-driven manner
-	go func(page *doc.Page) {
+	go func(page *libro.Page) {
 		topic, err := topicDao.Get(page.GetTopicId())
 		if err != nil {
 			log.Printf("[WARN] Post-delete page [%s] - Error getting topic [%s]: %e", page.GetId(), page.GetTopicId(), err)
@@ -838,7 +905,7 @@ func apiAdminDeleteTopicPage(ctx *itineris.ApiContext, _ *itineris.ApiAuth, para
 
 // apiAdminModifyTopicPage handles API call "adminModifyTopicPage"
 func apiAdminModifyTopicPage(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *itineris.ApiParams) *itineris.ApiResult {
-	_, authResult := authenticateApiCall(ctx)
+	_, authResult := authenticateAdminApiCall(ctx)
 	if authResult != nil {
 		return authResult
 	}
@@ -915,7 +982,7 @@ func apiAdminModifyTopicPage(ctx *itineris.ApiContext, _ *itineris.ApiAuth, para
 
 // apiAdminUpdateTopicPage handles API call "adminUpdateTopicPage"
 func apiAdminUpdateTopicPage(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *itineris.ApiParams) *itineris.ApiResult {
-	_, authResult := authenticateApiCall(ctx)
+	_, authResult := authenticateAdminApiCall(ctx)
 	if authResult != nil {
 		return authResult
 	}
@@ -955,6 +1022,273 @@ func apiAdminUpdateTopicPage(ctx *itineris.ApiContext, _ *itineris.ApiAuth, para
 	if err != nil || !result {
 		return itineris.NewApiResult(itineris.StatusErrorServer).
 			SetMessage(fmt.Sprintf("cannot update page [%s/%s] (error: %s)", page.GetId(), page.GetTitle(), err))
+	}
+
+	return itineris.NewApiResult(itineris.StatusOk)
+}
+
+/*----------------------------------------------------------------------*/
+
+var funcUserToMapTransform = func(m map[string]interface{}) map[string]interface{} {
+	s := semita.NewSemita(m)
+
+	// transform input map
+	result := map[string]interface{}{
+		"id":        m[henge.FieldId],
+		"t_created": m[henge.FieldTimeCreated],
+		"t_updated": m[henge.FieldTimeUpdated],
+	}
+	result["mid"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyFields, user.UserFieldMaskId), reddo.TypeString)
+	result["name"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, user.UserAttrDisplayName), reddo.TypeString)
+	result["is_admin"], _ = s.GetValueOfType(fmt.Sprintf("%s.%s", bo.SerKeyAttrs, user.UserAttrIsAdmin), reddo.TypeBool)
+
+	// convert "timestamp" to UTC
+	if t, ok := result["t_created"].(time.Time); ok {
+		result["t_created"] = t.In(time.UTC)
+	}
+	if t, ok := result["t_updated"].(time.Time); ok {
+		result["t_updated"] = t.In(time.UTC)
+	}
+
+	return result
+}
+
+// apiAdminGetUserList handles API call "adminGetUserList"
+func apiAdminGetUserList(ctx *itineris.ApiContext, _ *itineris.ApiAuth, _ *itineris.ApiParams) *itineris.ApiResult {
+	curUser, authResult := authenticateAdminApiCall(ctx)
+	if authResult != nil {
+		return authResult
+	}
+
+	userList, err := userDao.GetAll(nil, nil)
+	if err != nil {
+		return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage(err.Error())
+	}
+	data := make([]map[string]interface{}, 0)
+	for _, user := range userList {
+		if curUser.IsAdmin() || curUser.GetId() == user.GetId() {
+			// admin can see all user accounts, otherwise can only see myself
+			data = append(data, user.ToMap(funcUserToMapTransform))
+		}
+	}
+	return itineris.NewApiResult(itineris.StatusOk).SetData(data)
+}
+
+// apiAdminAddUser handles API call "adminAddUser"
+func apiAdminAddUser(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *itineris.ApiParams) *itineris.ApiResult {
+	curUser, authResult := authenticateAdminApiCall(ctx)
+	if authResult != nil {
+		return authResult
+	}
+
+	if !curUser.IsAdmin() {
+		// only admin can create new user account
+		return itineris.NewApiResult(itineris.StatusNoPermission).SetMessage(fmt.Sprintf("creating new user account is denied"))
+	}
+
+	id := _extractParam(params, "id", reddo.TypeString, "", nil)
+	id = strings.ToLower(id.(string))
+	if id == "" {
+		return itineris.NewApiResult(itineris.StatusErrorClient).SetMessage("user-id is empty")
+	}
+	newUser, err := userDao.Get(id.(string))
+	if err != nil {
+		return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage(fmt.Sprintf("error getting user [%s] (error: %s)", id, err))
+	}
+	if newUser != nil {
+		return itineris.NewApiResult(itineris.StatusErrorClient).SetMessage(fmt.Sprintf("user [%s] already existed", id))
+	}
+
+	isAdmin := _extractParam(params, "is_admin", reddo.TypeBool, false, nil)
+	maskId := strings.ToLower(utils.UniqueId())
+	name := _extractParam(params, "name", reddo.TypeString, maskId, nil)
+
+	newPwdEnc := _extractParam(params, "new_pwd", reddo.TypeString, "", nil)
+	newPwdRaw, err := RsaDecryptFromBase64(RsaModePKCS1v15, newPwdEnc.(string), rsaPrivKey)
+	if err != nil || newPwdRaw == nil {
+		return itineris.NewApiResult(itineris.StatusErrorClient).
+			SetMessage(fmt.Sprintf("cannot decrypt data (error: %s)", err))
+	}
+	confirmedPwdEnc := _extractParam(params, "confirmed_pwd", reddo.TypeString, "", nil)
+	confirmedPwdRaw, err := RsaDecryptFromBase64(RsaModePKCS1v15, confirmedPwdEnc.(string), rsaPrivKey)
+	if err != nil || confirmedPwdRaw == nil {
+		return itineris.NewApiResult(itineris.StatusErrorClient).
+			SetMessage(fmt.Sprintf("cannot decrypt data (error: %s)", err))
+	}
+	if strings.TrimSpace(string(newPwdRaw)) != strings.TrimSpace(string(confirmedPwdRaw)) {
+		return itineris.NewApiResult(itineris.StatusErrorClient).SetMessage("password does not match the confirmed one")
+	}
+
+	newUser = user.NewUser(goapi.AppVersionNumber, id.(string), maskId)
+	newUser.
+		SetAdmin(isAdmin.(bool)).
+		SetDisplayName(name.(string)).
+		SetPassword(encryptPassword(newUser.GetId(), strings.TrimSpace(string(newPwdRaw))))
+	result, err := userDao.Create(newUser)
+	if err != nil || !result {
+		return itineris.NewApiResult(itineris.StatusErrorServer).
+			SetMessage(fmt.Sprintf("cannot create user account %s (error: %s)", id, err))
+	}
+
+	return itineris.NewApiResult(itineris.StatusOk)
+}
+
+// apiAdminUpdateMyProfile handles API call "adminUpdateMyProfile"
+func apiAdminUpdateMyProfile(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *itineris.ApiParams) *itineris.ApiResult {
+	curUser, authResult := authenticateAdminApiCall(ctx)
+	if authResult != nil {
+		return authResult
+	}
+
+	uid := _extractParam(params, "uid", reddo.TypeString, "", nil)
+	user, err := userDao.Get(uid.(string))
+	if err != nil {
+		return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage(err.Error())
+	}
+	if user == nil {
+		return itineris.NewApiResult(itineris.StatusNotFound).SetMessage("user not found")
+	}
+
+	if curUser.GetId() != user.GetId() {
+		// can only update profile of the currently logged-in user
+		return itineris.NewApiResult(itineris.StatusNoPermission).SetMessage("no permission")
+	}
+
+	// for now, only display-name can be changed
+	displayName := _extractParam(params, "name", reddo.TypeString, user.GetMaskId(), nil)
+	user.SetDisplayName(displayName.(string))
+
+	result, err := userDao.Update(user)
+	if err != nil || !result {
+		return itineris.NewApiResult(itineris.StatusErrorServer).
+			SetMessage(fmt.Sprintf("cannot update user [%s] (error: %s)", user.GetId(), err))
+	}
+
+	return itineris.NewApiResult(itineris.StatusOk)
+}
+
+// apiAdminUpdateMyPassword handles API call "adminUpdateMyPassword"
+func apiAdminUpdateMyPassword(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *itineris.ApiParams) *itineris.ApiResult {
+	curUser, authResult := authenticateAdminApiCall(ctx)
+	if authResult != nil {
+		return authResult
+	}
+
+	uid := _extractParam(params, "uid", reddo.TypeString, "", nil)
+	user, err := userDao.Get(uid.(string))
+	if err != nil {
+		return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage(err.Error())
+	}
+	if user == nil {
+		return itineris.NewApiResult(itineris.StatusNotFound).SetMessage("user not found")
+	}
+
+	if curUser.GetId() != user.GetId() {
+		// can only change password of the currently logged-in user
+		return itineris.NewApiResult(itineris.StatusNoPermission).SetMessage("no permission")
+	}
+
+	currentPwdEnc := _extractParam(params, "current_pwd", reddo.TypeString, "", nil)
+	currentPwdRaw, err := RsaDecryptFromBase64(RsaModePKCS1v15, currentPwdEnc.(string), rsaPrivKey)
+	if err != nil || currentPwdRaw == nil {
+		return itineris.NewApiResult(itineris.StatusErrorClient).
+			SetMessage(fmt.Sprintf("cannot decrypt data (error: %s)", err))
+	}
+	newPwdEnc := _extractParam(params, "new_pwd", reddo.TypeString, "", nil)
+	newPwdRaw, err := RsaDecryptFromBase64(RsaModePKCS1v15, newPwdEnc.(string), rsaPrivKey)
+	if err != nil || newPwdRaw == nil {
+		return itineris.NewApiResult(itineris.StatusErrorClient).
+			SetMessage(fmt.Sprintf("cannot decrypt data (error: %s)", err))
+	}
+	confirmedPwdEnc := _extractParam(params, "confirmed_pwd", reddo.TypeString, "", nil)
+	confirmedPwdRaw, err := RsaDecryptFromBase64(RsaModePKCS1v15, confirmedPwdEnc.(string), rsaPrivKey)
+	if err != nil || confirmedPwdRaw == nil {
+		return itineris.NewApiResult(itineris.StatusErrorClient).
+			SetMessage(fmt.Sprintf("cannot decrypt data (error: %s)", err))
+	}
+	if !verifyPassword(user, string(currentPwdRaw)) {
+		return itineris.NewApiResult(itineris.StatusErrorClient).SetMessage("current password mismatched")
+	}
+	if strings.TrimSpace(string(newPwdRaw)) != strings.TrimSpace(string(confirmedPwdRaw)) {
+		return itineris.NewApiResult(itineris.StatusErrorClient).SetMessage("new password does not match the confirmed one")
+	}
+
+	if DEVMODE {
+		// prevent changing password of the default user account in DEVMODE
+		initAdminUserId := goapi.AppConfig.GetString("gvabe.init.admin_user_id")
+		if initAdminUserId == user.GetId() {
+			newPwdRaw = []byte(goapi.AppConfig.GetString("gvabe.init.admin_user_pwd"))
+		}
+	}
+	user.SetPassword(encryptPassword(user.GetId(), string(newPwdRaw)))
+	result, err := userDao.Update(user)
+	if err != nil || !result {
+		return itineris.NewApiResult(itineris.StatusErrorServer).
+			SetMessage(fmt.Sprintf("cannot update user [%s] (error: %s)", user.GetId(), err))
+	}
+
+	return itineris.NewApiResult(itineris.StatusOk)
+}
+
+// apiAdminUpdateUserProfile handles API call "adminUpdateUserProfile"
+func apiAdminUpdateUserProfile(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *itineris.ApiParams) *itineris.ApiResult {
+	curUser, authResult := authenticateAdminApiCall(ctx)
+	if authResult != nil {
+		return authResult
+	}
+
+	uid := _extractParam(params, "uid", reddo.TypeString, "", nil)
+	user, err := userDao.Get(uid.(string))
+	if err != nil {
+		return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage(err.Error())
+	}
+	if user == nil {
+		return itineris.NewApiResult(itineris.StatusNotFound).SetMessage("user not found")
+	}
+
+	if curUser.GetId() == user.GetId() {
+		// can not update your own profile via this API
+		return itineris.NewApiResult(itineris.StatusNoPermission).SetMessage("no permission")
+	}
+
+	isAdmin := _extractParam(params, "is_admin", reddo.TypeBool, false, nil)
+	displayName := _extractParam(params, "name", reddo.TypeString, user.GetMaskId(), nil)
+	user.SetDisplayName(displayName.(string)).SetAdmin(isAdmin.(bool))
+
+	result, err := userDao.Update(user)
+	if err != nil || !result {
+		return itineris.NewApiResult(itineris.StatusErrorServer).
+			SetMessage(fmt.Sprintf("cannot update user [%s] (error: %s)", user.GetId(), err))
+	}
+
+	return itineris.NewApiResult(itineris.StatusOk)
+}
+
+// apiAdminDeleteUserProfile handles API call "adminDeleteUserProfile"
+func apiAdminDeleteUserProfile(ctx *itineris.ApiContext, _ *itineris.ApiAuth, params *itineris.ApiParams) *itineris.ApiResult {
+	curUser, authResult := authenticateAdminApiCall(ctx)
+	if authResult != nil {
+		return authResult
+	}
+
+	uid := _extractParam(params, "uid", reddo.TypeString, "", nil)
+	user, err := userDao.Get(uid.(string))
+	if err != nil {
+		return itineris.NewApiResult(itineris.StatusErrorServer).SetMessage(err.Error())
+	}
+	if user == nil {
+		return itineris.NewApiResult(itineris.StatusNotFound).SetMessage("user not found")
+	}
+
+	if curUser.GetId() == user.GetId() || !curUser.IsAdmin() {
+		// can not delete your own account, or you are not admin
+		return itineris.NewApiResult(itineris.StatusNoPermission).SetMessage("no permission")
+	}
+
+	result, err := userDao.Delete(user)
+	if err != nil || !result {
+		return itineris.NewApiResult(itineris.StatusErrorServer).
+			SetMessage(fmt.Sprintf("cannot delete user [%s] (error: %s)", user.GetId(), err))
 	}
 
 	return itineris.NewApiResult(itineris.StatusOk)

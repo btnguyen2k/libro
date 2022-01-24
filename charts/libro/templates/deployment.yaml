@@ -1,0 +1,130 @@
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "libro.name" . }}
+type: Opaque
+stringData:
+  LIBRO_TIMEZONE: '{{ .Values.secret.LIBRO_TIMEZONE }}'
+  LIBRO_INIT_ADMIN_USER_ID: '{{ .Values.secret.LIBRO_INIT_ADMIN_USER_ID }}'
+  LIBRO_DB_TYPE: '{{ .Values.secret.LIBRO_DB_TYPE }}'
+  LIBRO_DB_PGSQL_URL: '{{ .Values.secret.LIBRO_DB_PGSQL_URL }}'
+  LIBRO_DB_MONGODB_DB: '{{ .Values.secret.LIBRO_DB_MONGODB_DB }}'
+  LIBRO_DB_MONGODB_URL: '{{ .Values.secret.LIBRO_DB_MONGODB_URL }}'
+  LIBRO_EXTER_APP_ID: '{{ .Values.secret.LIBRO_EXTER_APP_ID }}'
+  LIBRO_EXTER_BASE_URL: '{{ .Values.secret.LIBRO_EXTER_BASE_URL }}'
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "libro.name" . }}
+  labels:
+    {{- include "libro.labels" . | nindent 4 }}
+spec:
+{{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+{{- end }}
+  revisionHistoryLimit: 1
+  selector:
+    matchLabels:
+      {{- include "libro.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+    {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      labels:
+        {{- include "libro.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      # volumes:
+      #   - name: keys
+      #     secret:
+      #       secretName: {{ .Values.librocfg.secret_name_keys }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          # volumeMounts:
+          #   - name: keys
+          #     mountPath: {{ .Values.librocfg.secret_mountpath_keys }}
+          #     readOnly: true
+          ports:
+            - name: http
+              containerPort: {{ .Values.httpPort }}
+              protocol: TCP
+          # livenessProbe:
+          #   httpGet:
+          #     path: /info
+          #     port: http
+          # readinessProbe:
+          #   httpGet:
+          #     path: /info
+          #     port: http
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          env:
+            - name: DEBUG
+              value: '{{ .Values.librocfg.debug }}'
+            - name: DEVMODE
+              value: '{{ .Values.librocfg.devmode }}'
+            - name: TIMEZONE
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "libro.name" . }}
+                  key: LIBRO_TIMEZONE
+            - name: INIT_ADMIN_USER_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "libro.name" . }}
+                  key: LIBRO_INIT_ADMIN_USER_ID
+            - name: DB_TYPE
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "libro.name" . }}
+                  key: LIBRO_DB_TYPE
+            - name: DB_PGSQL_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "libro.name" . }}
+                  key: LIBRO_DB_PGSQL_URL
+            - name: DB_MONGODB_DB
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "libro.name" . }}
+                  key: LIBRO_DB_MONGODB_DB
+            - name: DB_MONGODB_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "libro.name" . }}
+                  key: LIBRO_DB_MONGODB_URL
+            - name: EXTER_APP_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "libro.name" . }}
+                  key: LIBRO_EXTER_APP_ID
+            - name: EXTER_BASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "libro.name" . }}
+                  key: LIBRO_EXTER_BASE_URL
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
